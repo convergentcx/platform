@@ -1,15 +1,57 @@
 import React, { Component } from 'react';
 import { Link, Route } from 'react-router-dom';
 import styled, { ThemeProvider } from 'styled-components';
-import './App.css';
 
-// import Content from './content.jpg';
-import Logan from './Logan-Saether.jpg';
-import Reptile from './contemplative-reptile.jpg';
+/// Assets
+import Logan from './assets/pics/Logan-Saether.jpg';
+import Reptile from './assets/pics/contemplative-reptile.jpg';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHandHoldingUsd, faRssSquare, faHandshake, faCamera, faThumbsUp, faArrowRight, faArrowLeft, faMapPin, faMapMarker, faMapMarkerAlt, faInfoCircle, faUserFriends, faRss, faCoins, faDollarSign, faMoneyBill, faChartLine } from '@fortawesome/free-solid-svg-icons'
+/// FontAwesome
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faHandHoldingUsd,
+  faHandshake, 
+  faCamera, 
+  faThumbsUp, 
+  faArrowRight, 
+  faArrowLeft, 
+  faMapMarkerAlt, 
+  faInfoCircle, 
+  faUserFriends, 
+  faRss, 
+  faCoins, 
+  faDollarSign, 
+  faMoneyBill, 
+  faChartLine 
+} from '@fortawesome/free-solid-svg-icons';
 
+/// Components
+import Subject from './components/Dropzone.jsx';
+
+/// Styled-Components
+// Pallette
+const colors = {
+  White: '#FFF',
+  Black: '#000',
+  CvgBlue: '#2424D0',
+  CvgPurp: '#411999',
+  darkPurp: '#05021A',
+  bgGrey: '#E9EDF2',
+};
+
+// Mixins
+const shadowMixin = 'box-shadow: 0 15px 35px rgba(50,50,93,.1), 0 5px 15px rgba(0,0,0,.07);'
+
+// Components
+/*
+
+  Transitions
+  --------------
+  Fast -    0.2s
+  Medium -  0.3s
+  Slow -    0.5s
+
+*/
 const NavBox = styled.div`
   width: 260px;
   background-color: #FFF;
@@ -19,6 +61,7 @@ const NavBox = styled.div`
   border-radius: 10px;
   margin-left: auto;
   margin-right: auto;
+  ${shadowMixin}
 `;
 
 const NavList = styled.ul`
@@ -37,15 +80,14 @@ const ListItem = styled.li`
   border-top-width: 0.5px;
   font-size: 11px;
   height: 32px;
-
 `;
 
 const ListLink = styled(Link)`
   text-decoration: none;
   color: #000;
-  transition: 0.3s;
+  transition: 0.2s;
   :hover {
-    color: #2424D0;
+    color: ${colors.CvgPurp};
   }
 `;
 
@@ -70,7 +112,7 @@ const ProfileContainer = styled.div`
   margin-right: 0%;
   max-width: 100%;
   min-height: 100vh;
-  background: #2424D0;
+  background: #E9EDF2;
 `
 
 const Left = styled.div`
@@ -147,6 +189,7 @@ const AboutContainer = styled.div`
   width: 50vw;
   height: 90vh;
   margin-top: 5vh;
+  ${shadowMixin}
 `;
 
 const TradeScreenTab = styled.button`
@@ -354,6 +397,42 @@ const DashboardContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+`;
+
+const DashboardLeft = styled.div`
+  width: 20%;
+  height: 100%;
+  background: #005566;
+`;
+
+const DashboardMiddle = styled.div`
+  width: 50%;
+  height: 100%;
+  background: #117788;
+  justify-content: center;
+  display: flex;
+`;
+
+const PolaroidCard = styled.div`
+  width: 400px;
+  height: 500px;
+  background: #444488;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+`;
+
+const CreativeInput = styled.input`
+  width: 80%;
+  color: #FFF;
+  height: 30px;
+  margin-top: 8px;
+`;
+
+const DashboardRight = styled.div`
+  width: 20%;
+  height: 100%;
+  background: #2299AA;
 `;
 
 const InnerDisplay = (props) => (
@@ -758,11 +837,11 @@ const ProfilePage = () => (
             &nbsp;&nbsp;
             <ListLink to="/profile/about">about</ListLink>
           </ListItem>
-          <ListItem>
+          {/* <ListItem>
             <FontAwesomeIcon icon={faRss} size="sm"/>
             &nbsp;&nbsp;
             <ListLink to="/profile/feed">feed</ListLink>
-          </ListItem>
+          </ListItem> */}
           <ListItem>
             <FontAwesomeIcon icon={faHandHoldingUsd} size="sm"/>
             &nbsp;&nbsp;
@@ -783,7 +862,7 @@ const ProfilePage = () => (
     </Left>
     <Middle>
       <Route path='/profile/about' component={AboutPage}/>
-      <Route path='/profile/feed' component={ContentPage}/>
+      {/* <Route path='/profile/feed' component={ContentPage}/> */}
       <Route path='/profile/invest' component={InvestPage}/>
       <Route path='/profile/transact' component={TransactPage}/>
     </Middle>
@@ -829,7 +908,14 @@ const FAQPage = () => (
 
 const DashboardPage = () => (
   <DashboardContainer>
-
+    <DashboardLeft/>
+    <DashboardMiddle>
+      <PolaroidCard>
+        <Subject/>
+        <CreativeInput/>
+      </PolaroidCard>
+    </DashboardMiddle>
+    <DashboardRight/>
   </DashboardContainer>
 )
 
