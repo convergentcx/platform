@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import { Link, Route } from 'react-router-dom';
+import { Link, Route, withRouter } from 'react-router-dom';
 import styled, { ThemeProvider } from 'styled-components';
+import { observer, inject } from 'mobx-react';
+import makeBlockie from 'ethereum-blockies-base64';
 
 /// Assets
 import Logan from './assets/pics/Logan-Saether.jpg';
@@ -20,7 +22,7 @@ import {
   faUserFriends, 
   faRss, 
   faCoins, 
-  faDollarSign, 
+  faDollarSign,
   faMoneyBill, 
   faChartLine 
 } from '@fortawesome/free-solid-svg-icons';
@@ -452,6 +454,16 @@ const ContentImage = styled.img`
   border-radius: 16px 16px 0 0;
 `;
 
+const HoveringBlockie = styled.img`
+  position: fixed;
+  width: 64px;
+  height: 64px;
+  top: 16px;
+  right: 16px;
+  border-radius: 50px;
+  ${shadowMixin}
+`;
+
 class HoverableContent extends Component {
   state = {
     hovering: false,
@@ -820,7 +832,7 @@ const TransactPage = () => (
   </div>
 )
 
-const ProfilePage = () => (
+const ProfilePage = withRouter((props) => (
   <ProfileContainer>
     <Left>
       <NavBox>
@@ -865,9 +877,10 @@ const ProfilePage = () => (
       {/* <Route path='/profile/feed' component={ContentPage}/> */}
       <Route path='/profile/invest' component={InvestPage}/>
       <Route path='/profile/transact' component={TransactPage}/>
+      {props.children}
     </Middle>
   </ProfileContainer>
-);
+));
 
 const HomePage = () => (
   <HomeContainer>
@@ -919,6 +932,7 @@ const DashboardPage = () => (
   </DashboardContainer>
 )
 
+const App = inject('web3Store')(observer(
 class App extends Component {
 
   state = {
@@ -933,7 +947,7 @@ class App extends Component {
 
   render() {
     const { sideNav } = this.state;
-
+    console.log(this.props)
     return (
       <Wrapper>
       
@@ -955,14 +969,7 @@ class App extends Component {
           <SideNavLink onClick={this.closeNav} to="/faq">FAQ</SideNavLink>
         </div>
 
-        <img style={{
-          position: 'fixed',
-          width: '64px',
-          height: '64px',
-          top: '16px',
-          right: '16px',
-          borderRadius: '50px',
-        }} src={Logan} alt='logan'/>
+        <HoveringBlockie src={this.props.web3Store.account ? makeBlockie(this.props.web3Store.account) : Logan} alt='logan' onClick={() => this.props.web3Store.turnOnWeb3()}/>
 
         <Route exact path='/' component={HomePage}/>
         <Route path='/dashboard' component={DashboardPage}/>
@@ -972,6 +979,6 @@ class App extends Component {
       </Wrapper>
     );
   }
-}
+}));
 
-export default App;
+export default withRouter(App);
