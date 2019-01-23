@@ -29,6 +29,7 @@ import {
 
 /// Components
 import Home from './components/Home';
+import FAQ from './components/FAQ';
 import Subject from './components/Dropzone.jsx';
 
 /// Styled-Components
@@ -352,23 +353,6 @@ const RequestButton = styled.button`
     color: orange;
     background: #05021A;
   }
-`;
-
-const FAQContainer = styled.div`
-  width: 100%;
-  min-height: 100vh;
-  padding-top: 80px;
-  background: #05021A;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-`;
-
-const FAQItem = styled.div`
-  color: #FFF;
-  max-width: 80%;
-  margin-bottom: 80px;
 `;
 
 const DashboardContainer = styled.div`
@@ -861,35 +845,6 @@ const ProfilePage = withRouter((props) => (
   </ProfileContainer>
 ));
 
-const FAQPage = () => (
-  <FAQContainer>
-    <FAQItem>
-      <h1>Why should I launch a token?</h1>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-      </p>
-    </FAQItem>
-    <FAQItem>
-      <h1>Why should I launch a token?</h1>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-      </p>
-    </FAQItem>
-    <FAQItem>
-      <h1>Why should I launch a token?</h1>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-      </p>
-    </FAQItem>
-    <FAQItem>
-      <h1>Why should I launch a token?</h1>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-      </p>
-    </FAQItem>
-  </FAQContainer>
-)
-
 const DashboardPage = () => (
   <DashboardContainer>
     <DashboardLeft/>
@@ -945,7 +900,7 @@ class App extends Component {
         <Route exact path='/' component={Home}/>
         <Route path='/dashboard' component={DashboardPage}/>
         <Route path='/profile' component={ProfilePage}/>
-        <Route path='/faq' component={FAQPage}/>
+        <Route path='/faq' component={FAQ}/>
 
       </Wrapper>
     );
