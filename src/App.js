@@ -20,7 +20,6 @@ import {
   faMapMarkerAlt, 
   faInfoCircle, 
   faUserFriends, 
-  faRss, 
   faCoins, 
   faDollarSign,
   faMoneyBill, 
@@ -28,9 +27,9 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 /// Components
+import Dashboard from './components/Dashboard';
 import Home from './components/Home';
 import FAQ from './components/FAQ';
-import Subject from './components/Dropzone.jsx';
 
 /// Styled-Components
 // Pallette
@@ -355,51 +354,6 @@ const RequestButton = styled.button`
   }
 `;
 
-const DashboardContainer = styled.div`
-  width: 100%;
-  height: 100vh;
-  background: #2424D0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const DashboardLeft = styled.div`
-  width: 20%;
-  height: 100%;
-  background: #005566;
-`;
-
-const DashboardMiddle = styled.div`
-  width: 50%;
-  height: 100%;
-  background: #117788;
-  justify-content: center;
-  display: flex;
-`;
-
-const PolaroidCard = styled.div`
-  width: 400px;
-  height: 500px;
-  background: #444488;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-`;
-
-const CreativeInput = styled.input`
-  width: 80%;
-  color: #FFF;
-  height: 30px;
-  margin-top: 8px;
-`;
-
-const DashboardRight = styled.div`
-  width: 20%;
-  height: 100%;
-  background: #2299AA;
-`;
-
 const InnerDisplay = (props) => (
   <div style={{ paddingTop: '32px' }}>
     {props.title}
@@ -408,7 +362,7 @@ const InnerDisplay = (props) => (
       {props.info}
     </div>
   </div>
-)
+);
 
 const ContentImage = styled.img`
   width: calc(100% - 16px);
@@ -845,19 +799,6 @@ const ProfilePage = withRouter((props) => (
   </ProfileContainer>
 ));
 
-const DashboardPage = () => (
-  <DashboardContainer>
-    <DashboardLeft/>
-    <DashboardMiddle>
-      <PolaroidCard>
-        <Subject/>
-        <CreativeInput/>
-      </PolaroidCard>
-    </DashboardMiddle>
-    <DashboardRight/>
-  </DashboardContainer>
-)
-
 const App = inject('web3Store')(observer(
 class App extends Component {
 
@@ -898,7 +839,7 @@ class App extends Component {
         <HoveringBlockie src={this.props.web3Store.account ? makeBlockie(this.props.web3Store.account) : Logan} alt='logan' onClick={() => this.props.web3Store.turnOnWeb3()}/>
 
         <Route exact path='/' component={Home}/>
-        <Route path='/dashboard' component={DashboardPage}/>
+        <Route path='/dashboard' component={Dashboard}/>
         <Route path='/profile' component={ProfilePage}/>
         <Route path='/faq' component={FAQ}/>
 
