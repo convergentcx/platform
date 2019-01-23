@@ -1,11 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { HashRouter as Router } from 'react-router-dom';
+import { Provider } from 'mobx-react';
 import './index.css';
 import App from './App';
+import Web3Store from './stores/web3-store';
 import * as serviceWorker from './serviceWorker';
 
-ReactDOM.render(<Router><App/></Router>, document.getElementById('root'));
+ReactDOM.render(
+  <Router>
+    <Provider web3Store={new Web3Store()}>
+      <App/>
+    </Provider>
+  </Router>, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

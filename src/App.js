@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import { Link, Route } from 'react-router-dom';
+import { Link, Route, withRouter } from 'react-router-dom';
 import styled, { ThemeProvider } from 'styled-components';
+import { observer, inject } from 'mobx-react';
+import makeBlockie from 'ethereum-blockies-base64';
 
 /// Assets
 import Logan from './assets/pics/Logan-Saether.jpg';
@@ -20,7 +22,7 @@ import {
   faUserFriends, 
   faRss, 
   faCoins, 
-  faDollarSign, 
+  faDollarSign,
   faMoneyBill, 
   faChartLine 
 } from '@fortawesome/free-solid-svg-icons';
@@ -357,19 +359,26 @@ const HomeContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  background: ${colors.bgGrey};
 `;
 
 const LaunchButton = styled.button`
-  width: 25%;
-  height: 25%;
+  width: 40vw;
+  height: 40vw;
+  border-radius: 20vw;
   font-size: 48px;
-  background: #2424D0;
-  color: white;
-  border: none;
+  background: #FFF;
+  color: #000;
+  border: solid;
+  border-color: #000;
+  border-width: 16px;
   transition: 1s;
+  font-style: italic;
+  ${shadowMixin}
   :hover {
-    color: orange;
-    background: #05021A;
+    color: #FFF;
+    background: #000;
+    box-shadow: 0 15px 35px rgba(50,50,93,.9), 0 5px 15px rgba(0,0,0,.87);
   }
 `;
 
@@ -450,6 +459,16 @@ const ContentImage = styled.img`
   height: 420px;
   padding-top: 8px;
   border-radius: 16px 16px 0 0;
+`;
+
+const HoveringBlockie = styled.img`
+  position: fixed;
+  width: 64px;
+  height: 64px;
+  top: 16px;
+  right: 16px;
+  border-radius: 50px;
+  ${shadowMixin}
 `;
 
 class HoverableContent extends Component {
@@ -820,7 +839,7 @@ const TransactPage = () => (
   </div>
 )
 
-const ProfilePage = () => (
+const ProfilePage = withRouter((props) => (
   <ProfileContainer>
     <Left>
       <NavBox>
@@ -865,17 +884,43 @@ const ProfilePage = () => (
       {/* <Route path='/profile/feed' component={ContentPage}/> */}
       <Route path='/profile/invest' component={InvestPage}/>
       <Route path='/profile/transact' component={TransactPage}/>
+      {props.children}
     </Middle>
   </ProfileContainer>
-);
+));
 
-const HomePage = () => (
-  <HomeContainer>
-    <LaunchButton>
-      Launch Your Token
-    </LaunchButton>
-  </HomeContainer>
-);
+class HomePage extends React.Component {
+  state = {
+    text: 'CONVERGENT'
+  }
+
+  mouseEnter = () => {
+    this.setState({ text: '' });
+    setTimeout(() => {
+      this.setState({ text: 'LAUNCH' })
+    }, 600);
+  }
+
+  mouseExit = () => {
+    this.setState({ text: '' });
+    setTimeout(() => {
+      this.setState({ text: 'CONVERGENT' })
+    }, 300);
+  }
+
+  render() {
+    return (
+      <HomeContainer>
+        <LaunchButton
+          onMouseEnter={this.mouseEnter}
+          onMouseLeave={this.mouseExit}
+        >
+          {this.state.text}
+        </LaunchButton>
+      </HomeContainer>
+    );
+  }
+};
 
 const FAQPage = () => (
   <FAQContainer>
@@ -919,6 +964,7 @@ const DashboardPage = () => (
   </DashboardContainer>
 )
 
+const App = inject('web3Store')(observer(
 class App extends Component {
 
   state = {
@@ -933,7 +979,7 @@ class App extends Component {
 
   render() {
     const { sideNav } = this.state;
-
+    console.log(this.props)
     return (
       <Wrapper>
       
@@ -955,14 +1001,7 @@ class App extends Component {
           <SideNavLink onClick={this.closeNav} to="/faq">FAQ</SideNavLink>
         </div>
 
-        <img style={{
-          position: 'fixed',
-          width: '64px',
-          height: '64px',
-          top: '16px',
-          right: '16px',
-          borderRadius: '50px',
-        }} src={Logan} alt='logan'/>
+        <HoveringBlockie src={this.props.web3Store.account ? makeBlockie(this.props.web3Store.account) : Logan} alt='logan' onClick={() => this.props.web3Store.turnOnWeb3()}/>
 
         <Route exact path='/' component={HomePage}/>
         <Route path='/dashboard' component={DashboardPage}/>
@@ -972,6 +1011,6 @@ class App extends Component {
       </Wrapper>
     );
   }
-}
+}));
 
-export default App;
+export default withRouter(App);
