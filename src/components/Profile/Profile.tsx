@@ -441,7 +441,7 @@ class InvestPage extends React.Component {
 
   render() {
     const { investing, exiting } = this.state;
-
+    console.log(this.props)
     return (
       <div>
         <InvestBox>
@@ -516,7 +516,7 @@ const ProfilePage = withRouter((props) => (
           <ListItem>
             <FontAwesomeIcon icon={faInfoCircle} size="sm"/>
             &nbsp;&nbsp;
-            <ListLink to="/profile/about">about</ListLink>
+            <ListLink to={`/profile/${props.match.params.address}/about`}>about</ListLink>
           </ListItem>
           {/* <ListItem>
             <FontAwesomeIcon icon={faRss} size="sm"/>
@@ -526,12 +526,12 @@ const ProfilePage = withRouter((props) => (
           <ListItem>
             <FontAwesomeIcon icon={faHandHoldingUsd} size="sm"/>
             &nbsp;&nbsp;
-            <ListLink to="/profile/invest">invest</ListLink>
+            <ListLink to={`/profile/${props.match.params.address}/invest`}>invest</ListLink>
           </ListItem>
           <ListItem>
             <FontAwesomeIcon icon={faHandshake} size="sm"/>
             &nbsp;&nbsp;
-            <ListLink to="/profile/transact">transact</ListLink>
+            <ListLink to={`/profile/${props.match.params.address}/transact`}>transact</ListLink>
           </ListItem>
           {/* <ListItem>
             <FontAwesomeIcon icon={faUserFriends} size="sm"/>
@@ -542,10 +542,10 @@ const ProfilePage = withRouter((props) => (
       </NavBox>
     </Left>
     <Middle>
-      <Route path='/profile/about' component={AboutPage}/>
+      <Route path={`/profile/${props.match.params.address}/about`} component={AboutPage}/>
       {/* <Route path='/profile/feed' component={ContentPage}/> */}
-      <Route path='/profile/invest' component={InvestPage}/>
-      <Route path='/profile/transact' component={TransactPage}/>
+      <Route path={`/profile/${props.match.params.address}/invest`} component={InvestPage}/>
+      <Route path={`/profile/${props.match.params.address}/transact`} component={TransactPage}/>
       {props.children}
     </Middle>
   </ProfileContainer>

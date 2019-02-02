@@ -1,8 +1,14 @@
 import { observable, action } from 'mobx';
 import Web3 from 'web3';
 
+import ConvergentBeta from '../assets/artifacts/ConvergentBeta.json';
+
+const CB_PROXY_ADDR = "0x93bd15db2cbb045604d5df11f037203a1b57c23a";
+
 export default class Web3Store {
   @observable account = null;
+  @observable cbAccounts = null;
+  @observable convergentBeta = null;
   @observable readonly = false;  // App starts in readonly mode
   @observable web3: any|null = null;
   // @observable test: string = 'not updated';
@@ -40,7 +46,42 @@ export default class Web3Store {
     }
     this.updateWeb3(_window.web3);
     await this.updateAccount();
+    await this.instantiateConvergentBeta();
     console.log('enabled');
+  }
+
+  @action
+  instantiateConvergentBeta = async () => {
+    if (!this.web3) {
+      console.error('Unable to instantiate Convergent Beta');
+    }
+
+    const { abi } = ConvergentBeta;
+    const convergentBeta = new this.web3.eth.Contract(
+      abi,
+      CB_PROXY_ADDR,
+    );
+
+    this.convergentBeta = convergentBeta;
+    console.log('convergent beta instantiated');
+    // console.log(this.convergentBeta);
+    await this.startCachingAccounts();
+  }
+
+  @action
+  startCachingAccounts = async () => {
+    if (!this.convergentBeta) {
+      console.error('convergent beta not initialized');
+    }
+
+    const initAccounts = await (this.convergentBeta as any).getPastEvents('NewAccount', {fromBlock: 0, toBlock: 'latest'});
+    // console.log(initAccounts);
+    this.cbAccounts = initAccounts;
+    // Now start watching the accounts.
+    (this.convergentBeta as any).events.NewAccount({fromBlock: 0})
+    .on('data', (event: any) => {
+      console.log(event);
+    });
   }
 
   // @action

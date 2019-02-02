@@ -20,6 +20,7 @@ import {
 /// Components
 import Dashboard from './components/Dashboard';
 import Home from './components/Home';
+import List from './components/List';
 import FAQ from './components/FAQ';
 import Profile from './components/Profile';
 
@@ -280,7 +281,7 @@ class App extends Component {
 
   render() {
     const { sideNav } = this.state;
-    console.log(this.props)
+    // console.log(this.props)
     return (
       <Wrapper>
       
@@ -298,15 +299,17 @@ class App extends Component {
           </SideNavClose>
           <SideNavLink onClick={this.closeNav} to="/">Home</SideNavLink>
           <SideNavLink onClick={this.closeNav} to="/dashboard">Dashboard</SideNavLink>
+          <SideNavLink onClick={this.closeNav} to="/list">List</SideNavLink>
           <SideNavLink onClick={this.closeNav} to="/profile">Explore</SideNavLink>
           <SideNavLink onClick={this.closeNav} to="/faq">FAQ</SideNavLink>
         </div>
 
         <HoveringBlockie src={this.props.web3Store.account ? makeBlockie(this.props.web3Store.account) : Logan} alt='logan' onClick={() => this.props.web3Store.turnOnWeb3()}/>
 
-        <Route exact path='/' component={Home}/>
+        <Route exact path='/' render={props => <Home {...props} web3Store={this.props.web3Store}/>}/>
         <Route path='/dashboard' component={Dashboard}/>
-        <Route path='/profile' component={Profile}/>
+        <Route path='/list' render={props => <List {...props} web3Store={this.props.web3Store}/>}/>
+        <Route path='/profile/:address' component={Profile}/>
         <Route path='/faq' component={FAQ}/>
 
       </Wrapper>

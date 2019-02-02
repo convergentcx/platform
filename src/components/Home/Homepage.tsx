@@ -32,9 +32,55 @@ const LaunchButton = styled.button`
   }
 `;
 
-class HomePage extends React.Component {
+type HomePageState = {
+  accountName: string|null,
+  accountTicker: string|null,
+  launching: boolean,
+  text: string,
+  [x: number]: any,
+};
+
+class HomePage extends React.Component<{web3Store: any}, HomePageState> {
   state = {
-    text: 'CONVERGENT'
+    accountName: null,
+    accountTicker: null,
+    launching: false,
+    text: 'CONVERGENT',
+  }
+
+  deploy = async () => {
+    const { web3Store } = this.props; 
+    if (!web3Store) {
+      alert('Log in first!');
+    }
+    const randBytes32 = web3Store.web3.utils.randomHex(32);
+    const tx = await web3Store.convergentBeta.methods.newAccount(
+      randBytes32,
+      this.state.accountName,
+      this.state.accountTicker,
+      "0x6635F83421Bf059cd8111f180f0727128685BaE4",
+      "500000",
+      "1000000000000000000",
+      "500000000000000",
+      "10",
+    ).send({ from: this.props.web3Store.account });
+    console.log(tx);
+    if (tx.status === true) {
+      console.log('success');
+      console.log('tx hash: ', tx.transactionHash);
+      console.log('account: ', tx.events.NewAccount.returnValues.account);
+    }
+  }
+
+  inputUpdate = (evt: any) => {
+    const { name, value } = evt.target;
+    this.setState({
+      [name]: value,
+    });
+  }
+
+  mouseClick = () => {
+    this.setState({ launching: true });
   }
 
   mouseEnter = () => {
@@ -52,14 +98,38 @@ class HomePage extends React.Component {
   }
 
   render() {
+    console.log(this.state);
     return (
       <HomeContainer>
-        <LaunchButton
-          onMouseEnter={this.mouseEnter}
-          onMouseLeave={this.mouseExit}
-        >
-          {this.state.text}
-        </LaunchButton>
+        {
+          this.state.launching
+          ?
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              Your name:
+              <input
+                name="accountName"
+                onChange={this.inputUpdate}
+              />
+              Your ticker symbol:
+              <input
+                name="accountTicker"
+                onChange={this.inputUpdate}
+              />
+              <button
+                onClick={this.deploy}
+              >
+                Deploy
+              </button>
+            </div>
+          :
+            <LaunchButton
+              onClick={this.mouseClick}
+              onMouseEnter={this.mouseEnter}
+              onMouseLeave={this.mouseExit}
+            >
+              {this.state.text}
+            </LaunchButton>
+        }
       </HomeContainer>
     );
   }
