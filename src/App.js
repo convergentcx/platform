@@ -309,7 +309,7 @@ class App extends Component {
         <Route exact path='/' render={props => <Home {...props} web3Store={this.props.web3Store}/>}/>
         <Route path='/dashboard' component={Dashboard}/>
         <Route path='/list' render={props => <List {...props} web3Store={this.props.web3Store}/>}/>
-        <Route path='/profile/:address' component={Profile}/>
+        <Route path='/profile/:address' render={props => <Profile {...props} web3Store={this.props.web3Store}/>}/>
         <Route path='/faq' component={FAQ}/>
 
       </Wrapper>

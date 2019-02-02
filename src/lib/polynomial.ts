@@ -43,7 +43,7 @@ class Polynomial {
    */
   integral(x: Decimal): Decimal {
     const nexp = this.exponent.add(1);
-    return this.slope.mul((x.pow(nexp)).div(nexp));
+    return reduceTokenDecimals(this.slope.mul((x.pow(nexp)).div(nexp)));
   }
 
   /**

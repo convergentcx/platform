@@ -1,12 +1,17 @@
 import { observable, action } from 'mobx';
 import Web3 from 'web3';
 
+import Account from '../assets/artifacts/Account.json';
 import ConvergentBeta from '../assets/artifacts/ConvergentBeta.json';
+
+import Polynomial from '../lib/polynomial';
+import { toDecimal } from '../lib/util';
 
 const CB_PROXY_ADDR = "0x93bd15db2cbb045604d5df11f037203a1b57c23a";
 
 export default class Web3Store {
   @observable account = null;
+  @observable betaCache = {};
   @observable cbAccounts = null;
   @observable convergentBeta = null;
   @observable readonly = false;  // App starts in readonly mode
@@ -82,6 +87,59 @@ export default class Web3Store {
     .on('data', (event: any) => {
       console.log(event);
     });
+  }
+
+  @action
+  getContractDataAndCache = async (address: string) => {
+    // Check for web3
+    if (!this.web3) {
+      console.error('Web3 not enabled!');
+      return;
+    }
+    // Validate address
+    if (!this.web3.utils.isAddress(address)) {
+      console.error('incorrect address');
+      return;
+    }
+
+    const { abi } = Account;
+    const acc = new this.web3.eth.Contract(abi, address);
+
+    const rr = await (acc as any).methods.reserveRatio().call();
+    const vs = await (acc as any).methods.virtualSupply().call();
+    const vr = await (acc as any).methods.virtualReserve().call();
+    const ts = await (acc as any).methods.totalSupply().call();
+    
+    const poly = Polynomial.fromBancorParams(
+      toDecimal(vs.toString()),
+      toDecimal(vr.toString()),
+      toDecimal(rr.toString()),
+      toDecimal('1000000'),
+    );
+
+    console.log(vs)
+    const integral = poly.integral(
+      toDecimal(vs).add(toDecimal(ts))
+    );
+
+    console.log(this.web3.utils.fromWei(integral.toString()), 'eth')
+
+    const oldCache = this.betaCache;
+    this.betaCache = Object.assign(oldCache, {
+      [address] : {
+        price: integral.toString(),
+        rr,
+        vs,
+        vr,
+        ts,
+      },
+    });
+
+    console.log(rr.toString());
+    console.log(vs.toString());
+    console.log(vr.toString());
+    console.log(ts.toString());
+
   }
 
   // @action

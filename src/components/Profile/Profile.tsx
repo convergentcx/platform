@@ -243,9 +243,18 @@ const InnerDisplay = (props: any) => (
   </div>
 );
 
-class TradeScreen extends React.Component<any, any> {
+type TradeScreenProps = {address: string, web3Store: any};
+type TradeScreenState = {active: number};
+
+class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
   state = {
     active: 0,
+  }
+
+  componentDidMount = async () => {
+    const { address, web3Store } = this.props;
+    // Get data and cache it.
+    await web3Store.getContractDataAndCache(address);
   }
 
   setActive = (evt: any) => {
@@ -257,6 +266,15 @@ class TradeScreen extends React.Component<any, any> {
 
   render() {
     const { active } = this.state;
+    const { address, web3Store } = this.props;
+
+    const data = web3Store.betaCache[address];
+    if (!data) {
+      console.log(web3Store.betaCache)
+      console.log('data', data);
+      return 'Loading...';
+    }
+
     return (
       <div style={{ height: '90%' }}>
         <div style={{ width: '100%', height: '8%', display: 'flex', flexDirection: 'row' }}>
@@ -303,7 +321,7 @@ class TradeScreen extends React.Component<any, any> {
               &&
               <InnerDisplay
                 title="Price"
-                info="$404.69 USD"
+                info={`${web3Store.web3.utils.fromWei(web3Store.betaCache[address].price)} eth`}
               />
             ) ||
             (
@@ -412,7 +430,7 @@ const ExitScreen = (props: any) => (
   </div>
 );
 
-class InvestPage extends React.Component {
+class InvestPage extends React.Component<any, any> {
   state = {
     investing: false,
     exiting: false,
@@ -450,7 +468,7 @@ class InvestPage extends React.Component {
             ||
             (exiting && <ExitScreen quit={this.quit}/>)
             ||
-            <TradeScreen/>
+            <TradeScreen address={this.props.address} web3Store={this.props.web3Store}/>
           }
           {/* <div style={{ height: '30%' }}/> */}
           <div style={{ height: '10%', display: 'flex' }}>
@@ -501,7 +519,7 @@ const TransactPage = () => (
   </div>
 )
 
-const ProfilePage = withRouter((props) => (
+const ProfilePage = withRouter((props: any) => (
   <ProfileContainer>
     <Left>
       <NavBox>
@@ -544,7 +562,7 @@ const ProfilePage = withRouter((props) => (
     <Middle>
       <Route path={`/profile/${props.match.params.address}/about`} component={AboutPage}/>
       {/* <Route path='/profile/feed' component={ContentPage}/> */}
-      <Route path={`/profile/${props.match.params.address}/invest`} component={InvestPage}/>
+      <Route path={`/profile/${props.match.params.address}/invest`} render={() => <InvestPage address={props.match.params.address} web3Store={props.web3Store}/>}/>
       <Route path={`/profile/${props.match.params.address}/transact`} component={TransactPage}/>
       {props.children}
     </Middle>
