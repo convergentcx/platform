@@ -171,7 +171,7 @@ const HoveringBlockie = styled.img`
   ${shadowMixin}
 `;
 
-const SpeedDialAnchor = styled.div`
+const SpeedDialAnchor = observer(styled.div`
   cursor: pointer;
   position: fixed;
   width: 56px;
@@ -181,7 +181,7 @@ const SpeedDialAnchor = styled.div`
   border-radius: 28px;
   ${shadowMixin}
   background: ${props => props.open ? '#232323' : '#000'};
-  color: ${props => props.locked ? 'red' : 'green'};
+  color: ${props => props.locked ? (props.readonly ? 'orange' : 'red') : 'green'};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -192,7 +192,7 @@ const SpeedDialAnchor = styled.div`
     color: ;
     background: #232323;
   }
-`;
+`);
 
 const SpeedDialButton = styled.div`
   cursor: pointer;
@@ -348,7 +348,7 @@ class SpeedDial extends React.Component {
   }
 }
 
-class LockedSpeedDial extends React.Component {
+const LockedSpeedDial = observer(class LockedSpeedDial extends React.Component {
   state = {
     hovering: 0,
     open: false,
@@ -357,7 +357,7 @@ class LockedSpeedDial extends React.Component {
   render() {
     return (
       <>
-        <SpeedDialAnchor locked={true} open={this.state.open} onClick={() => this.setState({open: !this.state.open})}>
+        <SpeedDialAnchor locked={true} readonly={this.props.web3Store.readonly} open={this.state.open} onClick={() => this.setState({open: !this.state.open})}>
           <FontAwesomeIcon icon={faEthereum}/>
         </SpeedDialAnchor>
         {this.state.open &&
@@ -373,7 +373,7 @@ class LockedSpeedDial extends React.Component {
       </>
     )
   }
-}
+});
 
 const UnlockedSpeedDial = withRouter(class UnlockedSpeedDial extends React.Component {
   state = {
@@ -436,6 +436,7 @@ class App extends Component {
 
   componentDidMount = () => {
     this.props.web3Store.initIPFS();
+    this.props.web3Store.initReadonly();
   }
 
   render() {

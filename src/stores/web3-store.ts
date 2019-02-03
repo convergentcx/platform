@@ -42,7 +42,7 @@ export default class Web3Store {
 
   @action
   updateAccount = async () => {
-    if (!this.web3 || this.readonly) { return; }
+    if (!this.web3) { return; }
     const main = (await this.web3.eth.getAccounts())[0];
     console.log('setting account ', main);
     this.account = main;
@@ -50,6 +50,7 @@ export default class Web3Store {
 
   @action
   cacheAccounts = () => {
+    if (this.readonly) { return }
     if (!this.convergentBeta) {
       setTimeout(this.cacheAccounts, 2000);
     }
@@ -90,6 +91,15 @@ export default class Web3Store {
   }
 
   @action
+  initReadonly = async () => {
+    const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws/v3/7121204aac9a45dcb9c2cc825fb85159'));
+    console.log('READONLY MODE')
+    this.readonly = true;
+    this.web3 = web3;
+    await this.instantiateConvergentBeta();
+  }
+
+  @action
   turnOnWeb3 = async () => {
     console.log('enabling web3');
     // console.log(window);
@@ -104,12 +114,19 @@ export default class Web3Store {
       _window.web3 = new Web3(_window.web3.currentProvider);
     } else {
       console.log('Browser is not ethereum enabled');
+      console.log('falling back');
       return;
     }
     this.updateWeb3(_window.web3);
     await this.updateAccount();
+    // await this.signWelcome();
     await this.instantiateConvergentBeta();
     console.log('enabled');
+  }
+
+  @action
+  signWelcome = async () => {
+    await this.web3.eth.personal.sign("Welcome to Convergent Beta DApp. Happy investing in your friends!", this.account);
   }
 
   @action
@@ -128,6 +145,7 @@ export default class Web3Store {
     console.log('convergent beta instantiated');
     // console.log(this.convergentBeta);
     this.cacheAccounts();
+    console.log('HERERERERE')
     await this.startCachingAccounts();
   }
 

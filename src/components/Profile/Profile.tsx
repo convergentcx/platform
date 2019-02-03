@@ -20,6 +20,7 @@ import {
 import Logan from '../../assets/pics/Logan-Saether.jpg';
 import { colors, shadowMixin } from '../../common';
 import { inject, observer } from 'mobx-react';
+import Web3Store from '../../stores/web3-store';
 
 const NavBox = styled.div`
   width: 260px;
@@ -141,6 +142,7 @@ const TradeScreenContent = styled.div`
 type ButtonProps = {exiting: boolean, investing: boolean};
 
 const InvestButton = styled.button<ButtonProps>`
+  cursor: pointer;
   width: 50%;
   background: #FFF;
   border-radius: 0 0 0 10px;
@@ -171,6 +173,7 @@ const InvestButton = styled.button<ButtonProps>`
 `;
 
 const ExitButton = styled.button<ButtonProps>`
+  cursor: pointer;
   width: 50%;
   background: #FFF;
   border-radius: 0 0 10px 0;
@@ -207,6 +210,8 @@ const QuitButton = styled.button`
   background: transparent;
   border: none;
   transition: 0.3s;
+  font-weight: 900;
+  cursor: pointer;
   :hover {
     color: orange;
   }
@@ -217,12 +222,14 @@ const ConfirmButton = styled.button`
   background: #2424D0;
   transition: 0.3s;
   height: 80px;
-  width: 80px;
+  width: 160px;
   color: #FFF;
+  border-color: #000;
+  font-weight: 600;
   :hover {
     background: #05021A;
     color: orange;
-    border-color: purple;
+    border-color: #232323;
   }
 `;
 
@@ -403,44 +410,56 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
   }
 }
 
-const InvestScreen = (props: any) => (
-  <div style={{ height: '90%', background: '#000', borderRadius: '10px 10px 0 0', textAlign: 'center' }}>
-    <div style={{ width: '100%', background: '', height: '8%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', borderRadius: '10px 10px 0 0' }}>
-      <QuitButton onClick={props.quit}>
-        X
-      </QuitButton>
-    </div>
-    <div style={{ color: 'white', fontSize: '32px', paddingTop: '12px' }}>
-      How much?
-    </div>
-    <br/>
-    <input style={{ color: 'black', background: 'white', border: 'none' }}>
+const InvestScreen = inject('web3Store')(class InvestScreen extends React.Component<any,any> {
+  state = {
+    inputVal: 0,
+  }
 
-    </input>
-    <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
-      You get:
-    </div>
-    <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
-      ~ 12.4009 LGN
-    </div>
-    <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
-      In time:
-    </div>
-    <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
-      24 minutes
-    </div>
-    <br/>
-    <ConfirmButton>
-      <FontAwesomeIcon icon={faThumbsUp} size="lg"/>
-    </ConfirmButton>
-    {/* <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
-      Logan gets:
-    </div>
-    <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
-      12 USD
-    </div> */}
-  </div>
-)
+  render() {
+    console.log(this.state)
+    console.log(this.props)
+
+    return (
+      <div style={{ height: '90%', background: 'rgba(0,0,0,0.8)', borderRadius: '10px 10px 0 0', textAlign: 'center' }}>
+        <div style={{ width: '100%', background: '', height: '8%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', borderRadius: '10px 10px 0 0' }}>
+          <QuitButton onClick={this.props.quit}>
+            X
+          </QuitButton>
+        </div>
+        <div style={{ color: 'white', fontSize: '32px', paddingTop: '12px' }}>
+          How much?
+        </div>
+        <br/>
+        <input style={{ color: 'black', background: 'white', border: 'none' }} onChange={(e: any) => this.setState({inputVal: e.target.value})}>
+
+        </input>
+        <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
+          You get:
+        </div>
+        <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
+          ~ 12.4009 CAT
+        </div>
+        {/* <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
+          In time:
+        </div>
+        <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
+          24 minutes
+        </div> */}
+        <br/>
+        <ConfirmButton>
+          {/* <FontAwesomeIcon icon={faThumbsUp} size="lg"/> */}
+          BUY
+        </ConfirmButton>
+        {/* <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
+          Logan gets:
+        </div>
+        <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
+          12 USD
+        </div> */}
+      </div>
+    )
+  }
+});
 
 const ExitScreen = (props: any) => (
   <div style={{ height: '90%', background: '#000', borderRadius: '10px 10px 0 0', textAlign: 'center' }}>
@@ -502,16 +521,16 @@ class InvestPage extends React.Component<any, any> {
 
   render() {
     const { investing, exiting } = this.state;
-    console.log(this.props)
+    const { address } = this.props;
     return (
       <div>
         <InvestBox>
           {
-            (investing && <InvestScreen quit={this.quit}/>)
+            (investing && <InvestScreen address={address} quit={this.quit}/>)
             ||
-            (exiting && <ExitScreen quit={this.quit}/>)
+            (exiting && <ExitScreen address={address} quit={this.quit}/>)
             ||
-            <TradeScreen address={this.props.address} web3Store={this.props.web3Store}/>
+            <TradeScreen address={address} web3Store={this.props.web3Store}/>
           }
           {/* <div style={{ height: '30%' }}/> */}
           <div style={{ height: '10%', display: 'flex' }}>
@@ -534,7 +553,7 @@ const AboutPage = inject('ipfsStore')(observer((props: any) => (
     {
       (props.web3Store.betaCache.has(props.address) && props.web3Store.ipfsCache.get(props.web3Store.betaCache.get(props.address).metadata))
       ?
-        props.web3Store.ipfsCache.get(props.web3Store.betaCache.get(props.address).metadata).bio
+        props.web3Store.ipfsCache.get(props.web3Store.betaCache.get(props.address).metadata).bio.replace(/\\n/g, '\n')
       : 'DApp still loading...'
     }
   </AboutInner>
