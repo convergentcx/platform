@@ -17,6 +17,7 @@ export default class IpfsStore {
     );
 
     this.ipfs = ipfs;
+    console.log('IPFS Activated');
   }
 
   initHelper = () => {
@@ -58,5 +59,12 @@ export default class IpfsStore {
   @action
   cache = async () => {
 
+  }
+
+  @action
+  getBytes32 = (contentAddress: string): string => {
+    const data = mhashIntoBytes32(contentAddress);
+    console.log(data);
+    return data.digest;
   }
 }

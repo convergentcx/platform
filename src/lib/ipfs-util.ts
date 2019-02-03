@@ -17,6 +17,7 @@ type MhashObject = {
   size: any,
 }
 
+// hashfunction - 18, size - 32
 export const b32IntoMhash = (obj: MhashObject) => {
   const { digest, hashFunction, size } = obj;
   if (size === 0) return null;

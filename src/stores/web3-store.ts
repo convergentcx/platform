@@ -191,7 +191,7 @@ export default class Web3Store {
       throw new Error('Incorrect economy address provided to updateMetadata function');
     }
 
-    console.log(metadata);
+    // console.log(metadata);
 
     const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, economy);

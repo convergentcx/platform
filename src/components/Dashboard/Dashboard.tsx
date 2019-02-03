@@ -2,15 +2,16 @@ import React from 'react';
 import { Link, Route, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 import { observer, inject } from 'mobx-react';
-import { any } from 'prop-types';
 import Web3Store from '../../stores/web3-store';
 
 // import Subject from '../Dropzone.jsx';
 
+import { colors } from '../../common';
+
 const DashboardContainer = styled.div`
   width: 100%;
   height: 100vh;
-  background: #FFF;
+  background: ${colors.BgGrey};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -161,12 +162,33 @@ const InteriorDashboard = inject('ipfsStore')(class InteriorDashboard extends Re
   state = {
     active: 0,
     bio: '',
+    uploading: false,
   }
 
-  commit = async (metadata: string) => {
-    const { web3Store } = this.props;
+  commit = async () => {
+    const { ipfsStore, web3Store } = this.props;
 
-    await web3Store.updateMetadata(this.props.match.params.account, metadata)
+    if (!web3Store.account) {
+      alert('Log in first! lol');
+      return
+    }
+
+    this.setState({ uploading: true });
+
+    const data = {
+      bio: this.state.bio,
+    };
+
+    const hash = await ipfsStore.add(
+      JSON.stringify(data),
+    );
+
+    this.setState({ uploading: false });
+
+    // TODO Cache it
+    const b32 = ipfsStore.getBytes32(hash[0].path);
+    await web3Store.updateMetadata(this.props.match.params.account, b32);
+    
   }
 
   inputUpdate = (evt: any) => {
@@ -233,9 +255,13 @@ const InteriorDashboard = inject('ipfsStore')(class InteriorDashboard extends Re
                   +
                 </AddServiceButton>
               </DisplayContainer>
-              <CommitButton onClick={() => this.commit(this.props.web3Store.web3.utils.randomHex(32))}>
+              <CommitButton onClick={this.commit}>
                 Commit to Ethereum
               </CommitButton>
+              {
+                this.state.uploading ?
+                'Uploading!' : ''
+              }
               </>
             ||
             active == 1 &&

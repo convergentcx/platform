@@ -24,6 +24,7 @@ const LaunchButton = styled.button`
   border-width: 16px;
   transition: 1s;
   font-style: italic;
+  font-weight: 900;
   ${shadowMixin}
   :hover {
     color: #FFF;
