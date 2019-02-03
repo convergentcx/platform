@@ -11,7 +11,8 @@ const CB_PROXY_ADDR = "0x93bd15db2cbb045604d5df11f037203a1b57c23a";
 
 export default class Web3Store {
   @observable account = null;
-  @observable betaCache = {};
+  @observable accountsCache: string[] = [];
+  @observable betaCache: Map<string, {}> = new Map();
   @observable cbAccounts = null;
   @observable convergentBeta = null;
   @observable readonly = false;  // App starts in readonly mode
@@ -24,6 +25,27 @@ export default class Web3Store {
     const main = (await this.web3.eth.getAccounts())[0];
     console.log('setting account ', main);
     this.account = main;
+  }
+
+  @action
+  cacheAccounts = () => {
+    if (!this.convergentBeta) {
+      setTimeout(this.cacheAccounts, 2000);
+    }
+
+    (this.convergentBeta as any).events.NewAccount({
+      fromBlock: 0,
+      filter: {
+        creator: this.account,
+      },
+    }).on('data', (event: any) => {
+      const LLL = event.returnValues.account;
+      console.log(LLL)
+      this.accountsCache.push(LLL);
+      // this.accountsCache = [...this.accountsCache, event.returnValues.account];
+      console.log(event)
+      console.log(this.accountsCache)
+    });
   }
 
   @action
@@ -70,6 +92,7 @@ export default class Web3Store {
     this.convergentBeta = convergentBeta;
     console.log('convergent beta instantiated');
     // console.log(this.convergentBeta);
+    this.cacheAccounts();
     await this.startCachingAccounts();
   }
 
@@ -85,7 +108,7 @@ export default class Web3Store {
     // Now start watching the accounts.
     (this.convergentBeta as any).events.NewAccount({fromBlock: 0})
     .on('data', (event: any) => {
-      console.log(event);
+      // console.log(event);
     });
   }
 
@@ -110,7 +133,8 @@ export default class Web3Store {
     const vr = await (acc as any).methods.virtualReserve().call();
     const ts = await (acc as any).methods.totalSupply().call();
     const symbol = await (acc as any).methods.symbol().call();
-    
+    const metadata = await (acc as any).methods.metadata().call();
+
     const poly = Polynomial.fromBancorParams(
       toDecimal(vs.toString()),
       toDecimal(vr.toString()),
@@ -134,7 +158,17 @@ export default class Web3Store {
         vr,
         ts,
         symbol,
+        metadata,
       },
+    });
+
+    const nowBlock = await this.web3.eth.getBlockNumber();
+    (acc as any).events.MetadataUpdated({fromBlock: nowBlock})
+    .on('data', (event: any) => {
+      const md = event.returnValues.newMetadata;
+      if ((this.betaCache as any)[address].metadata !== md) {
+        (this.betaCache as any)[address].metadata = md;
+      };
     });
 
     // console.log(rr.toString());

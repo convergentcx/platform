@@ -1,7 +1,7 @@
 import bs58 from 'bs58';
 const { utils } = require('web3');
 
-const mhashIntoBytes32 = (mhash: string): MhashObject => {
+export const mhashIntoBytes32 = (mhash: string): MhashObject => {
   const decoded = Buffer.from(bs58.decode(mhash));
 
   return {
@@ -17,7 +17,7 @@ type MhashObject = {
   size: any,
 }
 
-const b32IntoMhash = (obj: MhashObject) => {
+export const b32IntoMhash = (obj: MhashObject) => {
   const { digest, hashFunction, size } = obj;
   if (size === 0) return null;
 
@@ -36,7 +36,7 @@ type Service = {
   description: string,
 }
 
-type AccountData = {
+export type AccountData = {
   bio: string,
   image: string,
   services: Map<number, Service>,

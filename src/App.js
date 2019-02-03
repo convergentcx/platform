@@ -307,7 +307,7 @@ class App extends Component {
         <HoveringBlockie src={this.props.web3Store.account ? makeBlockie(this.props.web3Store.account) : Logan} alt='logan' onClick={() => this.props.web3Store.turnOnWeb3()}/>
 
         <Route exact path='/' render={props => <Home {...props} web3Store={this.props.web3Store}/>}/>
-        <Route path='/dashboard' component={Dashboard}/>
+        <Route path='/dashboard' render={props => <Dashboard {...props} web3Store={this.props.web3Store}/>}/>
         <Route path='/list' render={props => <List {...props} web3Store={this.props.web3Store}/>}/>
         <Route path='/profile/:address' render={props => <Profile {...props} web3Store={this.props.web3Store}/>}/>
         <Route path='/faq' component={FAQ}/>
