@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, Route, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
+import { any } from 'prop-types';
 
 // import Subject from '../Dropzone.jsx';
 
@@ -23,6 +24,11 @@ const YourAccounts = observer(styled.div`
 const AccountLink = styled(Link)`
   display: flex;
   width: 100%;
+  text-decoration: none;
+  transition: 0.2s;
+  :hover {
+    color: #A3A3A3;
+  }
 `;
 
 const DashboardLeft = styled.div`
@@ -36,15 +42,15 @@ const DashboardLink = styled.div<any>`
   display: flex;
   width: 100%;
   text-decoration: none;
-  color: ${(props: any) => props.active ? '#2424D0' : '#000'};
+  color: ${(props: any) => props.active ? '#FFF' : '#000'};
   justify-content: center;
   align-items: center;
   height: 20%;
   transition: 0.2s;
-  background: ${(props: any) => props.active ? '#CCC' : '#FFF'};
+  background: ${(props: any) => props.active ? '#000' : 'transparent'};
   :hover {
-    background: #CCC;
-    color: #2424D0;
+    background: ;
+    color: #FFF;
   }
 `;
 
@@ -52,8 +58,80 @@ const DashboardMiddle = styled.div`
   width: 60%;
   height: 100%;
   background: #117788;
-  justify-content: center;
+  align-items: center;
   display: flex;
+  flex-direction: column;
+`;
+
+const DisplayContainer = styled.div<any>`
+  width: 80%;
+  min-height: ${(props: any) => props.halfsize ? '15%' : '30%'};
+`;
+
+const BioDisplay = styled.input`
+  width: 100%;
+  background: #E9EDF2;
+  min-height: 50%;
+  color: #000;
+  display: flex;
+  align-items: flex-start;
+`;
+
+const CommitButton = styled.button`
+  display: flex;
+  cursor: pointer;
+  width: 90%;
+  background: transparent;
+  border: solid;
+  justify-content: center;
+  align-items: center;
+  height: 32px;
+  font-size: 16px;
+  transition: 0.3s;
+  :hover {
+    background: blue;
+  }
+`;
+
+const DisplayHeading = styled.h4`
+  margin-bottom: 8px;
+`;
+
+const AddButton = styled.button`
+  display: flex;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  justify-content: center;
+  align-items: center;
+  font-weight: 900;
+`;
+
+const AddServiceButton = styled.button`
+  display: flex;
+  width: 64px;
+  height: 32px;
+  border-radius: 16px;
+  justify-content: center;
+  align-items: center;
+  font-weight: 900;
+`;
+
+const TagContainer = styled.div`
+  display: flex;
+  width: 100%;
+  flex-flow: row wrap;
+`;
+
+const Tag =styled.button`
+  display: flex;
+  width: 96px;
+  height: 32px;
+  font-size: 10px;
+  border-radius: 16px;
+  justify-content: center;
+  align-items: center;
+  margin-right: 8px;
 `;
 
 // const PolaroidCard = styled.div`
@@ -106,7 +184,35 @@ class InteriorDashboard extends React.Component<any,any> {
         <DashboardMiddle>
           {
             active === 0 &&
+              <>
               <h1>Details</h1>
+              <DisplayContainer>
+                <DisplayHeading>
+                  Your bio:
+                </DisplayHeading>
+                <BioDisplay/>
+              </DisplayContainer>
+              <DisplayContainer halfsize>
+                <DisplayHeading>
+                  Your tags:
+                </DisplayHeading>
+                <TagContainer>
+                  <Tag>blockchain</Tag>
+                  <AddButton>+</AddButton>
+                </TagContainer>
+              </DisplayContainer>
+              <DisplayContainer halfsize>
+                <DisplayHeading>
+                  Your services:
+                </DisplayHeading>
+                <AddServiceButton>
+                  +
+                </AddServiceButton>
+              </DisplayContainer>
+              <CommitButton>
+                Commit to Ethereum
+              </CommitButton>
+              </>
             ||
             active == 1 &&
               <>
@@ -126,8 +232,9 @@ const DashboardPage = withRouter(observer(
 
   render() {
     const { web3Store } = this.props;
-    const items = web3Store.accountsCache.map((account: string) => {
-      return <AccountLink to={`/dashboard/${account}`} key={Math.random()}>{account}</AccountLink>
+
+    const items = Array.from(web3Store.accountsCache).map((value: any) => {
+       return <AccountLink to={`/dashboard/${value}`} key={Math.random()}>{value}</AccountLink>;
     });
 
     return (

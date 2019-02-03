@@ -11,7 +11,7 @@ const CB_PROXY_ADDR = "0x93bd15db2cbb045604d5df11f037203a1b57c23a";
 
 export default class Web3Store {
   @observable account = null;
-  @observable accountsCache: string[] = [];
+  @observable accountsCache: Set<string> = new Set();
   @observable betaCache: Map<string, {}> = new Map();
   @observable cbAccounts = null;
   @observable convergentBeta = null;
@@ -40,11 +40,13 @@ export default class Web3Store {
       },
     }).on('data', (event: any) => {
       const LLL = event.returnValues.account;
-      console.log(LLL)
-      this.accountsCache.push(LLL);
+      // console.log(LLL)
+      if (!this.accountsCache.has(LLL)) {
+        this.accountsCache.add(LLL);
+      }
       // this.accountsCache = [...this.accountsCache, event.returnValues.account];
-      console.log(event)
-      console.log(this.accountsCache)
+      // console.log(event)
+      // console.log(this.accountsCache)
     });
   }
 

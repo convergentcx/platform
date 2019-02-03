@@ -6,6 +6,7 @@ import makeBlockie from 'ethereum-blockies-base64';
 
 /// Assets
 import Logan from './assets/pics/Logan-Saether.jpg';
+import Lock from './assets/pics/lock.png';
 import Reptile from './assets/pics/contemplative-reptile.jpg';
 
 /// FontAwesome
@@ -150,8 +151,8 @@ const HoveringBlockie = styled.img`
   position: fixed;
   width: 64px;
   height: 64px;
-  top: 16px;
-  right: 16px;
+  bottom: 2%;
+  right: 2%;
   border-radius: 50px;
   ${shadowMixin}
 `;
@@ -304,7 +305,7 @@ class App extends Component {
           <SideNavLink onClick={this.closeNav} to="/faq">FAQ</SideNavLink>
         </div>
 
-        <HoveringBlockie src={this.props.web3Store.account ? makeBlockie(this.props.web3Store.account) : Logan} alt='logan' onClick={() => this.props.web3Store.turnOnWeb3()}/>
+        <HoveringBlockie src={this.props.web3Store.account ? makeBlockie(this.props.web3Store.account) : Lock} alt='unlock' onClick={() => this.props.web3Store.turnOnWeb3()}/>
 
         <Route exact path='/' render={props => <Home {...props} web3Store={this.props.web3Store}/>}/>
         <Route path='/dashboard' render={props => <Dashboard {...props} web3Store={this.props.web3Store}/>}/>

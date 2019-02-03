@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { observer } from 'mobx-react';
 
 const ListContainer = styled.div`
   width: 100%;
@@ -19,7 +20,7 @@ const ListItem = styled(Link)`
 `;
 
 const List = (props: any) => {
-  let items = 'loading';
+  let items = 'Please log in';
   if (props.web3Store.cbAccounts) { 
     console.log('filling')
     items = props.web3Store.cbAccounts.map((account: any) => (
@@ -36,4 +37,4 @@ const List = (props: any) => {
   );
 };
 
-export default List;
+export default observer(List);
