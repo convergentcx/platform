@@ -13,8 +13,10 @@
     "@types/react-router-dom": "^4.3.1",
     "@types/styled-components": "^4.1.6",
     "@types/web3": "^1.0.14",
+    "bs58": "^4.0.1",
     "decimal.js": "^10.0.2",
     "ethereum-blockies-base64": "^1.0.2",
+    "ipfs-http-client": "^29.1.0",
     "mobx": "^5.9.0",
     "mobx-react": "^5.4.3",
     "react": "^16.7.0",
@@ -44,6 +46,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "@types/bs58": "^4.0.0",
     "@types/decimal.js": "^7.4.0"
   }
 }

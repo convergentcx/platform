@@ -269,7 +269,7 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
   }
 
   setActive = (evt: any) => {
-    const id = evt.target.id;
+    const { id } = evt.target;
     this.setState({
       active: parseInt(id),
     });
