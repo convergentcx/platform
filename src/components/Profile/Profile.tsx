@@ -120,6 +120,7 @@ const AboutInner = styled.div`
 `;
 
 const TradeScreenTab = styled.button<any>`
+  cursor: pointer;
   width: 20%;
   background: ${(props: any) => props.active ? '#CCC' : '#FFF'};
   border: none;
@@ -276,10 +277,9 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
     }
   }
 
-  setActive = (evt: any) => {
-    const { id } = evt.target;
+  setActive = (idx: any) => {
     this.setState({
-      active: parseInt(id),
+      active: parseInt(idx),
     });
   }
 
@@ -298,35 +298,35 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
           <TradeScreenTab
             active={this.state.active === 0}
             id={0}
-            onClick={this.setActive}
+            onClick={() => this.setActive(0)}
           >
             <FontAwesomeIcon icon={faDollarSign}/>
           </TradeScreenTab>
           <TradeScreenTab
             active={this.state.active === 1} 
             id ="1"
-            onClick={this.setActive}
+            onClick={() => this.setActive(1)}
           >
             <FontAwesomeIcon icon={faMoneyBill}/>
           </TradeScreenTab>
           <TradeScreenTab
             active={this.state.active === 2} 
             id ="2"
-            onClick={this.setActive}
+            onClick={() => this.setActive(2)}
           >
             <FontAwesomeIcon icon={faCoins}/>
           </TradeScreenTab>
           <TradeScreenTab
             active={this.state.active === 3} 
             id ="3"
-            onClick={this.setActive}
+            onClick={() => this.setActive(3)}
           >
             <FontAwesomeIcon icon={faUserFriends}/>
           </TradeScreenTab>
           <TradeScreenTab
             active={this.state.active === 4} 
             id ="4"
-            onClick={this.setActive}
+            onClick={() => this.setActive(4)}
           >
             <FontAwesomeIcon icon={faChartLine}/>
           </TradeScreenTab>
