@@ -109,6 +109,7 @@ export default class Web3Store {
     const vs = await (acc as any).methods.virtualSupply().call();
     const vr = await (acc as any).methods.virtualReserve().call();
     const ts = await (acc as any).methods.totalSupply().call();
+    const symbol = await (acc as any).methods.symbol().call();
     
     const poly = Polynomial.fromBancorParams(
       toDecimal(vs.toString()),
@@ -132,13 +133,14 @@ export default class Web3Store {
         vs,
         vr,
         ts,
+        symbol,
       },
     });
 
-    console.log(rr.toString());
-    console.log(vs.toString());
-    console.log(vr.toString());
-    console.log(ts.toString());
+    // console.log(rr.toString());
+    // console.log(vs.toString());
+    // console.log(vr.toString());
+    // console.log(ts.toString());
 
   }
 

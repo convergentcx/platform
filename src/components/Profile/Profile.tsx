@@ -238,23 +238,34 @@ const InnerDisplay = (props: any) => (
     {props.title}
     <hr/>
     <div style={{ color: 'grey', fontSize: '64px' }}>
-      {props.info}
+      {props.children}
     </div>
   </div>
 );
 
 type TradeScreenProps = {address: string, web3Store: any};
-type TradeScreenState = {active: number};
+type TradeScreenState = {active: number, loaded: boolean};
 
 class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
   state = {
     active: 0,
+    loaded: false,
   }
 
   componentDidMount = async () => {
     const { address, web3Store } = this.props;
     // Get data and cache it.
     await web3Store.getContractDataAndCache(address);
+    this.pollForData(address);
+  }
+
+  pollForData = (address: string) => {
+    const data = this.props.web3Store.betaCache[address];
+    if (!data) {
+      setTimeout(() => this.pollForData(address), 2000);
+    } else {
+      this.setState({ loaded: true });
+    }
   }
 
   setActive = (evt: any) => {
@@ -270,9 +281,7 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
 
     const data = web3Store.betaCache[address];
     if (!data) {
-      console.log(web3Store.betaCache)
-      console.log('data', data);
-      return 'Loading...';
+      
     }
 
     return (
@@ -321,13 +330,31 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
               &&
               <InnerDisplay
                 title="Price"
-                info={`${web3Store.web3.utils.fromWei(web3Store.betaCache[address].price)} eth`}
-              />
+                // info={`${web3Store.web3.utils.fromWei(web3Store.betaCache[address].price)} eth`}
+              >
+                {
+                  this.state.loaded
+                  ?
+                    `${web3Store.web3.utils.fromWei(web3Store.betaCache[address].price)} eth`
+                  :
+                    'Loading....'
+                }
+              </InnerDisplay>
             ) ||
             (
               active === 1
               &&
-              <InnerDisplay title="Market Cap" info="$23.02 USD"/>
+              <InnerDisplay title="Market Cap">
+                {
+                  this.state.loaded
+                  ?
+                    `${web3Store.web3.utils.fromWei(
+                      (web3Store.betaCache[address].price * web3Store.betaCache[address].ts).toString()
+                    )} eth`
+                  :
+                      'Loading....'
+                }
+              </InnerDisplay>
             ) ||
             (
               active === 2
@@ -335,7 +362,15 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
               <InnerDisplay
                 title="Supply"
                 info="1,000,576 LGN"
-              />
+              >
+                {
+                  this.state.loaded
+                  ?
+                    `${web3Store.betaCache[address].ts} ${web3Store.betaCache[address].symbol}`
+                  :
+                    'Loading....'
+                }
+              </InnerDisplay>
             ) ||
             (
               active === 3
