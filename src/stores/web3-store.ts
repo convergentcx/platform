@@ -1,4 +1,5 @@
 import { observable, action } from 'mobx';
+import ipfsClient from 'ipfs-http-client';
 import Web3 from 'web3';
 
 import Account from '../assets/artifacts/Account.json';
@@ -6,6 +7,8 @@ import ConvergentBeta from '../assets/artifacts/ConvergentBeta.json';
 
 import Polynomial from '../lib/polynomial';
 import { toDecimal } from '../lib/util';
+
+import { AccountData, b32IntoMhash, mhashIntoBytes32 } from '../lib/ipfs-util';
 
 const CB_PROXY_ADDR = "0x93bd15db2cbb045604d5df11f037203a1b57c23a";
 
@@ -31,6 +34,8 @@ export default class Web3Store {
   @observable betaCache: Map<string, BetaCacheObject> = new Map(); // Will update through polling every 2000 ms
   @observable cbAccounts: Map<string, CbAccount> = new Map(); // Will update any time a new account event comes (contains less data)
   @observable convergentBeta = null; // The contract instance
+  @observable ipfs: any = null;   // Global IPFS object
+  @observable ipfsCache: Map<string, AccountData> = new Map();
   @observable readonly = false;  // App starts in readonly mode
   @observable web3: any|null = null;  // Global Web3 object
   // @observable test: string = 'not updated';
@@ -70,6 +75,18 @@ export default class Web3Store {
   updateWeb3 = (web3: any) => {
     this.web3 = web3;
     console.log('web3 updated');
+  }
+
+  @action
+  initIPFS = () => {
+    const ipfs = ipfsClient(
+      'ipfs.infura.io',
+      '5001',
+      { protocol: 'https' },
+    );
+
+    this.ipfs = ipfs;
+    console.log('IPFS connected');
   }
 
   @action
@@ -147,16 +164,58 @@ export default class Web3Store {
       });
 
       this.pollAllTehData();
+      this.pollIPFS();
     });
   }
 
   @action
   pollAllTehData = async () => {
+    for (const [account, _] of this.cbAccounts) {
+      this.getContractDataAndCache(account);
+    }
+
     setInterval(() => {
+      console.log('web3 polling round');
       for (const [account, _] of this.cbAccounts) {
         this.getContractDataAndCache(account);
       }
-    }, 10000);
+    }, 4000);
+  }
+
+  @action
+  pollIPFS = () => {
+    if (!this.web3) throw new Error('pollIPFS failed');
+
+    for (const [address, data] of this.betaCache) {
+      this.ipfsGetDataAndCache(data.metadata);
+    }
+
+    setInterval(() => {
+      console.log('ipfs polling round')
+      for (const [address, data] of this.betaCache) {
+        console.log(address, data)
+        this.ipfsGetDataAndCache(data.metadata);
+      }
+    }, 4000);
+  }
+
+  @action
+  ipfsGetDataAndCache = async (metadata: string) => {
+    console.log('metadata: ', metadata)
+    const obj = {
+      digest: metadata,
+      hashFunction: 18,
+      size: 32,
+    };
+    console.log('obj', obj)
+
+    const contentAddress = b32IntoMhash(obj);
+    const raw = await this.ipfs.get(contentAddress);
+    console.log(raw);
+    const data: AccountData = JSON.parse(raw[0].content.toString());
+    console.log('data: ', data)
+    this.ipfsCache = this.ipfsCache.set(metadata, data);
+    console.log('cached: ', metadata)
   }
 
   @action
@@ -189,18 +248,16 @@ export default class Web3Store {
       toDecimal('1000000'),
     );
 
-    console.log(vs)
+    // console.log(vs)
     const integral = poly.integral(
       toDecimal(vs).add(toDecimal(ts))
     );
 
     const marketCap = integral.mul(ts).toString();
 
-    console.log(this.web3.utils.fromWei(integral.toString()), 'eth')
-
-    const oldCache = this.betaCache;
-    this.betaCache = Object.assign(oldCache, {
-      [address] : {
+    this.betaCache.set(
+      address,  
+      {
         price: integral.toString(),
         marketCap,
         rr,
@@ -210,22 +267,20 @@ export default class Web3Store {
         symbol,
         metadata,
       },
-    });
+    );
+
+    console.log('cached metadata: ', metadata);
 
     const nowBlock = await this.web3.eth.getBlockNumber();
     (acc as any).events.MetadataUpdated({fromBlock: nowBlock})
     .on('data', (event: any) => {
       const md = event.returnValues.newMetadata;
-      if ((this.betaCache as any)[address].metadata !== md) {
-        (this.betaCache as any)[address].metadata = md;
+      const oldEntry = this.betaCache.get(address);
+      if ((oldEntry as any).metadata !== md) {
+        const newEntry = Object.assign(oldEntry, { metadata: md });
+        this.betaCache.set(address, newEntry);
       };
     });
-
-    // console.log(rr.toString());
-    // console.log(vs.toString());
-    // console.log(vr.toString());
-    // console.log(ts.toString());
-
   }
 
   @action

@@ -421,7 +421,7 @@ const UnlockedSpeedDial = withRouter(class UnlockedSpeedDial extends React.Compo
   }
 });
 
-const App = inject('web3Store')(observer(
+const App = inject('web3Store', 'ipfsStore')(observer(
 class App extends Component {
 
   // state = {
@@ -433,6 +433,10 @@ class App extends Component {
   //     sideNav: false,
   //   })
   // }
+
+  componentDidMount = () => {
+    this.props.web3Store.initIPFS();
+  }
 
   render() {
     // const { sideNav } = this.state;

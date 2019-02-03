@@ -19,6 +19,7 @@ import {
 
 import Logan from '../../assets/pics/Logan-Saether.jpg';
 import { colors, shadowMixin } from '../../common';
+import { inject, observer } from 'mobx-react';
 
 const NavBox = styled.div`
   width: 260px;
@@ -111,6 +112,11 @@ const AboutContainer = styled.div`
   height: 90vh;
   margin-top: 5vh;
   ${shadowMixin}
+`;
+
+const AboutInner = styled.div`
+  padding: 32px;
+  display: flex;
 `;
 
 const TradeScreenTab = styled.button<any>`
@@ -254,13 +260,15 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
 
   componentDidMount = async () => {
     const { address, web3Store } = this.props;
-    // Get data and cache it.
-    await web3Store.getContractDataAndCache(address);
+    if (!web3Store.betaCache.has(address)) {
+      // Get data and cache it.
+      await web3Store.getContractDataAndCache(address);
+    }
     this.pollForData(address);
   }
 
   pollForData = (address: string) => {
-    const data = this.props.web3Store.betaCache[address];
+    const data = this.props.web3Store.betaCache.get(address);
     if (!data) {
       setTimeout(() => this.pollForData(address), 2000);
     } else {
@@ -279,7 +287,7 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
     const { active } = this.state;
     const { address, web3Store } = this.props;
 
-    const data = web3Store.betaCache[address];
+    const data = web3Store.betaCache.get(address);
     if (!data) {
       
     }
@@ -335,7 +343,7 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
                 {
                   this.state.loaded
                   ?
-                    `${web3Store.web3.utils.fromWei(web3Store.betaCache[address].price)} eth`
+                    `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).price)} eth`
                   :
                     'Loading....'
                 }
@@ -349,7 +357,7 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
                   this.state.loaded
                   ?
                     `${web3Store.web3.utils.fromWei(
-                      (web3Store.betaCache[address].price * web3Store.betaCache[address].ts).toString()
+                      web3Store.betaCache.get(address).marketCap
                     )} eth`
                   :
                       'Loading....'
@@ -366,7 +374,7 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
                 {
                   this.state.loaded
                   ?
-                    `${web3Store.betaCache[address].ts} ${web3Store.betaCache[address].symbol}`
+                    `${web3Store.betaCache.get(address).ts} ${web3Store.betaCache.get(address).symbol}`
                   :
                     'Loading....'
                 }
@@ -520,16 +528,18 @@ class InvestPage extends React.Component<any, any> {
   }
 };
 
-const AboutPage = (props: any) => (
+const AboutPage = inject('ipfsStore')(observer((props: any) => (
  <AboutContainer>
-   {
-     props.web3Store.betaCache[props.address]
-     ?
-      props.web3Store.betaCache[props.address].bio
-     : 'filling'
-   }
+   <AboutInner>
+    {
+      (props.web3Store.betaCache.has(props.address) && props.web3Store.ipfsCache.get(props.web3Store.betaCache.get(props.address).metadata))
+      ?
+        props.web3Store.ipfsCache.get(props.web3Store.betaCache.get(props.address).metadata).bio
+      : 'DApp still loading...'
+    }
+  </AboutInner>
  </AboutContainer>
-)
+)));
 
 const TransactPage = () => (
   <div style={{ width: '45vw', marginLeft: '5%', marginTop: '5vh', height: '90vh' }}>
