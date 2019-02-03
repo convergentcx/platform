@@ -6,6 +6,7 @@ import { AccountData, b32IntoMhash, mhashIntoBytes32 } from '../lib/ipfs-util';
 export default class IpfsStore {
   @observable ipfs: any = null;
   @observable ipfsCache: Map<string, AccountData> = new Map();
+  @observable ipfsLock: boolean = false;
 
   @action 
   initIPFS = async () => {
@@ -22,6 +23,15 @@ export default class IpfsStore {
     if (!this.ipfs) {
       this.initIPFS();
     }
+  }
+
+  @action
+  add = async (some: string): Promise<string> => {
+    this.initHelper();
+    this.ipfsLock = true;
+    const ipfsHash = await this.ipfs.add(Buffer.from(some));
+    this.ipfsLock = false;
+    return ipfsHash;
   }
 
   @action

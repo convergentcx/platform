@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link, Route, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import { observer } from 'mobx-react';
+import { observer, inject } from 'mobx-react';
 import { any } from 'prop-types';
+import Web3Store from '../../stores/web3-store';
 
 // import Subject from '../Dropzone.jsx';
 
@@ -68,7 +69,7 @@ const DisplayContainer = styled.div<any>`
   min-height: ${(props: any) => props.halfsize ? '15%' : '30%'};
 `;
 
-const BioDisplay = styled.input`
+const BioInput = styled.input`
   width: 100%;
   background: #E9EDF2;
   min-height: 50%;
@@ -81,16 +82,16 @@ const CommitButton = styled.button`
   display: flex;
   cursor: pointer;
   width: 90%;
-  background: transparent;
   border: solid;
   justify-content: center;
   align-items: center;
   height: 32px;
   font-size: 16px;
   transition: 0.3s;
-  :hover {
-    background: blue;
-  }
+  border-radius: 32px;
+  border-color: #202020;
+  margin-top: 16px;
+  font-weight: 900;
 `;
 
 const DisplayHeading = styled.h4`
@@ -156,9 +157,23 @@ const DashboardRight = styled.div`
   background: #2299AA;
 `;
 
-class InteriorDashboard extends React.Component<any,any> {
+const InteriorDashboard = inject('ipfsStore')(class InteriorDashboard extends React.Component<any,any> {
   state = {
     active: 0,
+    bio: '',
+  }
+
+  commit = async (metadata: string) => {
+    const { web3Store } = this.props;
+
+    await web3Store.updateMetadata(this.props.match.params.account, metadata)
+  }
+
+  inputUpdate = (evt: any) => {
+    const { name, value } = evt.target;
+    this.setState({
+      [name]: value,
+    });
   }
 
   setActive = (evt: any) => {
@@ -166,6 +181,12 @@ class InteriorDashboard extends React.Component<any,any> {
     this.setState({
       active: parseInt(id),
     });
+  }
+
+  transmute = async (): Promise<string> => {
+    const data = { bio: this.state.bio };
+    const dataStr = JSON.stringify(data);
+    return Promise.resolve('');
   }
 
   render() {
@@ -190,9 +211,12 @@ class InteriorDashboard extends React.Component<any,any> {
                 <DisplayHeading>
                   Your bio:
                 </DisplayHeading>
-                <BioDisplay/>
+                <BioInput
+                  name="bio"
+                  onChange={this.inputUpdate}
+                />
               </DisplayContainer>
-              <DisplayContainer halfsize>
+              {/* <DisplayContainer halfsize>
                 <DisplayHeading>
                   Your tags:
                 </DisplayHeading>
@@ -200,7 +224,7 @@ class InteriorDashboard extends React.Component<any,any> {
                   <Tag>blockchain</Tag>
                   <AddButton>+</AddButton>
                 </TagContainer>
-              </DisplayContainer>
+              </DisplayContainer> */}
               <DisplayContainer halfsize>
                 <DisplayHeading>
                   Your services:
@@ -209,7 +233,7 @@ class InteriorDashboard extends React.Component<any,any> {
                   +
                 </AddServiceButton>
               </DisplayContainer>
-              <CommitButton>
+              <CommitButton onClick={() => this.commit(this.props.web3Store.web3.utils.randomHex(32))}>
                 Commit to Ethereum
               </CommitButton>
               </>
@@ -225,7 +249,7 @@ class InteriorDashboard extends React.Component<any,any> {
       </>
     )
   }
-};
+});
 
 const DashboardPage = withRouter(observer(
   class DashboardPage extends React.Component<any,any>{
@@ -248,7 +272,7 @@ const DashboardPage = withRouter(observer(
             :
               <h1>Please log in</h1>
         )}/>
-        <Route path='/dashboard/:account' render={(props: any) => <InteriorDashboard {...props}/>}/>
+        <Route path='/dashboard/:account' render={(props: any) => <InteriorDashboard {...props} web3Store={web3Store}/>}/>
       </DashboardContainer>
     )
   }

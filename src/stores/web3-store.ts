@@ -180,6 +180,26 @@ export default class Web3Store {
 
   }
 
+  @action
+  updateMetadata = async (economy: string, metadata: string) => {
+    if (!this.web3) {
+      console.error('no web3 lol')
+      return;
+    }
+
+    if (!this.web3.utils.isAddress(economy)) {
+      throw new Error('Incorrect economy address provided to updateMetadata function');
+    }
+
+    console.log(metadata);
+
+    const { abi } = Account;
+    const acc = new this.web3.eth.Contract(abi, economy);
+
+    const tx = await acc.methods.updateMetadata(metadata).send({from: this.account});
+    console.log(tx)
+  }
+
   // @action
   // updateTest = () => {
   //   console.log('testing');

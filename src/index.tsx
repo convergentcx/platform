@@ -4,12 +4,13 @@ import { HashRouter as Router } from 'react-router-dom';
 import { Provider } from 'mobx-react';
 import './index.css';
 import App from './App';
+import IpfsStore from './stores/ipfs-store';
 import Web3Store from './stores/web3-store';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
   <Router>
-    <Provider web3Store={new Web3Store()}>
+    <Provider ipfsStore ={new IpfsStore()} web3Store={new Web3Store()}>
       <App/>
     </Provider>
   </Router>, document.getElementById('root'));

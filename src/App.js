@@ -4,6 +4,8 @@ import styled, { ThemeProvider } from 'styled-components';
 import { observer, inject } from 'mobx-react';
 import makeBlockie from 'ethereum-blockies-base64';
 
+import Tooltip from 'rc-tooltip';
+
 /// Assets
 import Logan from './assets/pics/Logan-Saether.jpg';
 import Lock from './assets/pics/lock.png';
@@ -15,9 +17,21 @@ import {
   faCamera, 
   faArrowRight, 
   faArrowLeft, 
-  faCoins, 
+  faCoins,
+  faBong,
+  faFastForward,
+  faHome,
+  faUserLock,
+  faGlobeEurope,
+  faDatabase,
+  faDesktop,
+  faIndustry,
+  faUsersCog,
+  faRocket,
+  faQuestion,
 } from '@fortawesome/free-solid-svg-icons';
 
+import { faEthereum } from '@fortawesome/free-brands-svg-icons';
 /// Components
 import Dashboard from './components/Dashboard';
 import Home from './components/Home';
@@ -157,6 +171,50 @@ const HoveringBlockie = styled.img`
   ${shadowMixin}
 `;
 
+const SpeedDialAnchor = styled.div`
+  cursor: pointer;
+  position: fixed;
+  width: 56px;
+  height: 56px;
+  bottom: 4%;
+  right: 2%;
+  border-radius: 28px;
+  ${shadowMixin}
+  background: ${props => props.open ? '#232323' : '#000'};
+  color: ${props => props.locked ? 'red' : 'green'};
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 0.3s;
+  font-size: 24px;
+  font-weight: 900;
+  :hover {
+    color: ;
+    background: #232323;
+  }
+`;
+
+const SpeedDialButton = styled.div`
+  cursor: pointer;
+  position: fixed;
+  width: 48px;
+  height: 48px;
+  bottom: calc(${props => props.offset * 52}px + 36px + 8%);
+  right: calc(2% + 4px);
+  border-radius: 24px;
+  ${shadowMixin}
+  background: #0044DD;
+  color: #FFF;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 0.3s;
+  :hover {
+    background: #2424D0;
+    color: #AAA;
+  }
+`;
+
 class HoverableContent extends Component {
   state = {
     hovering: false,
@@ -179,7 +237,7 @@ class HoverableContent extends Component {
       </div>
     );
   }
-}
+};
 
 const ContentPage = () => (
   <div style={{ paddingBottom: '50px' }}>
@@ -267,26 +325,122 @@ const ContentPage = () => (
   </div>
 );
 
-const App = inject('web3Store')(observer(
-class App extends Component {
-
+class SpeedDial extends React.Component {
   state = {
-    sideNav: false,
-  }
-
-  closeNav = () => {
-    this.setState({
-      sideNav: false,
-    })
+    open: false,
   }
 
   render() {
-    const { sideNav } = this.state;
+    return (
+      <>
+        <SpeedDialAnchor open={this.state.open} onClick={() => this.setState({open: !this.state.open})}>
+          <FontAwesomeIcon icon={faBong}/>
+        </SpeedDialAnchor>
+        {this.state.open &&
+          <>
+            <SpeedDialButton offset={10}>
+              <FontAwesomeIcon icon={faFastForward}/>
+            </SpeedDialButton>
+          </>
+        }
+      </>
+    )
+  }
+}
+
+class LockedSpeedDial extends React.Component {
+  state = {
+    hovering: 0,
+    open: false,
+  }
+
+  render() {
+    return (
+      <>
+        <SpeedDialAnchor locked={true} open={this.state.open} onClick={() => this.setState({open: !this.state.open})}>
+          <FontAwesomeIcon icon={faEthereum}/>
+        </SpeedDialAnchor>
+        {this.state.open &&
+          <>
+              <SpeedDialButton 
+                offset={0}
+                onClick={() => this.props.web3Store.turnOnWeb3()}
+              >
+                <FontAwesomeIcon icon={faUserLock}/>
+              </SpeedDialButton>
+          </>
+        }
+      </>
+    )
+  }
+}
+
+const UnlockedSpeedDial = withRouter(class UnlockedSpeedDial extends React.Component {
+  state = {
+    hovering: 0,
+    open: false,
+  }
+
+  render() {
+    const { history } = this.props;
+    return (
+      <>
+        <SpeedDialAnchor locked={false} open={this.state.open} onClick={() => this.setState({open: !this.state.open})}>
+          <FontAwesomeIcon icon={faEthereum}/>
+        </SpeedDialAnchor>
+        {this.state.open &&
+          <>
+              <SpeedDialButton 
+                offset={0}
+                onClick={() => history.push('/list')}
+              >
+                <FontAwesomeIcon icon={faGlobeEurope}/>
+              </SpeedDialButton>
+              <SpeedDialButton 
+                offset={1}
+                onClick={() => history.push('/dashboard')}
+              >
+                <FontAwesomeIcon icon={faUsersCog}/>
+              </SpeedDialButton>
+              <SpeedDialButton 
+                offset={2}
+                onClick={() => history.push('/')}
+              >
+                <FontAwesomeIcon icon={faRocket}/>
+              </SpeedDialButton>
+              <SpeedDialButton 
+                offset={3}
+                onClick={() => history.push('/faq')}
+              >
+                <FontAwesomeIcon icon={faQuestion}/>
+              </SpeedDialButton>
+          </>
+        }
+      </>
+    )
+  }
+});
+
+const App = inject('web3Store')(observer(
+class App extends Component {
+
+  // state = {
+  //   sideNav: false,
+  // }
+
+  // closeNav = () => {
+  //   this.setState({
+  //     sideNav: false,
+  //   })
+  // }
+
+  render() {
+    // const { sideNav } = this.state;
     // console.log(this.props)
     return (
       <Wrapper>
       
-        <div style={{ height: '100%', width: sideNav ? '250px':'25px', overflowX: 'hidden', zIndex: '1', position: 'fixed', top: '0', left: '0', background: 'rgba(0,0,0,0.5)', paddingTop: '60px' }}>
+        {/* <div style={{ height: '100%', width: sideNav ? '250px':'25px', overflowX: 'hidden', zIndex: '1', position: 'fixed', top: '0', left: '0', background: 'rgba(0,0,0,0.5)', paddingTop: '60px' }}>
           {
             !sideNav 
             && <SideNavOpen onClick={() => this.setState({ sideNav: true })} style={{
@@ -303,9 +457,16 @@ class App extends Component {
           <SideNavLink onClick={this.closeNav} to="/list">List</SideNavLink>
           <SideNavLink onClick={this.closeNav} to="/profile">Explore</SideNavLink>
           <SideNavLink onClick={this.closeNav} to="/faq">FAQ</SideNavLink>
-        </div>
+        </div> */}
 
-        <HoveringBlockie src={this.props.web3Store.account ? makeBlockie(this.props.web3Store.account) : Lock} alt='unlock' onClick={() => this.props.web3Store.turnOnWeb3()}/>
+        {/* <HoveringBlockie src={this.props.web3Store.account ? makeBlockie(this.props.web3Store.account) : Lock} alt='unlock' onClick={() => this.props.web3Store.turnOnWeb3()}/> */}
+        {
+          this.props.web3Store.account
+            ?
+              <UnlockedSpeedDial web3Store={this.props.web3Store}/>
+            :
+              <LockedSpeedDial web3Store={this.props.web3Store}/>
+        }
 
         <Route exact path='/' render={props => <Home {...props} web3Store={this.props.web3Store}/>}/>
         <Route path='/dashboard' render={props => <Dashboard {...props} web3Store={this.props.web3Store}/>}/>
