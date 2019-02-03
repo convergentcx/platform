@@ -522,7 +522,12 @@ class InvestPage extends React.Component<any, any> {
 
 const AboutPage = (props: any) => (
  <AboutContainer>
-
+   {
+     props.web3Store.betaCache[props.address]
+     ?
+      props.web3Store.betaCache[props.address].bio
+     : 'filling'
+   }
  </AboutContainer>
 )
 
@@ -595,7 +600,7 @@ const ProfilePage = withRouter((props: any) => (
       </NavBox>
     </Left>
     <Middle>
-      <Route path={`/profile/${props.match.params.address}/about`} component={AboutPage}/>
+      <Route path={`/profile/${props.match.params.address}/about`} render={() => <AboutPage address={props.match.params.address} web3Store={props.web3Store}/>}/>
       {/* <Route path='/profile/feed' component={ContentPage}/> */}
       <Route path={`/profile/${props.match.params.address}/invest`} render={() => <InvestPage address={props.match.params.address} web3Store={props.web3Store}/>}/>
       <Route path={`/profile/${props.match.params.address}/transact`} component={TransactPage}/>

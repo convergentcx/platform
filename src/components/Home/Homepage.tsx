@@ -13,6 +13,7 @@ const HomeContainer = styled.div`
 `;
 
 const LaunchButton = styled.button`
+  cursor: pointer;
   width: 40vw;
   height: 40vw;
   border-radius: 20vw;
@@ -31,6 +32,11 @@ const LaunchButton = styled.button`
     background: #000;
     box-shadow: 0 15px 35px rgba(50,50,93,.9), 0 5px 15px rgba(0,0,0,.87);
   }
+`;
+
+const DeployButton = styled.button`
+  cursor: pointer;
+  margin-top: 16px;
 `;
 
 type HomePageState = {
@@ -110,17 +116,20 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
               <input
                 name="accountName"
                 onChange={this.inputUpdate}
+                style={{
+                  marginBottom: '8px',
+                }}
               />
               Your ticker symbol:
               <input
                 name="accountTicker"
                 onChange={this.inputUpdate}
               />
-              <button
+              <DeployButton
                 onClick={this.deploy}
               >
                 Deploy
-              </button>
+              </DeployButton>
             </div>
           :
             <LaunchButton

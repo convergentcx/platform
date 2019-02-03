@@ -24,11 +24,17 @@ const List = (props: any) => {
   let items = [];
   if (props.web3Store.cbAccounts) { 
     console.log('filling')
-    items = props.web3Store.cbAccounts.map((account: any) => (
-      <ListItem to={`/profile/${account.returnValues.account}`} key={Math.random().toString()}>
-        {account.returnValues.account}
-      </ListItem>
-    ));
+    for (const [account, obj] of props.web3Store.cbAccounts) {
+      items.push(
+        <ListItem to={`/profile/${account}`} key={Math.random()}>
+          Account: {account}
+          <br/>
+          Creator: {obj.creator}
+          <br/>
+          Created at: {obj.blockNumber}
+        </ListItem>
+      )
+    }
   }
 
   return (

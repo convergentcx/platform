@@ -9,14 +9,30 @@ import { toDecimal } from '../lib/util';
 
 const CB_PROXY_ADDR = "0x93bd15db2cbb045604d5df11f037203a1b57c23a";
 
+type CbAccount = {
+  creator: string,
+  blockNumber: number,
+};
+
+type BetaCacheObject = {
+  price: string,
+  marketCap: string,
+  rr: string,
+  vs: string,
+  vr: string,
+  ts: string,
+  symbol: string,
+  metadata: string,
+};
+
 export default class Web3Store {
-  @observable account = null;
+  @observable account = null; // Main unlocked account
   @observable accountsCache: Set<string> = new Set();
-  @observable betaCache: Map<string, {}> = new Map();
-  @observable cbAccounts = null;
-  @observable convergentBeta = null;
+  @observable betaCache: Map<string, BetaCacheObject> = new Map(); // Will update through polling every 2000 ms
+  @observable cbAccounts: Map<string, CbAccount> = new Map(); // Will update any time a new account event comes (contains less data)
+  @observable convergentBeta = null; // The contract instance
   @observable readonly = false;  // App starts in readonly mode
-  @observable web3: any|null = null;
+  @observable web3: any|null = null;  // Global Web3 object
   // @observable test: string = 'not updated';
 
   @action
@@ -105,13 +121,42 @@ export default class Web3Store {
     }
 
     const initAccounts = await (this.convergentBeta as any).getPastEvents('NewAccount', {fromBlock: 0, toBlock: 'latest'});
-    // console.log(initAccounts);
-    this.cbAccounts = initAccounts;
+    console.log(initAccounts)
+    console.log(typeof initAccounts);
+    initAccounts.forEach((event: any) => {
+      // console.log(event)
+      const { returnValues: { account, creator }, blockNumber } = event;
+      // console.log(account, creator, blockNumber)
+      this.cbAccounts.set(account, {
+        creator,
+        blockNumber,
+      });
+    });
+    
+
+    // this.cbAccounts = initAccounts;
     // Now start watching the accounts.
     (this.convergentBeta as any).events.NewAccount({fromBlock: 0})
     .on('data', (event: any) => {
       // console.log(event);
+      const { returnValues: { account, creator }, blockNumber } = event;
+      // console.log(account, creator, blockNumber)
+      this.cbAccounts.set(account, {
+        creator,
+        blockNumber,
+      });
+
+      this.pollAllTehData();
     });
+  }
+
+  @action
+  pollAllTehData = async () => {
+    setInterval(() => {
+      for (const [account, _] of this.cbAccounts) {
+        this.getContractDataAndCache(account);
+      }
+    }, 10000);
   }
 
   @action
@@ -149,12 +194,15 @@ export default class Web3Store {
       toDecimal(vs).add(toDecimal(ts))
     );
 
+    const marketCap = integral.mul(ts).toString();
+
     console.log(this.web3.utils.fromWei(integral.toString()), 'eth')
 
     const oldCache = this.betaCache;
     this.betaCache = Object.assign(oldCache, {
       [address] : {
         price: integral.toString(),
+        marketCap,
         rr,
         vs,
         vr,
