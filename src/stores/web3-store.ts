@@ -27,6 +27,8 @@ type BetaCacheObject = {
   symbol: string,
   metadata: string,
   poly: Polynomial,
+  heldContributions: string,
+  name: string,
 };
 
 export default class Web3Store {
@@ -37,6 +39,7 @@ export default class Web3Store {
   @observable convergentBeta = null; // The contract instance
   @observable ipfs: any = null;   // Global IPFS object
   @observable ipfsCache: Map<string, AccountData> = new Map();
+  @observable ipfsLock: boolean = false;  // Locks for IPFS
   @observable readonly = false;  // App starts in readonly mode
   @observable web3: any|null = null;  // Global Web3 object
   // @observable test: string = 'not updated';
@@ -68,6 +71,16 @@ export default class Web3Store {
         this.accountsCache.add(myAccount);
       }
     });
+  }
+
+  @action
+  sendContribution = async (address: string) => {
+    if (this.readonly) throw new Error('Cannot perform this action of sending contributions in readonly mode.');
+
+    const { abi } = Account;
+    const acc = new this.web3.eth.Contract(abi, address);
+    const ret = await acc.methods.sendContributions().send({ from: this.account });
+    console.log(ret)
   }
 
   @action
@@ -142,6 +155,15 @@ export default class Web3Store {
 
     this.ipfs = ipfs;
     console.log('IPFS connected');
+  }
+
+  @action
+  ipfsAdd = async (some: string): Promise<string> => {
+    this.ipfsLock = true;
+    console.log('IPFS ADDING YO')
+    const ipfsHash = await this.ipfs.add(Buffer.from(some));
+    this.ipfsLock = false;
+    return ipfsHash;
   }
 
   @action
@@ -313,6 +335,8 @@ export default class Web3Store {
     const ts = await (acc as any).methods.totalSupply().call();
     const symbol = await (acc as any).methods.symbol().call();
     const metadata = await (acc as any).methods.metadata().call();
+    const heldContributions = await (acc as any).methods.heldContributions().call();
+    const name = await (acc as any).methods.name().call();
 
     const poly = Polynomial.fromBancorParams(
       toDecimal(vs.toString()),
@@ -350,6 +374,8 @@ export default class Web3Store {
         symbol,
         metadata,
         poly,
+        heldContributions,
+        name,
       },
     );
 

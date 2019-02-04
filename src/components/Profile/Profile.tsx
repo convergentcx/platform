@@ -287,6 +287,16 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
     }
   }
 
+  sendContributions = () => {
+    const { address, web3Store } = this.props;
+    if (!web3Store.account) {
+      alert('You must be logged in to do this action!');
+      return;
+    }
+
+    web3Store.sendContribution(address);
+  }
+
   setActive = (idx: any) => {
     this.setState({
       active: parseInt(idx),
@@ -348,7 +358,6 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
               &&
               <InnerDisplay
                 title="Price"
-                // info={`${web3Store.web3.utils.fromWei(web3Store.betaCache[address].price)} eth`}
               >
                 {
                   this.state.loaded
@@ -379,7 +388,6 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
               &&
               <InnerDisplay
                 title="Supply"
-                info="1,000,576 LGN"
               >
                 {
                   this.state.loaded
@@ -395,15 +403,26 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
               &&
               <InnerDisplay
                 title="Contributors"
-                info="1,207"
-              />
+              >
+                {
+                  this.state.loaded
+                  ?
+                    `${web3Store.betaCache.get(address).name} has ${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).heldContributions)} contributions waiting.`
+                    : 'Loading...'
+                }
+                <br/>
+                <button
+                  onClick={this.sendContributions}
+                >
+                  Send!
+                </button>
+              </InnerDisplay>
             ) ||
             (
               active === 4
               &&
               <InnerDisplay
                 title="Bonding Curve"
-                info="Custom Tab"
               >
                 <MyChart/>
               </InnerDisplay>

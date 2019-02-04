@@ -158,7 +158,7 @@ const DashboardRight = styled.div`
   background: #2299AA;
 `;
 
-const InteriorDashboard = inject('ipfsStore')(class InteriorDashboard extends React.Component<any,any> {
+const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboard extends React.Component<any,any> {
   state = {
     active: 0,
     bio: '',
@@ -179,7 +179,7 @@ const InteriorDashboard = inject('ipfsStore')(class InteriorDashboard extends Re
       bio: this.state.bio,
     };
 
-    const hash = await ipfsStore.add(
+    const hash = await web3Store.ipfsAdd(
       JSON.stringify(data),
     );
 
