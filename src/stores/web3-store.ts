@@ -26,6 +26,7 @@ type BetaCacheObject = {
   ts: string,
   symbol: string,
   metadata: string,
+  poly: Polynomial,
 };
 
 export default class Web3Store {
@@ -46,6 +47,7 @@ export default class Web3Store {
     const main = (await this.web3.eth.getAccounts())[0];
     console.log('setting account ', main);
     this.account = main;
+    this.cacheAccounts();
   }
 
   @action
@@ -61,15 +63,39 @@ export default class Web3Store {
         creator: this.account,
       },
     }).on('data', (event: any) => {
-      const LLL = event.returnValues.account;
-      // console.log(LLL)
-      if (!this.accountsCache.has(LLL)) {
-        this.accountsCache.add(LLL);
+      const myAccount = event.returnValues.account;
+      if (!this.accountsCache.has(myAccount)) {
+        this.accountsCache.add(myAccount);
       }
-      // this.accountsCache = [...this.accountsCache, event.returnValues.account];
-      // console.log(event)
-      // console.log(this.accountsCache)
     });
+  }
+
+  @action
+  getBuyReturn = async (address: string, value: string) =>{
+    const { abi } = Account;
+    const acc = new this.web3.eth.Contract(abi, address);
+    // console.log(acc)
+    const ret = await acc.methods.purchaseReturn(value).call();
+    return ret;
+  }
+
+  @action
+  buy = async (address: string, value: string) => {
+    if (!this.account) {
+      throw new Error('No account!!');
+    }
+    const { abi } = Account;
+    const acc = new this.web3.eth.Contract(abi, address);
+    const ret = await acc.methods.buy(
+      value,
+      0,
+      0
+    ).send({
+      from: this.account,
+      value,
+      gasPrice: this.web3.utils.toWei('2', 'gwei'),
+    });
+    console.log(ret)
   }
 
   @action
@@ -118,6 +144,7 @@ export default class Web3Store {
       return;
     }
     this.updateWeb3(_window.web3);
+    this.readonly = false;
     await this.updateAccount();
     // await this.signWelcome();
     await this.instantiateConvergentBeta();
@@ -271,12 +298,12 @@ export default class Web3Store {
       toDecimal(vs).add(toDecimal(ts))
     );
 
-    const marketCap = integral.mul(ts).toString();
+    const marketCap = integral.mul(ts).div(toDecimal(10).pow(18)).toString();
 
     this.betaCache.set(
       address,  
       {
-        price: integral.toString(),
+        price: integral.div(toDecimal(10).pow(18)).toString(),
         marketCap,
         rr,
         vs,
@@ -284,6 +311,7 @@ export default class Web3Store {
         ts,
         symbol,
         metadata,
+        poly,
       },
     );
 

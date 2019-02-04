@@ -20,7 +20,8 @@ import {
 import Logan from '../../assets/pics/Logan-Saether.jpg';
 import { colors, shadowMixin } from '../../common';
 import { inject, observer } from 'mobx-react';
-import Web3Store from '../../stores/web3-store';
+
+import { toDecimal } from '../../lib/util';
 
 const NavBox = styled.div`
   width: 260px;
@@ -350,7 +351,7 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
                 {
                   this.state.loaded
                   ?
-                    `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).price)} eth`
+                    `${web3Store.betaCache.get(address).price.slice(0,9)} eth`
                   :
                     'Loading....'
                 }
@@ -363,9 +364,9 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
                 {
                   this.state.loaded
                   ?
-                    `${web3Store.web3.utils.fromWei(
-                      web3Store.betaCache.get(address).marketCap
-                    )} eth`
+                    `${
+                      web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).marketCap.split('.')[0]).slice(0,9)
+                    } eth`
                   :
                       'Loading....'
                 }
@@ -381,7 +382,7 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
                 {
                   this.state.loaded
                   ?
-                    `${web3Store.betaCache.get(address).ts} ${web3Store.betaCache.get(address).symbol}`
+                    `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).ts).slice(0,9)} ${web3Store.betaCache.get(address).symbol}`
                   :
                     'Loading....'
                 }
@@ -410,14 +411,71 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
   }
 }
 
-const InvestScreen = inject('web3Store')(class InvestScreen extends React.Component<any,any> {
+const InvestScreen = inject('web3Store')(observer(class InvestScreen extends React.Component<any,any> {
   state = {
     inputVal: 0,
+    youGet: 0,
+  }
+
+  inputUpdate = (evt: any) => {
+    const { value } = evt.target;
+    this.updateYouGet(value);
+  }
+
+  updateYouGet = async (value: any) => {
+    const youGet = await this.props.web3Store.getBuyReturn(
+      this.props.address,
+      value.toString(),
+    );
+    console.log(youGet)
+    this.setState({
+      inputVal: value,
+      youGet,
+    })
+  }
+
+  buy = async () => {
+    const { web3Store } = this.props;
+    if (web3Store.readonly) {
+      alert('You are in readonly mode! Cannot do actions.');
+      return;
+    }
+    if (this.state.inputVal == 0) {
+      alert('You are trying to invest 0. That makes no sense.');
+      return;
+    }
+    await web3Store.buy(this.props.address, this.state.inputVal);
   }
 
   render() {
-    console.log(this.state)
-    console.log(this.props)
+    // console.log(this.state)
+    // console.log(this.props)
+
+    const { address, web3Store: { betaCache, web3: { utils } } } = this.props;
+
+    let symbol;
+    if (betaCache.has(address)) {
+      symbol = betaCache.get(address).symbol;
+
+      // youGet = this.props.web3Store.getBuyReturn(address, this.state.inputVal.toString());
+      // const vr = toDecimal(betaCache.get(address).vr);
+      // const newReserve = toDecimal(this.state.inputVal).add(vr);
+      // console.log('newReserve: ', newReserve.toString());
+  
+      // const youGetOne = betaCache.get(address).poly.solveForX(
+      //   newReserve,
+      // );
+
+      // const vs = toDecimal(betaCache.get(address).vs);
+  
+      // // console.log('youGet: ', youGet.sub(vs).toString())
+      // console.log('youGetOne:', youGetOne.toString())
+      // console.log('vs:', vs.toString());
+      // youGet = youGetOne.sub(vs);
+      // console.log('youGet:', youGet.toString())
+    } else {
+      symbol = "???";
+    }
 
     return (
       <div style={{ height: '90%', background: 'rgba(0,0,0,0.8)', borderRadius: '10px 10px 0 0', textAlign: 'center' }}>
@@ -430,14 +488,14 @@ const InvestScreen = inject('web3Store')(class InvestScreen extends React.Compon
           How much?
         </div>
         <br/>
-        <input style={{ color: 'black', background: 'white', border: 'none' }} onChange={(e: any) => this.setState({inputVal: e.target.value})}>
+        <input style={{ color: 'black', background: 'white', border: 'none' }} onChange={this.inputUpdate}>
 
         </input>
         <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
           You get:
         </div>
         <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
-          ~ 12.4009 CAT
+          {utils.fromWei(this.state.youGet.toString())} {symbol}
         </div>
         {/* <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
           In time:
@@ -446,7 +504,9 @@ const InvestScreen = inject('web3Store')(class InvestScreen extends React.Compon
           24 minutes
         </div> */}
         <br/>
-        <ConfirmButton>
+        <ConfirmButton
+          onClick={this.buy}
+        >
           {/* <FontAwesomeIcon icon={faThumbsUp} size="lg"/> */}
           BUY
         </ConfirmButton>
@@ -459,7 +519,7 @@ const InvestScreen = inject('web3Store')(class InvestScreen extends React.Compon
       </div>
     )
   }
-});
+}));
 
 const ExitScreen = (props: any) => (
   <div style={{ height: '90%', background: '#000', borderRadius: '10px 10px 0 0', textAlign: 'center' }}>

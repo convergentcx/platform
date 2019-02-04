@@ -65,7 +65,7 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
       randBytes32,
       this.state.accountName,
       this.state.accountTicker,
-      "0x6635F83421Bf059cd8111f180f0727128685BaE4",
+      "0x0000000000000000000000000000000000000000",
       "500000",
       "1000000000000000000",
       "500000000000000",
