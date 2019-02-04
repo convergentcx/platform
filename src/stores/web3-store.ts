@@ -71,6 +71,34 @@ export default class Web3Store {
   }
 
   @action
+  getSellReturn = async (address: string, value: string) => {
+    const { abi } = Account;
+    const acc = new this.web3.eth.Contract(abi, address);
+
+    const ret = await acc.methods.sellReturn(value).call();
+    return ret;
+  }
+
+  @action
+  sell = async (address: string, value: string) => {
+    if (!this.account) {
+      throw new Error('No account!!!');
+    }
+
+    const { abi } = Account;
+    const acc = new this.web3.eth.Contract(abi, address);
+    const ret = await acc.methods.sell(
+      value,
+      0,
+      0
+    ).send({
+      from: this.account,
+      gasPrice: this.web3.utils.toWei('2', 'gwei'),
+    });
+    console.log(ret)
+  }
+
+  @action
   getBuyReturn = async (address: string, value: string) =>{
     const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
@@ -294,16 +322,26 @@ export default class Web3Store {
     );
 
     // console.log(vs)
-    const integral = poly.integral(
-      toDecimal(vs).add(toDecimal(ts))
+
+    const supplyWVS = toDecimal(vs).add(toDecimal(ts));
+
+    const vsPrice = poly.y(
+      toDecimal(vs)
     );
 
-    const marketCap = integral.mul(ts).div(toDecimal(10).pow(18)).toString();
+    const vsMC = vsPrice.mul(toDecimal(vs)); // doesnt divide out decimals
+
+    const price = poly.y(
+      supplyWVS,
+    );
+
+    // IN the below you've gotta subtract the mc of just virtual stuff
+    const marketCap = price.mul(toDecimal(ts)).div(toDecimal(10).pow(18)).toString();
 
     this.betaCache.set(
       address,  
       {
-        price: integral.div(toDecimal(10).pow(18)).toString(),
+        price: price.div(toDecimal(10).pow(18)).toString(),
         marketCap,
         rr,
         vs,

@@ -23,6 +23,8 @@ import { inject, observer } from 'mobx-react';
 
 import { toDecimal } from '../../lib/util';
 
+import MyChart from './Chart';
+
 const NavBox = styled.div`
   width: 260px;
   background-color: #FFF;
@@ -248,7 +250,7 @@ const RequestButton = styled.button`
   }
 `;
 
-const InnerDisplay = (props: any) => (
+const InnerDisplay = observer((props: any) => (
   <div style={{ paddingTop: '32px' }}>
     {props.title}
     <hr/>
@@ -256,12 +258,12 @@ const InnerDisplay = (props: any) => (
       {props.children}
     </div>
   </div>
-);
+));
 
 type TradeScreenProps = {address: string, web3Store: any};
 type TradeScreenState = {active: number, loaded: boolean};
 
-class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
+const TradeScreen = observer(class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
   state = {
     active: 0,
     loaded: false,
@@ -382,7 +384,7 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
                 {
                   this.state.loaded
                   ?
-                    `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).ts).slice(0,9)} ${web3Store.betaCache.get(address).symbol}`
+                    `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).ts).slice(0,9)} ${web3Store.betaCache.get(address).symbol.toLowerCase()}`
                   :
                     'Loading....'
                 }
@@ -402,14 +404,16 @@ class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
               <InnerDisplay
                 title="Bonding Curve"
                 info="Custom Tab"
-              />
+              >
+                <MyChart/>
+              </InnerDisplay>
             )
           }
         </TradeScreenContent>
       </div>
     );
   }
-}
+});
 
 const InvestScreen = inject('web3Store')(observer(class InvestScreen extends React.Component<any,any> {
   state = {
@@ -456,23 +460,6 @@ const InvestScreen = inject('web3Store')(observer(class InvestScreen extends Rea
     let symbol;
     if (betaCache.has(address)) {
       symbol = betaCache.get(address).symbol;
-
-      // youGet = this.props.web3Store.getBuyReturn(address, this.state.inputVal.toString());
-      // const vr = toDecimal(betaCache.get(address).vr);
-      // const newReserve = toDecimal(this.state.inputVal).add(vr);
-      // console.log('newReserve: ', newReserve.toString());
-  
-      // const youGetOne = betaCache.get(address).poly.solveForX(
-      //   newReserve,
-      // );
-
-      // const vs = toDecimal(betaCache.get(address).vs);
-  
-      // // console.log('youGet: ', youGet.sub(vs).toString())
-      // console.log('youGetOne:', youGetOne.toString())
-      // console.log('vs:', vs.toString());
-      // youGet = youGetOne.sub(vs);
-      // console.log('youGet:', youGet.toString())
     } else {
       symbol = "???";
     }
@@ -495,7 +482,7 @@ const InvestScreen = inject('web3Store')(observer(class InvestScreen extends Rea
           You get:
         </div>
         <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
-          {utils.fromWei(this.state.youGet.toString())} {symbol}
+          {utils.fromWei(this.state.youGet.toString())} {symbol.toLowerCase()}
         </div>
         {/* <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
           In time:
@@ -521,36 +508,80 @@ const InvestScreen = inject('web3Store')(observer(class InvestScreen extends Rea
   }
 }));
 
-const ExitScreen = (props: any) => (
-  <div style={{ height: '90%', background: '#000', borderRadius: '10px 10px 0 0', textAlign: 'center' }}>
-    <div style={{ width: '100%', background: '', height: '8%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', borderRadius: '10px 10px 0 0' }}>
-      <QuitButton onClick={props.quit}>
-        X
-      </QuitButton>
-    </div>
-    <div style={{ color: 'white', fontSize: '32px', paddingTop: '12px' }}>
-      Leaving so soon?
-    </div>
-    <br/>
-    <input style={{ color: 'black', background: 'white', border: 'none' }}/>
-    <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
-      ROI:
-    </div>
-    <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
-      ~$44.96 USD
-    </div>
-    <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
-      In time:
-    </div>
-    <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
-      3 minutes
-    </div>
-    <br/>
-    <ConfirmButton>
-      <FontAwesomeIcon icon={faThumbsUp} size="lg"/>
-    </ConfirmButton>
-  </div>
-);
+const ExitScreen = inject('web3Store')(observer(class ExitScreen extends React.Component<any,any> {
+  state = {
+    inputVal: 0,
+    returnVal: 0,
+  }
+
+  inputUpdate = (evt: any) => {
+    const { value } = evt.target;
+    this.updateReturnVal(value);
+  }
+
+  updateReturnVal = async (value: any) => {
+    const returnVal = await this.props.web3Store.getSellReturn(
+      this.props.address,
+      value.toString(),
+    );
+    // console.log(returnVal)
+    this.setState({
+      inputVal: value,
+      returnVal,
+    })
+  }
+
+  sell = async () => {
+    const { web3Store } = this.props;
+    if (web3Store.readonly) {
+      alert('You are in readonly mode! Cannot do actions.');
+      return;
+    }
+    if (this.state.inputVal == 0) {
+      alert('You are trying to invest 0. That makes no sense.');
+      return;
+    }
+    await web3Store.sell(this.props.address, this.state.inputVal);
+  }
+  
+  render() {
+    const { web3Store } = this.props;
+
+    return (
+      <div style={{ height: '90%', background: 'rgba(0,0,0,0.8)', borderRadius: '10px 10px 0 0', textAlign: 'center' }}>
+        <div style={{ width: '100%', background: '', height: '8%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', borderRadius: '10px 10px 0 0' }}>
+          <QuitButton onClick={this.props.quit}>
+            X
+          </QuitButton>
+        </div>
+        <div style={{ color: 'white', fontSize: '32px', paddingTop: '12px' }}>
+          Leaving so soon?
+        </div>
+        <br/>
+        <input style={{ color: 'black', background: 'white', border: 'none' }} onChange={this.inputUpdate}/>
+        <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
+          Return:
+        </div>
+        <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
+          ~ {web3Store.web3.utils.fromWei(this.state.returnVal.toString())} eth
+        </div>
+        {/* <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
+          In time:
+        </div>
+        <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
+          3 minutes
+        </div> */}
+        <br/>
+        <ConfirmButton
+          onClick={this.sell}
+        >
+          SELL
+          {/* <FontAwesomeIcon icon={faThumbsUp} size="lg"/> */}
+        </ConfirmButton>
+      </div>
+    )
+  }
+}));
 
 class InvestPage extends React.Component<any, any> {
   state = {
