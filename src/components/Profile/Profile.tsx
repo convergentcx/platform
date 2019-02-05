@@ -8,7 +8,6 @@ import {
   faCoins,
   faHandHoldingUsd,
   faHandshake, 
-  faThumbsUp,
   faMapMarkerAlt, 
   faInfoCircle, 
   faUserFriends,
@@ -20,8 +19,7 @@ import {
 import Logan from '../../assets/pics/Logan-Saether.jpg';
 import { colors, shadowMixin } from '../../common';
 import { inject, observer } from 'mobx-react';
-
-import { toDecimal } from '../../lib/util';
+import makeBlockie from 'ethereum-blockies-base64';
 
 import MyChart from './Chart';
 
@@ -727,6 +725,8 @@ const ProfilePage = withRouter(observer(class ProfilePage extends React.Componen
       console.log(Buffer.from(web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata).pic.data).toString('base64'));
     }
 
+    const blockie = makeBlockie(address);
+
     return (
       <ProfileContainer>
         <Left>
@@ -736,10 +736,10 @@ const ProfilePage = withRouter(observer(class ProfilePage extends React.Componen
               ?
                 <img
                   src={
-                    `data:image/jpeg;base64,${Buffer.from(web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata).pic.data).toString('base64')}` || Logan
+                    `data:image/jpeg;base64,${Buffer.from(web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata).pic.data).toString('base64')}` || blockie
                   } style={{ width: '100%', height: '12em', borderRadius: '10px 10px 0 0' }}/>
               :
-                <img src={Logan} alt="noneya" style={{ width: '100%', height: '12em', borderRadius: '10px 10px 0 0' }}/>
+                <img src={blockie} alt="noneya" style={{ width: '100%', height: '12em', borderRadius: '10px 10px 0 0' }}/>
             }
             <NavName>{web3Store.betaCache.get(address) ? web3Store.betaCache.get(address).name : '???'}</NavName>
             <div style={{ fontSize: '10px', paddingLeft: '24px', marginTop: '-12px' }}>

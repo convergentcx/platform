@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Link, Route, withRouter } from 'react-router-dom';
 import styled, { ThemeProvider } from 'styled-components';
 import { observer, inject } from 'mobx-react';
-import makeBlockie from 'ethereum-blockies-base64';
 
 import Tooltip from 'rc-tooltip';
 

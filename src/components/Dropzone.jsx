@@ -18,7 +18,7 @@ const Container = styled.div`
 `;
 
 const Subject = (props) => (
-  <Dropzone accept="image/*" onDrop={props.upload}>
+  <Dropzone accept="image/*" onDrop={props.upload} maxSize={1000000}>
     {({ getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject, acceptedFiles }) => {
       return (
         <Container

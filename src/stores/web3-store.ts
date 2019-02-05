@@ -314,11 +314,10 @@ export default class Web3Store {
 
     const contentAddress = b32IntoMhash(obj);
     const raw = await this.ipfs.get(contentAddress);
-    // console.log(raw);
     const data: AccountData = JSON.parse(raw[0].content.toString());
-    // console.log('data: ', data)
+
+    // Cannot cache picture because it 
     this.ipfsCache = this.ipfsCache.set(metadata, data);
-    // console.log('cached: ', metadata)
   }
 
   @action
