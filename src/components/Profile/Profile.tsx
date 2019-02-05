@@ -29,8 +29,8 @@ const NavBox = styled.div`
   width: 260px;
   background-color: #FFF;
   position: sticky;
-  margin-top: 20%;
-  top: 20%;
+  margin-top: 16%;
+  top: 16%;
   border-radius: 10px;
   margin-left: auto;
   margin-right: auto;
@@ -671,39 +671,43 @@ const AboutPage = inject('ipfsStore')(observer((props: any) => (
  </AboutContainer>
 )));
 
-const TransactPage = () => (
-  <div style={{ width: '45vw', marginLeft: '5%', marginTop: '5vh', height: '90vh' }}>
-    <div style={{ display: 'flex', width: '100%' }}>
-      <div style={{ fontSize: '64px', width: '60%', textAlign: 'left'}}>
-        Film Screening
+const TransactPage = observer(class TransactPage extends React.Component<any,any> {
+  render() {
+    return (
+      <div style={{ width: '45vw', marginLeft: '5%', marginTop: '5vh', height: '90vh' }}>
+        <div style={{ display: 'flex', width: '100%' }}>
+          <div style={{ fontSize: '64px', width: '60%', textAlign: 'left'}}>
+            Film Screening
+          </div>
+          <div style={{ fontSize: '128px', alignSelf: 'center', justifySelf: 'center', width: '50%' }}>
+            1
+          </div>
+        </div>
+        <div style={{ fontSize: '16px', textAlign: 'left' }}>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </div>
+        <br/>
+        <input style={{ border: 'solid', borderColor: 'black', color: 'black', borderWidth: '1px', background: 'white', width: '80%'}}/>
+        <br/>
+        <br/>
+        <RequestButton>
+          Request
+        </RequestButton>
+        <hr/>
+        {/* Two
+        <hr/>
+        Three
+        <hr/> */}
       </div>
-      <div style={{ fontSize: '128px', alignSelf: 'center', justifySelf: 'center', width: '50%' }}>
-        1
-      </div>
-    </div>
-    <div style={{ fontSize: '16px', textAlign: 'left' }}>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-    </div>
-    <br/>
-    <input style={{ border: 'solid', borderColor: 'black', color: 'black', borderWidth: '1px', background: 'white', width: '80%'}}/>
-    <br/>
-    <br/>
-    <RequestButton>
-      Request
-    </RequestButton>
-    <hr/>
-    {/* Two
-    <hr/>
-    Three
-    <hr/> */}
-  </div>
-)
+    )
+  }
+});
 
 const ProfilePage = withRouter(observer(class ProfilePage extends React.Component<any,any> {
   render() {
     const { web3Store, match: { params: { address } } } = this.props;
     if (web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata)) {
-      console.log(web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata).pic);
+      console.log(Buffer.from(web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata).pic.data).toString('base64'));
     }
 
     return (
@@ -711,14 +715,14 @@ const ProfilePage = withRouter(observer(class ProfilePage extends React.Componen
         <Left>
           <NavBox>
             {
-              web3Store.betaCache.has(address) && web3Store.ipfsCache.get(web3Store.betaCache.get(address).pic)
+              web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata)
               ?
                 <img
                   src={
                     `data:image/jpeg;base64,${Buffer.from(web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata).pic.data).toString('base64')}` || Logan
-                  } style={{ width: '100%', height: '45%', borderRadius: '10px 10px 0 0' }}/>
+                  } style={{ width: '100%', height: '12em', borderRadius: '10px 10px 0 0' }}/>
               :
-                <img src={Logan} alt="noneya" style={{ width: '100%', height: '45%', borderRadius: '10px 10px 0 0' }}/>
+                <img src={Logan} alt="noneya" style={{ width: '100%', height: '12em', borderRadius: '10px 10px 0 0' }}/>
             }
             <NavName>{web3Store.betaCache.get(address) ? web3Store.betaCache.get(address).name : '???'}</NavName>
             <div style={{ fontSize: '10px', paddingLeft: '24px', marginTop: '-12px' }}>
@@ -765,7 +769,7 @@ const ProfilePage = withRouter(observer(class ProfilePage extends React.Componen
           <Route path={`/profile/${address}/about`} render={() => <AboutPage address={address} web3Store={web3Store}/>}/>
           {/* <Route path='/profile/feed' component={ContentPage}/> */}
           <Route path={`/profile/${address}/invest`} render={() => <InvestPage address={address} web3Store={web3Store}/>}/>
-          <Route path={`/profile/${address}/transact`} component={TransactPage}/>
+          <Route path={`/profile/${address}/transact`} render={() => <TransactPage address={address} web3Store={web3Store}/>}/>
           {this.props.children}
         </Middle>
       </ProfileContainer>

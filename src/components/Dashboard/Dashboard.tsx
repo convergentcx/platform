@@ -68,12 +68,23 @@ const DashboardMiddle = styled.div`
 const DisplayContainer = styled.div<any>`
   width: 80%;
   min-height: ${(props: any) => props.halfsize ? '15%' : '30%'};
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const InputDisplay = styled.div`
+  width: 65%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
 `;
 
 const BioInput = styled.input`
   width: 100%;
   background: #E9EDF2;
-  min-height: 50%;
+  height: 60%;
   color: #000;
   display: flex;
   align-items: flex-start;
@@ -82,9 +93,29 @@ const BioInput = styled.input`
 const LocationInput = styled.input`
   width: 100%;
   background: #E9EDF2;
-  min-height: 20%;
+  height: 10%;
   display: flex;
   color: #000;
+`;
+
+const ServiceBox = styled.div`
+  display: flex;
+
+`;
+
+const ServiceInputTitle = styled.input`
+  display: flex;
+  width: 30%;
+`;
+
+const ServiceInputDescription = styled.input`
+  display: flex;
+  width: 55%;
+`;
+
+const ServiceInputPrice = styled.input`
+  display: flex;
+  width: 5%;
 `;
 
 const CommitButton = styled.button`
@@ -173,7 +204,12 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
     file: '',
     location: '',
     preview: '',
+    serviceEdit: false,
     uploading: false,
+    // TODO: something better
+    serviceTitle1: '',
+    serviceDescription1: '',
+    servicePrice1: '',
   }
 
   commit = async () => {
@@ -191,11 +227,19 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
     } catch (e) { console.error(e); }
 
     this.setState({ uploading: true });
+    console.log(imgBuf)
 
     const data = {
       bio: this.state.bio,
       location: this.state.location,
       pic: imgBuf,
+      services: [
+        {
+          title: this.state.serviceTitle1,
+          description: this.state.serviceDescription1,
+          price: this.state.servicePrice1,
+        },
+      ],
     };
 
     const hash = await web3Store.ipfsAdd(
@@ -235,7 +279,6 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
     reader.readAsDataURL(files[0]);
     
     this.setState({
-      file: files[0],
       preview: URL.createObjectURL(files[0]),
     })
   }
@@ -259,29 +302,17 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
               <>
               <h1>Details</h1>
               <DisplayContainer>
-                <DisplayHeading>
-                  Picture:
-                </DisplayHeading>
                 <Subject upload={this.upload} preview={this.state.preview}/>
-                {/* {this.state.preview && <img src={this.state.preview}/>} */}
-              </DisplayContainer>
-              <DisplayContainer>
-                <DisplayHeading>
-                  Your bio:
-                </DisplayHeading>
-                <BioInput
-                  name="bio"
-                  onChange={this.inputUpdate}
-                />
-              </DisplayContainer>
-              <DisplayContainer halfsize>
-                <DisplayHeading>
-                  Your location:
-                </DisplayHeading>
-                <LocationInput
-                  name="location"
-                  onChange={this.inputUpdate}
-                />
+                <InputDisplay>
+                  <BioInput
+                    name="bio"
+                    onChange={this.inputUpdate}
+                  />
+                  <LocationInput
+                    name="location"
+                    onChange={this.inputUpdate}
+                  />
+                </InputDisplay>
               </DisplayContainer>
               {/* <DisplayContainer halfsize>
                 <DisplayHeading>
@@ -294,9 +325,18 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
               </DisplayContainer> */}
               <DisplayContainer halfsize>
                 <DisplayHeading>
-                  Your services:
+                  What will you offer?
                 </DisplayHeading>
-                <AddServiceButton>
+                {
+                  this.state.serviceEdit ?
+                    <ServiceBox>
+                      <ServiceInputTitle name="service-title-1" onChange={this.inputUpdate}/>
+                      <ServiceInputDescription name="service-description-1" onChange={this.inputUpdate}/>
+                      <ServiceInputPrice name="service-price-1" onChange={this.inputUpdate}/>  
+                    </ServiceBox>
+                    : ''
+                }
+                <AddServiceButton onClick={() => this.setState({ serviceEdit: true })}>
                   +
                 </AddServiceButton>
               </DisplayContainer>

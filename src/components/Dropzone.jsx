@@ -3,10 +3,10 @@ import Dropzone from 'react-dropzone';
 import styled from 'styled-components';
 
 const Container = styled.div`
-  width: calc(30%);
+  width: 160px;
   border-radius: 10px;
   margin-top: 8px;
-  height: 70%;
+  height: 160px;
   border-width: 2px;
   border-radius: 5px;
   border-color: #000;

@@ -280,7 +280,7 @@ export default class Web3Store {
       for (const [account, _] of this.cbAccounts) {
         this.getContractDataAndCache(account);
       }
-    }, 4000);
+    }, 30000);
   }
 
   @action
@@ -297,8 +297,10 @@ export default class Web3Store {
         // console.log(address, data)
         this.ipfsGetDataAndCache(data.metadata);
       }
-    }, 4000);
+    }, 30000);
   }
+
+  // TODO, when a profile page is viewed, update the data in the background, and poll it more often
 
   @action
   ipfsGetDataAndCache = async (metadata: string) => {
