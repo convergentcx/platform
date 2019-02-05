@@ -193,6 +193,12 @@ export default class Web3Store {
       console.log('falling back');
       return;
     }
+    const netId = await _window.web3.eth.net.getId();
+    console.log('netId', netId)
+    if (netId !== 4) {
+      _window.alert('Please tune in on the Rinkeby test network!');
+      return;
+    }
     this.updateWeb3(_window.web3);
     this.readonly = false;
     await this.updateAccount();

@@ -325,57 +325,57 @@ const ContentPage = () => (
   </div>
 );
 
-class SpeedDial extends React.Component {
-  state = {
-    open: false,
-  }
+// class SpeedDial extends React.Component {
+//   state = {
+//     open: false,
+//   }
 
-  render() {
-    return (
-      <>
-        <SpeedDialAnchor open={this.state.open} onClick={() => this.setState({open: !this.state.open})}>
-          <FontAwesomeIcon icon={faBong}/>
-        </SpeedDialAnchor>
-        {this.state.open &&
-          <>
-            <SpeedDialButton offset={10}>
-              <FontAwesomeIcon icon={faFastForward}/>
-            </SpeedDialButton>
-          </>
-        }
-      </>
-    )
-  }
-}
+//   render() {
+//     return (
+//       <>
+//         <SpeedDialAnchor open={this.state.open} onClick={() => this.setState({open: !this.state.open})}>
+//           <FontAwesomeIcon icon={faBong}/>
+//         </SpeedDialAnchor>
+//         {this.state.open &&
+//           <>
+//             <SpeedDialButton offset={10}>
+//               <FontAwesomeIcon icon={faFastForward}/>
+//             </SpeedDialButton>
+//           </>
+//         }
+//       </>
+//     )
+//   }
+// }
 
-const LockedSpeedDial = observer(class LockedSpeedDial extends React.Component {
-  state = {
-    hovering: 0,
-    open: false,
-  }
+// const LockedSpeedDial = observer(class LockedSpeedDial extends React.Component {
+//   state = {
+//     hovering: 0,
+//     open: false,
+//   }
 
-  render() {
-    return (
-      <>
-        <SpeedDialAnchor locked={true} readonly={this.props.web3Store.readonly} open={this.state.open} onClick={() => this.setState({open: !this.state.open})}>
-          <FontAwesomeIcon icon={faEthereum}/>
-        </SpeedDialAnchor>
-        {this.state.open &&
-          <>
-              <SpeedDialButton 
-                offset={0}
-                onClick={() => this.props.web3Store.turnOnWeb3()}
-              >
-                <FontAwesomeIcon icon={faUserLock}/>
-              </SpeedDialButton>
-          </>
-        }
-      </>
-    )
-  }
-});
+//   render() {
+//     return (
+//       <>
+//         <SpeedDialAnchor locked={true} readonly={this.props.web3Store.readonly} open={this.state.open} onClick={() => this.setState({open: !this.state.open})}>
+//           <FontAwesomeIcon icon={faEthereum}/>
+//         </SpeedDialAnchor>
+//         {this.state.open &&
+//           <>
+//               <SpeedDialButton 
+//                 offset={0}
+//                 onClick={() => this.props.web3Store.turnOnWeb3()}
+//               >
+//                 <FontAwesomeIcon icon={faUserLock}/>
+//               </SpeedDialButton>
+//           </>
+//         }
+//       </>
+//     )
+//   }
+// });
 
-const UnlockedSpeedDial = withRouter(class UnlockedSpeedDial extends React.Component {
+const SpeedDial = withRouter(observer(class SpeedDial extends React.Component {
   state = {
     hovering: 0,
     open: false,
@@ -383,9 +383,12 @@ const UnlockedSpeedDial = withRouter(class UnlockedSpeedDial extends React.Compo
 
   render() {
     const { history } = this.props;
+    const locked = !this.props.web3Store.account;
+    console.log(locked)
+
     return (
       <>
-        <SpeedDialAnchor locked={false} open={this.state.open} onClick={() => this.setState({open: !this.state.open})}>
+        <SpeedDialAnchor locked={locked} readonly ={this.props.web3Store.readonly} open={this.state.open} onClick={() => this.setState({open: !this.state.open})}>
           <FontAwesomeIcon icon={faEthereum}/>
         </SpeedDialAnchor>
         {this.state.open &&
@@ -414,12 +417,21 @@ const UnlockedSpeedDial = withRouter(class UnlockedSpeedDial extends React.Compo
               >
                 <FontAwesomeIcon icon={faQuestion}/>
               </SpeedDialButton>
+              {
+                locked && 
+                <SpeedDialButton 
+                  offset={4}
+                  onClick={() => this.props.web3Store.turnOnWeb3()}
+                >
+                  <FontAwesomeIcon icon={faUserLock}/>
+                </SpeedDialButton>
+              }
           </>
         }
       </>
     )
   }
-});
+}));
 
 const App = inject('web3Store', 'ipfsStore')(observer(
 class App extends Component {
@@ -465,13 +477,8 @@ class App extends Component {
         </div> */}
 
         {/* <HoveringBlockie src={this.props.web3Store.account ? makeBlockie(this.props.web3Store.account) : Lock} alt='unlock' onClick={() => this.props.web3Store.turnOnWeb3()}/> */}
-        {
-          this.props.web3Store.account
-            ?
-              <UnlockedSpeedDial web3Store={this.props.web3Store}/>
-            :
-              <LockedSpeedDial web3Store={this.props.web3Store}/>
-        }
+
+        <SpeedDial web3Store={this.props.web3Store}/>
 
         <Route exact path='/' render={props => <Home {...props} web3Store={this.props.web3Store}/>}/>
         <Route path='/dashboard' render={props => <Dashboard {...props} web3Store={this.props.web3Store}/>}/>

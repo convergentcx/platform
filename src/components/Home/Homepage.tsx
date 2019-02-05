@@ -87,6 +87,10 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
   }
 
   mouseClick = () => {
+    if (this.props.web3Store.readonly) {
+      alert('Log in first!');
+      return;
+    }
     this.setState({ launching: true });
   }
 

@@ -13,15 +13,15 @@ const getColor = (props) => {
 };
 
 const Container = styled.div`
-  width: calc(100% - 16px);
+  width: calc(30%);
   border-radius: 10px;
   margin-top: 8px;
-  height: 420px;
+  height: 70%;
   border-width: 2px;
   border-radius: 5px;
-  border-color: ${props => getColor(props)};
+  border-color: #000;
   border-style: ${props => props.isDragReject || props.isDragActive ? 'solid' : 'dashed'};
-  background-color: ${props => props.isDragReject || props.isDragActive ? '#eee' : ''};
+  background-color: ${props => props.isDragReject || props.isDragActive ? '#eee' : '#E9EDF2'};
 `;
 
 const Subject = () => (

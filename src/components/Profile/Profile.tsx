@@ -229,6 +229,7 @@ const ConfirmButton = styled.button`
   color: #FFF;
   border-color: #000;
   font-weight: 600;
+  cursor: pointer;
   :hover {
     background: #05021A;
     color: orange;
@@ -424,7 +425,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
               <InnerDisplay
                 title="Bonding Curve"
               >
-                <MyChart/>
+                <MyChart address={address}/>
               </InnerDisplay>
             )
           }

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { observer, inject } from 'mobx-react';
 import Web3Store from '../../stores/web3-store';
 
-// import Subject from '../Dropzone.jsx';
+import Subject from '../Dropzone.jsx';
 
 import { colors } from '../../common';
 
@@ -77,6 +77,14 @@ const BioInput = styled.input`
   color: #000;
   display: flex;
   align-items: flex-start;
+`;
+
+const LocationInput = styled.input`
+  width: 100%;
+  background: #E9EDF2;
+  min-height: 20%;
+  display: flex;
+  color: #000;
 `;
 
 const CommitButton = styled.button`
@@ -229,12 +237,27 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
             active === 0 &&
               <>
               <h1>Details</h1>
+              {/* <DisplayContainer>
+                <DisplayHeading>
+                  Picture:
+                </DisplayHeading>
+                <Subject/>
+              </DisplayContainer> */}
               <DisplayContainer>
                 <DisplayHeading>
                   Your bio:
                 </DisplayHeading>
                 <BioInput
                   name="bio"
+                  onChange={this.inputUpdate}
+                />
+              </DisplayContainer>
+              <DisplayContainer halfsize>
+                <DisplayHeading>
+                  Your location:
+                </DisplayHeading>
+                <LocationInput
+                  name="location"
                   onChange={this.inputUpdate}
                 />
               </DisplayContainer>
