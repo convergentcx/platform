@@ -5,6 +5,7 @@ import { observer, inject } from 'mobx-react';
 import dataUriToBuffer from 'data-uri-to-buffer';
 
 import Subject from '../Dropzone.jsx';
+import makeBlockie from 'ethereum-blockies-base64';
 
 import { colors } from '../../common';
 
@@ -27,6 +28,8 @@ const AccountLink = styled(Link)`
   display: flex;
   width: 100%;
   text-decoration: none;
+  align-items: center;
+  margin-bottom: 8px;
   transition: 0.2s;
   :hover {
     color: #A3A3A3;
@@ -368,8 +371,12 @@ const DashboardPage = withRouter(observer(
   render() {
     const { web3Store } = this.props;
 
-    const items = Array.from(web3Store.accountsCache).map((value: any) => {
-       return <AccountLink to={`/dashboard/${value}`} key={Math.random()}>{value}</AccountLink>;
+    const items = Array.from(web3Store.accountsCache).map((address: any) => {
+      const blockie = makeBlockie(address);
+       return <AccountLink to={`/dashboard/${address}`} key={Math.random()}>
+        <img src={blockie} style={{ width: '50px', height: '50px', borderRadius: '25px' }} alt={address}/>
+        {address}
+       </AccountLink>;
     });
 
     return (

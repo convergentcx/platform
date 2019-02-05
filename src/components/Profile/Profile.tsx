@@ -16,10 +16,10 @@ import {
   faChartLine,
 } from '@fortawesome/free-solid-svg-icons';
 
-import Logan from '../../assets/pics/Logan-Saether.jpg';
 import { colors, shadowMixin } from '../../common';
 import { inject, observer } from 'mobx-react';
 import makeBlockie from 'ethereum-blockies-base64';
+import { RingLoader } from 'react-spinners';
 
 import MyChart from './Chart';
 
@@ -97,7 +97,6 @@ const Middle = styled.div`
     margin-left: -5px;
   }
 `;
-
 
 const InvestBox = styled.div`
   background: #FFF;
@@ -253,7 +252,7 @@ const InnerDisplay = observer((props: any) => (
   <div style={{ paddingTop: '32px' }}>
     {props.title}
     <hr/>
-    <div style={{ color: 'grey', fontSize: '64px' }}>
+    <div style={{ color: 'grey', fontSize: '64px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       {props.children}
     </div>
   </div>
@@ -363,7 +362,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
                   ?
                     `${web3Store.betaCache.get(address).price.slice(0,9)} eth`
                   :
-                    'Loading....'
+                    <RingLoader/>
                 }
               </InnerDisplay>
             ) ||
@@ -378,7 +377,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
                       web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).marketCap.split('.')[0]).slice(0,9)
                     } eth`
                   :
-                      'Loading....'
+                      <RingLoader/>
                 }
               </InnerDisplay>
             ) ||
@@ -393,7 +392,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
                   ?
                     `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).ts).slice(0,9)} ${web3Store.betaCache.get(address).symbol.toLowerCase()}`
                   :
-                    'Loading....'
+                    <RingLoader/>
                 }
               </InnerDisplay>
             ) ||
@@ -663,7 +662,7 @@ const AboutPage = inject('ipfsStore')(observer((props: any) => (
       (props.web3Store.betaCache.has(props.address) && props.web3Store.ipfsCache.get(props.web3Store.betaCache.get(props.address).metadata))
       ?
         props.web3Store.ipfsCache.get(props.web3Store.betaCache.get(props.address).metadata).bio.replace(/\\n/g, '\n')
-      : 'DApp still loading...'
+      : 'User has no description'
     }
   </AboutInner>
  </AboutContainer>

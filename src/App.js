@@ -3,17 +3,16 @@ import { Link, Route, withRouter } from 'react-router-dom';
 import styled, { ThemeProvider } from 'styled-components';
 import { observer, inject } from 'mobx-react';
 
-import Tooltip from 'rc-tooltip';
-
 /// Assets
-import Logan from './assets/pics/Logan-Saether.jpg';
-import Lock from './assets/pics/lock.png';
 import Reptile from './assets/pics/contemplative-reptile.jpg';
+import Floater from 'react-floater';
+
 
 /// FontAwesome
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faCamera, 
+  faCog,
   faArrowRight, 
   faArrowLeft, 
   faCoins,
@@ -202,16 +201,26 @@ const SpeedDialButton = styled.div`
   right: calc(2% + 4px);
   border-radius: 24px;
   ${shadowMixin}
-  background: #0044DD;
+  background: ${props => props.alt ? 'green' : '#0044DD'};
   color: #FFF;
   display: flex;
   justify-content: center;
   align-items: center;
   transition: 0.3s;
   :hover {
-    background: #2424D0;
+    background: ${props => props.alt ? 'dark green' : '#2424D0'};
     color: #AAA;
   }
+`;
+
+const SpeedFloater = styled.div`
+  height: 60px;
+  width: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #666;
+  background: #FFF;
 `;
 
 class HoverableContent extends Component {
@@ -380,10 +389,15 @@ const SpeedDial = withRouter(observer(class SpeedDial extends React.Component {
     open: false,
   }
 
+  click = (destination) => {
+    this.setState({
+      open: false,
+    });
+    this.props.history.push(destination);
+  }
+
   render() {
-    const { history } = this.props;
     const locked = !this.props.web3Store.account;
-    // console.log(locked)
 
     return (
       <>
@@ -392,38 +406,52 @@ const SpeedDial = withRouter(observer(class SpeedDial extends React.Component {
         </SpeedDialAnchor>
         {this.state.open &&
           <>
-              <SpeedDialButton 
-                offset={0}
-                onClick={() => history.push('/list')}
-              >
-                <FontAwesomeIcon icon={faGlobeEurope}/>
-              </SpeedDialButton>
-              <SpeedDialButton 
-                offset={1}
-                onClick={() => history.push('/dashboard')}
-              >
-                <FontAwesomeIcon icon={faUsersCog}/>
-              </SpeedDialButton>
-              <SpeedDialButton 
-                offset={2}
-                onClick={() => history.push('/')}
-              >
-                <FontAwesomeIcon icon={faRocket}/>
-              </SpeedDialButton>
-              <SpeedDialButton 
-                offset={3}
-                onClick={() => history.push('/faq')}
-              >
-                <FontAwesomeIcon icon={faQuestion}/>
-              </SpeedDialButton>
+              <Floater component={<SpeedFloater>explore</SpeedFloater>} placement="left" event="hover" eventDelay={0}>
+                <SpeedDialButton 
+                  offset={0}
+                  onClick={() => this.click('/list')}
+                >
+                  <FontAwesomeIcon icon={faGlobeEurope}/>
+                </SpeedDialButton>
+              </Floater>
+              <Floater component={<SpeedFloater>dashboard</SpeedFloater>} placement="left" event="hover" eventDelay={0}>
+                <SpeedDialButton 
+                  offset={1}
+                  onClick={() => this.click('/dashboard')}
+                >
+                  <FontAwesomeIcon icon={faCog}/>
+                </SpeedDialButton>
+              </Floater>
+              <Floater component={<SpeedFloater>launch</SpeedFloater>} placement="left" event="hover" eventDelay={0}>
+                <SpeedDialButton 
+                  offset={2}
+                  onClick={() => this.click('/')}
+                >
+                  <FontAwesomeIcon icon={faRocket}/>
+                </SpeedDialButton>
+              </Floater>
+              <Floater component={<SpeedFloater>faq</SpeedFloater>} placement="left" event="hover" eventDelay={0}>
+                <SpeedDialButton 
+                  offset={3}
+                  onClick={() => this.click('/faq')}
+                >
+                  <FontAwesomeIcon icon={faQuestion}/>
+                </SpeedDialButton>
+              </Floater>
               {
                 locked && 
-                <SpeedDialButton 
-                  offset={4}
-                  onClick={() => this.props.web3Store.turnOnWeb3()}
-                >
-                  <FontAwesomeIcon icon={faUserLock}/>
-                </SpeedDialButton>
+                <Floater component={<SpeedFloater>log in</SpeedFloater>} placement="top" event="hover" eventDelay={0}>
+                  <SpeedDialButton 
+                    alt
+                    offset={4}
+                    onClick={() => {
+                      this.setState({ open: false });
+                      this.props.web3Store.turnOnWeb3();
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faUserLock}/>
+                  </SpeedDialButton>
+                </Floater>
               }
           </>
         }
