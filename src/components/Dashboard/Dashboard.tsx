@@ -330,9 +330,9 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
                 {
                   this.state.serviceEdit ?
                     <ServiceBox>
-                      <ServiceInputTitle name="service-title-1" onChange={this.inputUpdate}/>
-                      <ServiceInputDescription name="service-description-1" onChange={this.inputUpdate}/>
-                      <ServiceInputPrice name="service-price-1" onChange={this.inputUpdate}/>  
+                      <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate}/>
+                      <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate}/>
+                      <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate}/>  
                     </ServiceBox>
                     : ''
                 }

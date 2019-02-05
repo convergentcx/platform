@@ -672,19 +672,36 @@ const AboutPage = inject('ipfsStore')(observer((props: any) => (
 )));
 
 const TransactPage = observer(class TransactPage extends React.Component<any,any> {
+  state = {
+    service: {},
+  }
+  
   render() {
+    const { address, web3Store } = this.props;
+    const { betaCache, ipfsCache } = web3Store;
+    let title,description,price;
+    if (betaCache.has(address) && ipfsCache.has(betaCache.get(address).metadata)) {
+      const { metadata } = betaCache.get(address);
+      // console.log(metadata)
+      // console.log(ipfsCache.get(metadata).services)
+      const { services } = ipfsCache.get(metadata);
+      title = services[0].title;
+      description = services[0].description;
+      price = services[0].price;
+    }
+
     return (
       <div style={{ width: '45vw', marginLeft: '5%', marginTop: '5vh', height: '90vh' }}>
         <div style={{ display: 'flex', width: '100%' }}>
           <div style={{ fontSize: '64px', width: '60%', textAlign: 'left'}}>
-            Film Screening
+            {title}
           </div>
           <div style={{ fontSize: '128px', alignSelf: 'center', justifySelf: 'center', width: '50%' }}>
-            1
+            {price}
           </div>
         </div>
         <div style={{ fontSize: '16px', textAlign: 'left' }}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          {description}
         </div>
         <br/>
         <input style={{ border: 'solid', borderColor: 'black', color: 'black', borderWidth: '1px', background: 'white', width: '80%'}}/>
