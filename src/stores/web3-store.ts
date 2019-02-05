@@ -48,7 +48,7 @@ export default class Web3Store {
   updateAccount = async () => {
     if (!this.web3) { return; }
     const main = (await this.web3.eth.getAccounts())[0];
-    console.log('setting account ', main);
+    // console.log('setting account ', main);
     this.account = main;
     this.cacheAccounts();
   }
@@ -80,7 +80,7 @@ export default class Web3Store {
     const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
     const ret = await acc.methods.sendContributions().send({ from: this.account });
-    console.log(ret)
+    // console.log(ret)
   }
 
   @action
@@ -108,7 +108,7 @@ export default class Web3Store {
       from: this.account,
       gasPrice: this.web3.utils.toWei('2', 'gwei'),
     });
-    console.log(ret)
+    // console.log(ret)
   }
 
   @action
@@ -136,13 +136,13 @@ export default class Web3Store {
       value,
       gasPrice: this.web3.utils.toWei('2', 'gwei'),
     });
-    console.log(ret)
+    // console.log(ret)
   }
 
   @action
   updateWeb3 = (web3: any) => {
     this.web3 = web3;
-    console.log('web3 updated');
+    // console.log('web3 updated');
   }
 
   @action
@@ -154,13 +154,13 @@ export default class Web3Store {
     );
 
     this.ipfs = ipfs;
-    console.log('IPFS connected');
+    // console.log('IPFS connected');
   }
 
   @action
   ipfsAdd = async (some: string): Promise<string> => {
     this.ipfsLock = true;
-    console.log('IPFS ADDING YO')
+    // console.log('IPFS ADDING YO')
     const ipfsHash = await this.ipfs.add(Buffer.from(some));
     this.ipfsLock = false;
     return ipfsHash;
@@ -169,7 +169,7 @@ export default class Web3Store {
   @action
   initReadonly = async () => {
     const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws/v3/7121204aac9a45dcb9c2cc825fb85159'));
-    console.log('READONLY MODE')
+    // console.log('READONLY MODE')
     this.readonly = true;
     this.web3 = web3;
     await this.instantiateConvergentBeta();
@@ -177,7 +177,7 @@ export default class Web3Store {
 
   @action
   turnOnWeb3 = async () => {
-    console.log('enabling web3');
+    // console.log('enabling web3');
     // console.log(window);
     const _window = window as any;
     if (_window.ethereum) {
@@ -189,12 +189,12 @@ export default class Web3Store {
     } else if (_window.web3) {
       _window.web3 = new Web3(_window.web3.currentProvider);
     } else {
-      console.log('Browser is not ethereum enabled');
-      console.log('falling back');
+      // console.log('Browser is not ethereum enabled');
+      // console.log('falling back');
       return;
     }
     const netId = await _window.web3.eth.net.getId();
-    console.log('netId', netId)
+    // console.log('netId', netId)
     if (netId !== 4) {
       _window.alert('Please tune in on the Rinkeby test network!');
       return;
@@ -204,7 +204,7 @@ export default class Web3Store {
     await this.updateAccount();
     // await this.signWelcome();
     await this.instantiateConvergentBeta();
-    console.log('enabled');
+    // console.log('enabled');
   }
 
   @action
@@ -225,10 +225,10 @@ export default class Web3Store {
     );
 
     this.convergentBeta = convergentBeta;
-    console.log('convergent beta instantiated');
+    // console.log('convergent beta instantiated');
     // console.log(this.convergentBeta);
     this.cacheAccounts();
-    console.log('HERERERERE')
+    // console.log('HERERERERE')
     await this.startCachingAccounts();
   }
 
@@ -239,8 +239,8 @@ export default class Web3Store {
     }
 
     const initAccounts = await (this.convergentBeta as any).getPastEvents('NewAccount', {fromBlock: 0, toBlock: 'latest'});
-    console.log(initAccounts)
-    console.log(typeof initAccounts);
+    // console.log(initAccounts)
+    // console.log(typeof initAccounts);
     initAccounts.forEach((event: any) => {
       // console.log(event)
       const { returnValues: { account, creator }, blockNumber } = event;
@@ -276,7 +276,7 @@ export default class Web3Store {
     }
 
     setInterval(() => {
-      console.log('web3 polling round');
+      // console.log('web3 polling round');
       for (const [account, _] of this.cbAccounts) {
         this.getContractDataAndCache(account);
       }
@@ -292,9 +292,9 @@ export default class Web3Store {
     }
 
     setInterval(() => {
-      console.log('ipfs polling round')
+      // console.log('ipfs polling round')
       for (const [address, data] of this.betaCache) {
-        console.log(address, data)
+        // console.log(address, data)
         this.ipfsGetDataAndCache(data.metadata);
       }
     }, 4000);
@@ -302,21 +302,21 @@ export default class Web3Store {
 
   @action
   ipfsGetDataAndCache = async (metadata: string) => {
-    console.log('metadata: ', metadata)
+    // console.log('metadata: ', metadata)
     const obj = {
       digest: metadata,
       hashFunction: 18,
       size: 32,
     };
-    console.log('obj', obj)
+    // console.log('obj', obj)
 
     const contentAddress = b32IntoMhash(obj);
     const raw = await this.ipfs.get(contentAddress);
-    console.log(raw);
+    // console.log(raw);
     const data: AccountData = JSON.parse(raw[0].content.toString());
-    console.log('data: ', data)
+    // console.log('data: ', data)
     this.ipfsCache = this.ipfsCache.set(metadata, data);
-    console.log('cached: ', metadata)
+    // console.log('cached: ', metadata)
   }
 
   @action
@@ -385,7 +385,7 @@ export default class Web3Store {
       },
     );
 
-    console.log('cached metadata: ', metadata);
+    // console.log('cached metadata: ', metadata);
 
     const nowBlock = await this.web3.eth.getBlockNumber();
     (acc as any).events.MetadataUpdated({fromBlock: nowBlock})
@@ -414,7 +414,7 @@ export default class Web3Store {
     const acc = new this.web3.eth.Contract(abi, economy);
 
     const tx = await acc.methods.updateMetadata(metadata).send({from: this.account});
-    console.log(tx)
+    // console.log(tx)
   }
 
   // @action

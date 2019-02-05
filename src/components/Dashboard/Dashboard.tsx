@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, Route, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 import { observer, inject } from 'mobx-react';
-import Web3Store from '../../stores/web3-store';
+import dataUriToBuffer from 'data-uri-to-buffer';
 
 import Subject from '../Dropzone.jsx';
 
@@ -170,6 +170,9 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
   state = {
     active: 0,
     bio: '',
+    file: '',
+    location: '',
+    preview: '',
     uploading: false,
   }
 
@@ -181,10 +184,18 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
       return
     }
 
+    let imgBuf;
+    try {
+      imgBuf = dataUriToBuffer(this.state.file)
+      console.log('imgBuf', imgBuf);
+    } catch (e) { console.error(e); }
+
     this.setState({ uploading: true });
 
     const data = {
       bio: this.state.bio,
+      location: this.state.location,
+      pic: imgBuf,
     };
 
     const hash = await web3Store.ipfsAdd(
@@ -213,10 +224,20 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
     });
   }
 
-  transmute = async (): Promise<string> => {
-    const data = { bio: this.state.bio };
-    const dataStr = JSON.stringify(data);
-    return Promise.resolve('');
+  upload = (files: any) => {
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.setState({
+        file: e.target.result,
+      });
+    };
+
+    reader.readAsDataURL(files[0]);
+    
+    this.setState({
+      file: files[0],
+      preview: URL.createObjectURL(files[0]),
+    })
   }
 
   render() {
@@ -237,12 +258,13 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
             active === 0 &&
               <>
               <h1>Details</h1>
-              {/* <DisplayContainer>
+              <DisplayContainer>
                 <DisplayHeading>
                   Picture:
                 </DisplayHeading>
-                <Subject/>
-              </DisplayContainer> */}
+                <Subject upload={this.upload} preview={this.state.preview}/>
+                {/* {this.state.preview && <img src={this.state.preview}/>} */}
+              </DisplayContainer>
               <DisplayContainer>
                 <DisplayHeading>
                   Your bio:

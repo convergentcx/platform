@@ -39,6 +39,7 @@ type Service = {
 
 export type AccountData = {
   bio: string,
-  image: string,
-  services: Map<number, Service>,
+  location: string,
+  pic: string,
+  services?: Map<number, Service>,
 }

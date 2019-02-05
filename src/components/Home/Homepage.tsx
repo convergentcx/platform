@@ -71,11 +71,11 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
       "500000000000000",
       "10",
     ).send({ from: this.props.web3Store.account });
-    console.log(tx);
+    // console.log(tx);
     if (tx.status === true) {
-      console.log('success');
-      console.log('tx hash: ', tx.transactionHash);
-      console.log('account: ', tx.events.NewAccount.returnValues.account);
+      // console.log('success');
+      // console.log('tx hash: ', tx.transactionHash);
+      // console.log('account: ', tx.events.NewAccount.returnValues.account);
     }
   }
 
@@ -109,7 +109,7 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
   }
 
   render() {
-    console.log(this.state);
+    // console.log(this.state);
     return (
       <HomeContainer>
         {

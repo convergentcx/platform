@@ -384,7 +384,7 @@ const SpeedDial = withRouter(observer(class SpeedDial extends React.Component {
   render() {
     const { history } = this.props;
     const locked = !this.props.web3Store.account;
-    console.log(locked)
+    // console.log(locked)
 
     return (
       <>

@@ -451,7 +451,7 @@ const InvestScreen = inject('web3Store')(observer(class InvestScreen extends Rea
       this.props.address,
       value.toString(),
     );
-    console.log(youGet)
+    // console.log(youGet)
     this.setState({
       inputVal: value,
       youGet,
@@ -699,54 +699,78 @@ const TransactPage = () => (
   </div>
 )
 
-const ProfilePage = withRouter((props: any) => (
-  <ProfileContainer>
-    <Left>
-      <NavBox>
-        <img src={Logan} alt="noneya" style={{ width: '100%', height: '45%', borderRadius: '10px 10px 0 0' }}/>
-        <NavName>Logan Saether</NavName>
-        <div style={{ fontSize: '10px', paddingLeft: '24px', marginTop: '-12px' }}>
-          <FontAwesomeIcon icon={faMapMarkerAlt} size="sm"/>
-          &nbsp;
-          Berlin, Germany
-        </div>
-        <NavList>
-          <ListItem>
-            <FontAwesomeIcon icon={faInfoCircle} size="sm"/>
-            &nbsp;&nbsp;
-            <ListLink to={`/profile/${props.match.params.address}/about`}>about</ListLink>
-          </ListItem>
-          {/* <ListItem>
-            <FontAwesomeIcon icon={faRss} size="sm"/>
-            &nbsp;&nbsp;
-            <ListLink to="/profile/feed">feed</ListLink>
-          </ListItem> */}
-          <ListItem>
-            <FontAwesomeIcon icon={faHandHoldingUsd} size="sm"/>
-            &nbsp;&nbsp;
-            <ListLink to={`/profile/${props.match.params.address}/invest`}>invest</ListLink>
-          </ListItem>
-          <ListItem>
-            <FontAwesomeIcon icon={faHandshake} size="sm"/>
-            &nbsp;&nbsp;
-            <ListLink to={`/profile/${props.match.params.address}/transact`}>transact</ListLink>
-          </ListItem>
-          {/* <ListItem>
-            <FontAwesomeIcon icon={faUserFriends} size="sm"/>
-            &nbsp;&nbsp;
-            <ListLink to="/profile/network">network</ListLink>
-          </ListItem> */}
-        </NavList>
-      </NavBox>
-    </Left>
-    <Middle>
-      <Route path={`/profile/${props.match.params.address}/about`} render={() => <AboutPage address={props.match.params.address} web3Store={props.web3Store}/>}/>
-      {/* <Route path='/profile/feed' component={ContentPage}/> */}
-      <Route path={`/profile/${props.match.params.address}/invest`} render={() => <InvestPage address={props.match.params.address} web3Store={props.web3Store}/>}/>
-      <Route path={`/profile/${props.match.params.address}/transact`} component={TransactPage}/>
-      {props.children}
-    </Middle>
-  </ProfileContainer>
-));
+const ProfilePage = withRouter(observer(class ProfilePage extends React.Component<any,any> {
+  render() {
+    const { web3Store, match: { params: { address } } } = this.props;
+    if (web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata)) {
+      console.log(web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata).pic);
+    }
+
+    return (
+      <ProfileContainer>
+        <Left>
+          <NavBox>
+            {
+              web3Store.betaCache.has(address) && web3Store.ipfsCache.get(web3Store.betaCache.get(address).pic)
+              ?
+                <img
+                  src={
+                    `data:image/jpeg;base64,${Buffer.from(web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata).pic.data).toString('base64')}` || Logan
+                  } style={{ width: '100%', height: '45%', borderRadius: '10px 10px 0 0' }}/>
+              :
+                <img src={Logan} alt="noneya" style={{ width: '100%', height: '45%', borderRadius: '10px 10px 0 0' }}/>
+            }
+            <NavName>{web3Store.betaCache.get(address) ? web3Store.betaCache.get(address).name : '???'}</NavName>
+            <div style={{ fontSize: '10px', paddingLeft: '24px', marginTop: '-12px' }}>
+              <FontAwesomeIcon icon={faMapMarkerAlt} size="sm"/>
+              &nbsp;
+              {
+                web3Store.betaCache.has(address) && web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata)
+                ?
+                  web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata).location || 'No location'
+                :
+                  'No location'
+              }
+            </div>
+            <NavList>
+              <ListItem>
+                <FontAwesomeIcon icon={faInfoCircle} size="sm"/>
+                &nbsp;&nbsp;
+                <ListLink to={`/profile/${address}/about`}>about</ListLink>
+              </ListItem>
+              {/* <ListItem>
+                <FontAwesomeIcon icon={faRss} size="sm"/>
+                &nbsp;&nbsp;
+                <ListLink to="/profile/feed">feed</ListLink>
+              </ListItem> */}
+              <ListItem>
+                <FontAwesomeIcon icon={faHandHoldingUsd} size="sm"/>
+                &nbsp;&nbsp;
+                <ListLink to={`/profile/${address}/invest`}>invest</ListLink>
+              </ListItem>
+              <ListItem>
+                <FontAwesomeIcon icon={faHandshake} size="sm"/>
+                &nbsp;&nbsp;
+                <ListLink to={`/profile/${address}/transact`}>transact</ListLink>
+              </ListItem>
+              {/* <ListItem>
+                <FontAwesomeIcon icon={faUserFriends} size="sm"/>
+                &nbsp;&nbsp;
+                <ListLink to="/profile/network">network</ListLink>
+              </ListItem> */}
+            </NavList>
+          </NavBox>
+        </Left>
+        <Middle>
+          <Route path={`/profile/${address}/about`} render={() => <AboutPage address={address} web3Store={web3Store}/>}/>
+          {/* <Route path='/profile/feed' component={ContentPage}/> */}
+          <Route path={`/profile/${address}/invest`} render={() => <InvestPage address={address} web3Store={web3Store}/>}/>
+          <Route path={`/profile/${address}/transact`} component={TransactPage}/>
+          {this.props.children}
+        </Middle>
+      </ProfileContainer>
+    )
+  }
+}));
 
 export default ProfilePage;

@@ -23,8 +23,9 @@ const ListItem = styled(Link)`
 const List = (props: any) => {
   let items = [];
   if (props.web3Store.cbAccounts) { 
-    console.log('filling')
+
     for (const [account, obj] of props.web3Store.cbAccounts) {
+      
       items.push(
         <ListItem to={`/profile/${account}`} key={Math.random()}>
           Account: {account}
