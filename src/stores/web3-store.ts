@@ -32,7 +32,7 @@ type BetaCacheObject = {
 };
 
 export default class Web3Store {
-  @observable account = null; // Main unlocked account
+  @observable account: string = ''; // Main unlocked account
   @observable accountsCache: Set<string> = new Set();
   @observable betaCache: Map<string, BetaCacheObject> = new Map(); // Will update through polling every 2000 ms
   @observable cbAccounts: Map<string, CbAccount> = new Map(); // Will update any time a new account event comes (contains less data)
@@ -41,6 +41,7 @@ export default class Web3Store {
   @observable ipfsCache: Map<string, AccountData> = new Map();
   @observable ipfsLock: boolean = false;  // Locks for IPFS
   @observable readonly = false;  // App starts in readonly mode
+  @observable toaster: any = null;  // The toast manager
   @observable web3: any|null = null;  // Global Web3 object
   // @observable test: string = 'not updated';
 
@@ -154,6 +155,7 @@ export default class Web3Store {
     );
 
     this.ipfs = ipfs;
+    this.toaster.add('IPFS initialized!', {appearance: 'info'})
     // console.log('IPFS connected');
   }
 
@@ -172,7 +174,13 @@ export default class Web3Store {
     // console.log('READONLY MODE')
     this.readonly = true;
     this.web3 = web3;
+    this.toaster.add(`App started in READONLY mode using Infura node. You will not be able to interact with Ethereum until you log in.`, {appearance: 'info'})
     await this.instantiateConvergentBeta();
+  }
+
+  @action
+  initToastMgmt = (toastMgr: any) => {
+    this.toaster = toastMgr;
   }
 
   @action
@@ -202,6 +210,7 @@ export default class Web3Store {
     this.updateWeb3(_window.web3);
     this.readonly = false;
     await this.updateAccount();
+    this.toaster.add(`Logged in to ${this.account.slice(0,10) + '...' + this.account.slice(-4)}. You may now interact with Ethereum.`, {appearance: 'success'})
     // await this.signWelcome();
     await this.instantiateConvergentBeta();
     // console.log('enabled');

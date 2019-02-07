@@ -136,7 +136,7 @@ const TradeScreenTab = styled.button<any>`
 const TradeScreenContent = styled.div`
   width: 100%;
   height: 92%;
-  background: #CCC;
+  background: rgba(0,0,0,0.2);
 `;
 
 type ButtonProps = {exiting: boolean, investing: boolean};
@@ -252,7 +252,7 @@ const InnerDisplay = observer((props: any) => (
   <div style={{ paddingTop: '32px' }}>
     {props.title}
     <hr/>
-    <div style={{ color: 'grey', fontSize: '64px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+    <div style={{ color: 'black', height: '100%', fontSize: '64px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       {props.children}
     </div>
   </div>
@@ -670,7 +670,12 @@ const AboutPage = inject('ipfsStore')(observer((props: any) => (
 
 const TransactPage = observer(class TransactPage extends React.Component<any,any> {
   state = {
+    msg: '',
     service: {},
+  }
+
+  request = () => {
+    console.log(this.state.msg);
   }
   
   render() {
@@ -701,10 +706,16 @@ const TransactPage = observer(class TransactPage extends React.Component<any,any
           {description}
         </div>
         <br/>
-        <input style={{ border: 'solid', borderColor: 'black', color: 'black', borderWidth: '1px', background: 'white', width: '80%'}}/>
+        <input 
+          style={{ border: 'solid', borderColor: 'black', color: 'black', borderWidth: '1px', background: 'white', width: '80%'}}
+          name="msg"
+          onChange={(e) => this.setState({ [e.target.name]: e.target.value })}
+        />
         <br/>
         <br/>
-        <RequestButton>
+        <RequestButton
+          onClick={this.request}
+        >
           Request
         </RequestButton>
         <hr/>

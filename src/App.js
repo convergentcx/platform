@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Link, Route, withRouter } from 'react-router-dom';
 import styled, { ThemeProvider } from 'styled-components';
 import { observer, inject } from 'mobx-react';
+import { withToastManager } from 'react-toast-notifications';
 
 /// Assets
 import Reptile from './assets/pics/contemplative-reptile.jpg';
@@ -179,7 +180,7 @@ const SpeedDialAnchor = observer(styled.div`
   border-radius: 28px;
   ${shadowMixin}
   background: ${props => props.open ? '#232323' : '#000'};
-  color: ${props => props.locked ? (props.readonly ? 'orange' : 'red') : 'green'};
+  color: ${props => props.locked ? (props.readonly ? '#2684FF' : 'red') : '#36B37E'};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -201,15 +202,15 @@ const SpeedDialButton = styled.div`
   right: calc(2% + 4px);
   border-radius: 24px;
   ${shadowMixin}
-  background: ${props => props.alt ? 'green' : '#0044DD'};
-  color: #FFF;
+  background: ${props => props.alt ? '#36B37E' : '#0044DD'};
+  color: #CCC;
   display: flex;
   justify-content: center;
   align-items: center;
   transition: 0.3s;
   :hover {
-    background: ${props => props.alt ? 'dark green' : '#2424D0'};
-    color: #AAA;
+    background: ${props => props.alt ? '#008800' : '#2424D0'};
+    color: #FFF;
   }
 `;
 
@@ -474,8 +475,11 @@ class App extends Component {
   // }
 
   componentDidMount = () => {
+    this.props.web3Store.initToastMgmt(this.props.toastManager);
     this.props.web3Store.initIPFS();
+    // this.props.toastManager.add('IPFS connected!', { appearance: 'info' })
     this.props.web3Store.initReadonly();
+    // this.props.toastManager.add('Connected to Rinkeby. You are in view mode and will not be able to interact with Ethereum until you log in.', { appearance: 'success' });
   }
 
   render() {
@@ -505,7 +509,7 @@ class App extends Component {
 
         {/* <HoveringBlockie src={this.props.web3Store.account ? makeBlockie(this.props.web3Store.account) : Lock} alt='unlock' onClick={() => this.props.web3Store.turnOnWeb3()}/> */}
 
-        <SpeedDial web3Store={this.props.web3Store}/>
+        <SpeedDial web3Store={this.props.web3Store} toastManager={this.props.toastManager}/>
 
         <Route exact path='/' render={props => <Home {...props} web3Store={this.props.web3Store}/>}/>
         <Route path='/dashboard' render={props => <Dashboard {...props} web3Store={this.props.web3Store}/>}/>
@@ -518,4 +522,4 @@ class App extends Component {
   }
 }));
 
-export default withRouter(App);
+export default withToastManager(withRouter(App));

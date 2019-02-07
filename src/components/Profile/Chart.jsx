@@ -1,26 +1,9 @@
 import React from 'react';
 import { Chart, Geom, Axis, Tooltip, Legend, Coord } from 'bizcharts';
 import { inject, observer } from 'mobx-react';
+import { RingLoader } from 'react-spinners';
 
 import { toDecimal } from '../../lib/util';
-
-// 数据源
-// const data = [
-//   { genre: 'Sports', sold: 275, income: 2300 },
-//   { genre: 'Strategy', sold: 115, income: 667 },
-//   { genre: 'Action', sold: 120, income: 982 },
-//   { genre: 'Shooter', sold: 350, income: 5271 },
-//   { genre: 'Other', sold: 150, income: 3710 }
-// ];
-
-// const data = [
-//   { x: 1, y: 1 },
-//   { x: 2, y: 4 },
-//   { x: 3, y: 8 },
-//   { x: 4, y: 12},
-//   { x: 5, y: 6 },
-//   { x: 6, y: 2 },
-// ];
 
 const cols = {
   x: { alias: 'supply' },
@@ -33,8 +16,9 @@ const BondingCurve = inject('web3Store')(observer(class BondingCurve extends Rea
 
     let data = null;
     if (web3Store.betaCache.has(address)) {
-      const { poly } = web3Store.betaCache.get(address);
+      const { poly, price, supply } = web3Store.betaCache.get(address);
       const { utils } = web3Store.web3;
+      console.log(price)
       data = [...Array(10).keys()].map((key) => {
         return { x: key.toString(), y: utils.fromWei(poly.y(toDecimal(utils.toWei(key.toString()))).toString()) };
       })
@@ -59,7 +43,7 @@ const BondingCurve = inject('web3Store')(observer(class BondingCurve extends Rea
               />
             </Chart>
           :
-            "Loading..."
+            <RingLoader/>
         }
       </>
     )

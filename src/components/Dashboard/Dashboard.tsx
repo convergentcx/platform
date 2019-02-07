@@ -6,6 +6,7 @@ import dataUriToBuffer from 'data-uri-to-buffer';
 
 import Subject from '../Dropzone.jsx';
 import makeBlockie from 'ethereum-blockies-base64';
+import { RingLoader } from 'react-spinners';
 
 import { colors } from '../../common';
 
@@ -355,7 +356,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
             active == 1 &&
               <>
               <h1>Inbox</h1>
-              <p>{this.props.match.params.account}</p>
+              <RingLoader/>
               </>
           }
         </DashboardMiddle>
