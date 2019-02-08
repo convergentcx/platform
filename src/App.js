@@ -3,18 +3,14 @@ import { Link, Route, withRouter } from 'react-router-dom';
 import styled, { ThemeProvider } from 'styled-components';
 import { observer, inject } from 'mobx-react';
 import { withToastManager } from 'react-toast-notifications';
-
-/// Assets
-import Reptile from './assets/pics/contemplative-reptile.jpg';
 import Floater from 'react-floater';
-
 
 /// FontAwesome
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faCamera, 
+  // faCamera, 
   faCog,
-  faCoins,
+  // faCoins,
   faUserLock,
   faGlobeEurope,
   faRocket,
@@ -62,104 +58,104 @@ const Wrapper = styled.div`
   min-height: 100vh;
 `;
 
-const ContentBox = styled.div`
-  background: #FFF;
-  border-radius: 10px;
-  width: 50vw;
-  height: 500px;
-  margin-top: 50px;
-  margin-left: 0;
-`;
+// const ContentBox = styled.div`
+//   background: #FFF;
+//   border-radius: 10px;
+//   width: 50vw;
+//   height: 500px;
+//   margin-top: 50px;
+//   margin-left: 0;
+// `;
 
-const ContentDate = styled.div`
-  font-size: 11px;
-  color: #999;
-  padding-right: 12px;
-  padding-bottom: 4px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-`;
+// const ContentDate = styled.div`
+//   font-size: 11px;
+//   color: #999;
+//   padding-right: 12px;
+//   padding-bottom: 4px;
+//   display: flex;
+//   justify-content: flex-end;
+//   align-items: center;
+// `;
 
-const ContentHashes = styled.div`
-  font-size: 11px;
-  color: #999;
-  padding-left: 8px;
-  width: 50%;
-  text-align: left;
-  height: 100%;
-  margin-top: 0;
-  display: flex;
-  flex-flow: row wrap;
-`;
+// const ContentHashes = styled.div`
+//   font-size: 11px;
+//   color: #999;
+//   padding-left: 8px;
+//   width: 50%;
+//   text-align: left;
+//   height: 100%;
+//   margin-top: 0;
+//   display: flex;
+//   flex-flow: row wrap;
+// `;
 
-const ContentHash = styled.a`
-  transition: 0.3s;
-  margin-left: 12px;
-  cursor: pointer;
-  :hover {
-    color: #555;
-  }
-`;
+// const ContentHash = styled.a`
+//   transition: 0.3s;
+//   margin-left: 12px;
+//   cursor: pointer;
+//   :hover {
+//     color: #555;
+//   }
+// `;
 
-const SideNavLink = styled(Link)`
-  padding: 8px 8px 8px 32px;
-  text-decoration: none;
-  font-size: 25px;
-  color: #AAA;
-  display: block;
-  transition: 0.3s;
-  :hover {
-    color: #000;
-  }
-`;
+// const SideNavLink = styled(Link)`
+//   padding: 8px 8px 8px 32px;
+//   text-decoration: none;
+//   font-size: 25px;
+//   color: #AAA;
+//   display: block;
+//   transition: 0.3s;
+//   :hover {
+//     color: #000;
+//   }
+// `;
 
-const SideNavClose = styled.a`
-  position: absolute;
-  top: 0;
-  right: 25px;
-  margin-left: 50px;
-  text-decoration: none;
-  color: #AAA;
-  display: block;
-  transition: 0.3s;
-  :hover {
-    color: #000;
-  }
-`;
+// const SideNavClose = styled.a`
+//   position: absolute;
+//   top: 0;
+//   right: 25px;
+//   margin-left: 50px;
+//   text-decoration: none;
+//   color: #AAA;
+//   display: block;
+//   transition: 0.3s;
+//   :hover {
+//     color: #000;
+//   }
+// `;
 
-const SideNavOpen = styled.a`
-  position: absolute;
-  top: 0;
-  right: 0;
-  text-decoration: none;
-  color: #AAA;
-  display: flex;
-  background: white;
-  width: 25px;
-  text-align: center;
-  transition: 0.3s;
-  :hover {
-    color: #000;
-  }
-`;
+// const SideNavOpen = styled.a`
+//   position: absolute;
+//   top: 0;
+//   right: 0;
+//   text-decoration: none;
+//   color: #AAA;
+//   display: flex;
+//   background: white;
+//   width: 25px;
+//   text-align: center;
+//   transition: 0.3s;
+//   :hover {
+//     color: #000;
+//   }
+// `;
 
-const ContentImage = styled.img`
-  width: calc(100% - 16px);
-  height: 420px;
-  padding-top: 8px;
-  border-radius: 16px 16px 0 0;
-`;
+// const ContentImage = styled.img`
+//   width: calc(100% - 16px);
+//   height: 420px;
+//   padding-top: 8px;
+//   border-radius: 16px 16px 0 0;
+// `;
 
-const HoveringBlockie = styled.img`
-  position: fixed;
-  width: 64px;
-  height: 64px;
-  bottom: 2%;
-  right: 2%;
-  border-radius: 50px;
-  ${shadowMixin}
-`;
+// const HoveringBlockie = styled.img`
+//   position: fixed;
+//   width: 64px;
+//   height: 64px;
+//   bottom: 2%;
+//   right: 2%;
+//   border-radius: 50px;
+//   ${shadowMixin}
+// `;
 
 const SpeedDialAnchor = observer(styled.div`
   cursor: pointer;
@@ -215,165 +211,115 @@ const SpeedFloater = styled.div`
   background: #FFF;
 `;
 
-class HoverableContent extends Component {
-  state = {
-    hovering: false,
-  }
-
-  render() {
-    return (
-      <div 
-        onMouseEnter={() => this.setState({ hovering: true })} 
-        onMouseLeave={() => this.setState({ hovering: false })}
-        style={{ background: '', height: '436px' }}
-      >
-        <ContentImage src={Reptile} alt="ronja"/>
-        {
-          this.state.hovering &&
-          <div style={{ background: 'rgba(0,0,0,0.6)', position: 'relative', top: '-425px', height: '420px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#FFF', margin: '0 8px 8px 8px', padding: '0', transition: '0.5s', borderRadius: '12px 12px 0 0' }}>
-            {(this.props.text && this.props.text.toLowerCase()) || 'no input text with this image'}
-          </div>
-        }
-      </div>
-    );
-  }
-};
-
-const ContentPage = () => (
-  <div style={{ paddingBottom: '50px' }}>
-    <ContentBox>
-      <HoverableContent text="these are my statues"/>
-      <div style={{ height: '44px', display: 'flex' }}>
-        <ContentHashes>
-          <ContentHash>#Classical</ContentHash>
-          <ContentHash>#Art</ContentHash>
-          <ContentHash>#Statue</ContentHash>
-          <ContentHash>#Atlas</ContentHash>
-          <ContentHash>#Painting</ContentHash>
-        </ContentHashes>
-        <div style={{ width: '50%', display: 'flex', justifyContent: 'flex-end', color: '#888' }}>
-          <div style={{ alignSelf: 'flex-start', alignItems: 'center', paddingRight: '12px', display: 'flex' }}>
-            <div style={{ fontSize: '11px' }}>
-              23
-            </div>
-            &nbsp;
-            <FontAwesomeIcon icon={faCoins} size="xs"/>
-          </div>
-        </div>
-      </div>
-      <ContentDate>
-        <FontAwesomeIcon icon={faCamera} size="sm"/>
-        &nbsp;
-        January 20, 2019
-      </ContentDate>
-    </ContentBox>
-
-    <ContentBox>
-      <HoverableContent text="these are my statues"/>
-      <div style={{ height: '44px', display: 'flex' }}>
-        <ContentHashes>
-          <ContentHash>#Classical</ContentHash>
-          <ContentHash>#Art</ContentHash>
-          <ContentHash>#Statue</ContentHash>
-          <ContentHash>#Atlas</ContentHash>
-          <ContentHash>#Painting</ContentHash>
-        </ContentHashes>
-        <div style={{ width: '50%', display: 'flex', justifyContent: 'flex-end', color: '#888' }}>
-          <div style={{ alignSelf: 'flex-start', alignItems: 'center', paddingRight: '12px', display: 'flex' }}>
-            <div style={{ fontSize: '11px' }}>
-              23
-            </div>
-            &nbsp;
-            <FontAwesomeIcon icon={faCoins} size="xs"/>
-          </div>
-        </div>
-      </div>
-      <ContentDate>
-        <FontAwesomeIcon icon={faCamera} size="sm"/>
-        &nbsp;
-        January 20, 2019
-      </ContentDate>
-    </ContentBox>
-
-    <ContentBox>
-      <HoverableContent text="these are my statues"/>
-      <div style={{ height: '44px', display: 'flex' }}>
-        <ContentHashes>
-          <ContentHash>#Classical</ContentHash>
-          <ContentHash>#Art</ContentHash>
-          <ContentHash>#Statue</ContentHash>
-          <ContentHash>#Atlas</ContentHash>
-          <ContentHash>#Painting</ContentHash>
-        </ContentHashes>
-        <div style={{ width: '50%', display: 'flex', justifyContent: 'flex-end', color: '#888' }}>
-          <div style={{ alignSelf: 'flex-start', alignItems: 'center', paddingRight: '12px', display: 'flex' }}>
-            <div style={{ fontSize: '11px' }}>
-              23
-            </div>
-            &nbsp;
-            <FontAwesomeIcon icon={faCoins} size="xs"/>
-          </div>
-        </div>
-      </div>
-      <ContentDate>
-        <FontAwesomeIcon icon={faCamera} size="sm"/>
-        &nbsp;
-        January 20, 2019
-      </ContentDate>
-    </ContentBox>
-
-  </div>
-);
-
-// class SpeedDial extends React.Component {
+// class HoverableContent extends Component {
 //   state = {
-//     open: false,
+//     hovering: false,
 //   }
 
 //   render() {
 //     return (
-//       <>
-//         <SpeedDialAnchor open={this.state.open} onClick={() => this.setState({open: !this.state.open})}>
-//           <FontAwesomeIcon icon={faBong}/>
-//         </SpeedDialAnchor>
-//         {this.state.open &&
-//           <>
-//             <SpeedDialButton offset={10}>
-//               <FontAwesomeIcon icon={faFastForward}/>
-//             </SpeedDialButton>
-//           </>
+//       <div 
+//         onMouseEnter={() => this.setState({ hovering: true })} 
+//         onMouseLeave={() => this.setState({ hovering: false })}
+//         style={{ background: '', height: '436px' }}
+//       >
+//         <ContentImage src={Reptile} alt="ronja"/>
+//         {
+//           this.state.hovering &&
+//           <div style={{ background: 'rgba(0,0,0,0.6)', position: 'relative', top: '-425px', height: '420px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#FFF', margin: '0 8px 8px 8px', padding: '0', transition: '0.5s', borderRadius: '12px 12px 0 0' }}>
+//             {(this.props.text && this.props.text.toLowerCase()) || 'no input text with this image'}
+//           </div>
 //         }
-//       </>
-//     )
+//       </div>
+//     );
 //   }
-// }
+// };
 
-// const LockedSpeedDial = observer(class LockedSpeedDial extends React.Component {
-//   state = {
-//     hovering: 0,
-//     open: false,
-//   }
+// const ContentPage = () => (
+//   <div style={{ paddingBottom: '50px' }}>
+//     <ContentBox>
+//       <HoverableContent text="these are my statues"/>
+//       <div style={{ height: '44px', display: 'flex' }}>
+//         <ContentHashes>
+//           <ContentHash>#Classical</ContentHash>
+//           <ContentHash>#Art</ContentHash>
+//           <ContentHash>#Statue</ContentHash>
+//           <ContentHash>#Atlas</ContentHash>
+//           <ContentHash>#Painting</ContentHash>
+//         </ContentHashes>
+//         <div style={{ width: '50%', display: 'flex', justifyContent: 'flex-end', color: '#888' }}>
+//           <div style={{ alignSelf: 'flex-start', alignItems: 'center', paddingRight: '12px', display: 'flex' }}>
+//             <div style={{ fontSize: '11px' }}>
+//               23
+//             </div>
+//             &nbsp;
+//             <FontAwesomeIcon icon={faCoins} size="xs"/>
+//           </div>
+//         </div>
+//       </div>
+//       <ContentDate>
+//         <FontAwesomeIcon icon={faCamera} size="sm"/>
+//         &nbsp;
+//         January 20, 2019
+//       </ContentDate>
+//     </ContentBox>
 
-//   render() {
-//     return (
-//       <>
-//         <SpeedDialAnchor locked={true} readonly={this.props.web3Store.readonly} open={this.state.open} onClick={() => this.setState({open: !this.state.open})}>
-//           <FontAwesomeIcon icon={faEthereum}/>
-//         </SpeedDialAnchor>
-//         {this.state.open &&
-//           <>
-//               <SpeedDialButton 
-//                 offset={0}
-//                 onClick={() => this.props.web3Store.turnOnWeb3()}
-//               >
-//                 <FontAwesomeIcon icon={faUserLock}/>
-//               </SpeedDialButton>
-//           </>
-//         }
-//       </>
-//     )
-//   }
-// });
+//     <ContentBox>
+//       <HoverableContent text="these are my statues"/>
+//       <div style={{ height: '44px', display: 'flex' }}>
+//         <ContentHashes>
+//           <ContentHash>#Classical</ContentHash>
+//           <ContentHash>#Art</ContentHash>
+//           <ContentHash>#Statue</ContentHash>
+//           <ContentHash>#Atlas</ContentHash>
+//           <ContentHash>#Painting</ContentHash>
+//         </ContentHashes>
+//         <div style={{ width: '50%', display: 'flex', justifyContent: 'flex-end', color: '#888' }}>
+//           <div style={{ alignSelf: 'flex-start', alignItems: 'center', paddingRight: '12px', display: 'flex' }}>
+//             <div style={{ fontSize: '11px' }}>
+//               23
+//             </div>
+//             &nbsp;
+//             <FontAwesomeIcon icon={faCoins} size="xs"/>
+//           </div>
+//         </div>
+//       </div>
+//       <ContentDate>
+//         <FontAwesomeIcon icon={faCamera} size="sm"/>
+//         &nbsp;
+//         January 20, 2019
+//       </ContentDate>
+//     </ContentBox>
+
+//     <ContentBox>
+//       <HoverableContent text="these are my statues"/>
+//       <div style={{ height: '44px', display: 'flex' }}>
+//         <ContentHashes>
+//           <ContentHash>#Classical</ContentHash>
+//           <ContentHash>#Art</ContentHash>
+//           <ContentHash>#Statue</ContentHash>
+//           <ContentHash>#Atlas</ContentHash>
+//           <ContentHash>#Painting</ContentHash>
+//         </ContentHashes>
+//         <div style={{ width: '50%', display: 'flex', justifyContent: 'flex-end', color: '#888' }}>
+//           <div style={{ alignSelf: 'flex-start', alignItems: 'center', paddingRight: '12px', display: 'flex' }}>
+//             <div style={{ fontSize: '11px' }}>
+//               23
+//             </div>
+//             &nbsp;
+//             <FontAwesomeIcon icon={faCoins} size="xs"/>
+//           </div>
+//         </div>
+//       </div>
+//       <ContentDate>
+//         <FontAwesomeIcon icon={faCamera} size="sm"/>
+//         &nbsp;
+//         January 20, 2019
+//       </ContentDate>
+//     </ContentBox>
+
+//   </div>
+// );
 
 const SpeedDial = withRouter(observer(class SpeedDial extends React.Component {
   state = {
@@ -455,51 +401,15 @@ const SpeedDial = withRouter(observer(class SpeedDial extends React.Component {
 const App = inject('web3Store', 'ipfsStore')(observer(
 class App extends Component {
 
-  // state = {
-  //   sideNav: false,
-  // }
-
-  // closeNav = () => {
-  //   this.setState({
-  //     sideNav: false,
-  //   })
-  // }
-
   componentDidMount = () => {
     this.props.web3Store.initToastMgmt(this.props.toastManager);
     this.props.web3Store.initIPFS();
-    // this.props.toastManager.add('IPFS connected!', { appearance: 'info' })
     this.props.web3Store.initReadonly();
-    // this.props.toastManager.add('Connected to Rinkeby. You are in view mode and will not be able to interact with Ethereum until you log in.', { appearance: 'success' });
   }
 
   render() {
-    // const { sideNav } = this.state;
-    // console.log(this.props)
     return (
       <Wrapper>
-      
-        {/* <div style={{ height: '100%', width: sideNav ? '250px':'25px', overflowX: 'hidden', zIndex: '1', position: 'fixed', top: '0', left: '0', background: 'rgba(0,0,0,0.5)', paddingTop: '60px' }}>
-          {
-            !sideNav 
-            && <SideNavOpen onClick={() => this.setState({ sideNav: true })} style={{
-              position: 'absolute', top: '0', display: 'block'
-            }}>
-              <FontAwesomeIcon icon={faArrowRight} size="sm"/>
-            </SideNavOpen>
-          }
-          <SideNavClose href="javascript:void(0)" onClick={this.closeNav}>
-            <FontAwesomeIcon icon={faArrowLeft} size="sm"/>
-          </SideNavClose>
-          <SideNavLink onClick={this.closeNav} to="/">Home</SideNavLink>
-          <SideNavLink onClick={this.closeNav} to="/dashboard">Dashboard</SideNavLink>
-          <SideNavLink onClick={this.closeNav} to="/list">List</SideNavLink>
-          <SideNavLink onClick={this.closeNav} to="/profile">Explore</SideNavLink>
-          <SideNavLink onClick={this.closeNav} to="/faq">FAQ</SideNavLink>
-        </div> */}
-
-        {/* <HoveringBlockie src={this.props.web3Store.account ? makeBlockie(this.props.web3Store.account) : Lock} alt='unlock' onClick={() => this.props.web3Store.turnOnWeb3()}/> */}
-
         <SpeedDial web3Store={this.props.web3Store} toastManager={this.props.toastManager}/>
 
         <Route exact path='/' render={props => <Home {...props} web3Store={this.props.web3Store}/>}/>
@@ -507,7 +417,6 @@ class App extends Component {
         <Route path='/list' render={props => <List {...props} web3Store={this.props.web3Store}/>}/>
         <Route path='/profile/:address' render={props => <Profile {...props} web3Store={this.props.web3Store}/>}/>
         <Route path='/faq' component={FAQ}/>
-
       </Wrapper>
     );
   }

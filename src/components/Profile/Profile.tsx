@@ -576,10 +576,10 @@ const ExitScreen = inject('web3Store')(observer(class ExitScreen extends React.C
         <br/>
         <input style={{ color: 'black', background: 'white', border: 'none' }} onChange={this.inputUpdate}/>
         <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
-          Return:
+          Returns:
         </div>
         <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
-          ~ {web3Store.web3.utils.fromWei(this.state.sellReturn.toString())} eth
+          {web3Store.web3.utils.fromWei(this.state.sellReturn.toString())} eth
         </div>
         {/* <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
           In time:
@@ -592,7 +592,6 @@ const ExitScreen = inject('web3Store')(observer(class ExitScreen extends React.C
           onClick={this.sell}
         >
           SELL
-          {/* <FontAwesomeIcon icon={faThumbsUp} size="lg"/> */}
         </ConfirmButton>
       </div>
     )
@@ -639,7 +638,6 @@ class InvestPage extends React.Component<any, any> {
             ||
             <TradeScreen address={address} web3Store={this.props.web3Store}/>
           }
-          {/* <div style={{ height: '30%' }}/> */}
           <div style={{ height: '10%', display: 'flex' }}>
           <InvestButton investing={investing} exiting={exiting} onClick={this.startInvest}>
             Invest
@@ -683,8 +681,6 @@ const TransactPage = observer(class TransactPage extends React.Component<any,any
     let title,description,price;
     if (betaCache.has(address) && ipfsCache.has(betaCache.get(address).metadata)) {
       const { metadata } = betaCache.get(address);
-      // console.log(metadata)
-      // console.log(ipfsCache.get(metadata).services)
       const { services } = ipfsCache.get(metadata);
       title = services[0].title;
       description = services[0].description;

@@ -45,7 +45,10 @@ const BondingCurve = inject('web3Store')(observer(class BondingCurve extends Rea
         const { slopeN, slopeD, exponent, spreadN, spreadD, totalSupply } = web3Store.betaCache.get(address);
         const y = getY(slopeN, slopeD, exponent, val);
         const sell = getSell(slopeN, slopeD, exponent, spreadN, spreadD, val)
-        return { x: val, buy: y, sell, reserved: val <= parseInt(web3Store.web3.utils.fromWei(totalSupply)) ? sell : '' };
+        if (val <= parseInt(web3Store.web3.utils.fromWei(totalSupply))) {
+          return { x: val, buy: y, sell, reserved: sell };
+        } 
+        return { x: val, buy: y, sell };
       })
     }
 
@@ -61,7 +64,7 @@ const BondingCurve = inject('web3Store')(observer(class BondingCurve extends Rea
               <Tooltip/>
               <Area type='monotone' dataKey='buy' stackId="1" stroke='green' fill='none' />
               <Area type='monotone' dataKey='sell' stackId="2" stroke='red' fill='none' />
-              <Area type='monotone' dataKey='reserved' stackId='3' stroke='red' fill='red'/>
+              <Area type='monotone' dataKey='reserved' stackId='3' stroke='none' fill='red'/>
             </AreaChart>
           :
             <RingLoader/>
