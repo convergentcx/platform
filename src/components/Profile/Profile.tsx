@@ -360,7 +360,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
                 {
                   this.state.loaded
                   ?
-                    `${web3Store.betaCache.get(address).curPrice.slice(0,9)} eth`
+                    `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).curPrice)} eth`
                   :
                     <RingLoader/>
                 }

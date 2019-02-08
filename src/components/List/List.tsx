@@ -47,7 +47,9 @@ const List = (props: any) => {
       let MC = '???'
       let name = '???'
       if (props.web3Store.betaCache.has(account)) {
-        MC = props.web3Store.web3.utils.fromWei(Math.floor(props.web3Store.betaCache.get(account).marketCap).toString()).slice(0,5);
+        MC = props.web3Store.web3.utils.fromWei(
+          Math.floor(props.web3Store.betaCache.get(account).marketCap).toString()
+        ).slice(0,5);
         name = props.web3Store.betaCache.get(account).name;
       }
 
