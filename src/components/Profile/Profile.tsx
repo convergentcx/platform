@@ -271,7 +271,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
     const { address, web3Store } = this.props;
     if (!web3Store.betaCache.has(address)) {
       // Get data and cache it.
-      await web3Store.getContractDataAndCache(address);
+      await web3Store.getAccountDataAndCache(address);
     }
     this.pollForData(address);
   }
@@ -360,7 +360,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
                 {
                   this.state.loaded
                   ?
-                    `${web3Store.betaCache.get(address).price.slice(0,9)} eth`
+                    `${web3Store.betaCache.get(address).curPrice.slice(0,9)} eth`
                   :
                     <RingLoader/>
                 }
@@ -374,7 +374,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
                   this.state.loaded
                   ?
                     `${
-                      web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).marketCap.split('.')[0]).slice(0,9)
+                      web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).marketCap).slice(0,9)
                     } eth`
                   :
                       <RingLoader/>
@@ -390,7 +390,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
                 {
                   this.state.loaded
                   ?
-                    `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).ts).slice(0,9)} ${web3Store.betaCache.get(address).symbol.toLowerCase()}`
+                    `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).totalSupply).slice(0,9)} ${web3Store.betaCache.get(address).symbol.toLowerCase()}`
                   :
                     <RingLoader/>
                 }
@@ -405,7 +405,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
                 {
                   this.state.loaded
                   ?
-                    `${web3Store.betaCache.get(address).name} has ${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).heldContributions)} contributions waiting.`
+                    `${web3Store.betaCache.get(address).name} has ${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).contributions)} contributions waiting.`
                     : 'Loading...'
                 }
                 <br/>
@@ -434,24 +434,23 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
 
 const InvestScreen = inject('web3Store')(observer(class InvestScreen extends React.Component<any,any> {
   state = {
-    inputVal: 0,
-    youGet: 0,
+    howMuch: 0,
+    cost: 0,
   }
 
   inputUpdate = (evt: any) => {
     const { value } = evt.target;
-    this.updateYouGet(value);
+    this.updateCost(value);
   }
 
-  updateYouGet = async (value: any) => {
-    const youGet = await this.props.web3Store.getBuyReturn(
+  updateCost = async (value: any) => {
+    const cost = await this.props.web3Store.getBuyReturn(
       this.props.address,
       value.toString(),
     );
-    // console.log(youGet)
     this.setState({
-      inputVal: value,
-      youGet,
+      howMuch: value,
+      cost,
     })
   }
 
@@ -461,11 +460,11 @@ const InvestScreen = inject('web3Store')(observer(class InvestScreen extends Rea
       alert('You are in readonly mode! Cannot do actions.');
       return;
     }
-    if (this.state.inputVal == 0) {
+    if (this.state.howMuch == 0) {
       alert('You are trying to invest 0. That makes no sense.');
       return;
     }
-    await web3Store.buy(this.props.address, this.state.inputVal);
+    await web3Store.buy(this.props.address, this.state.howMuch, this.state.cost);
   }
 
   render() {
@@ -489,17 +488,17 @@ const InvestScreen = inject('web3Store')(observer(class InvestScreen extends Rea
           </QuitButton>
         </div>
         <div style={{ color: 'white', fontSize: '32px', paddingTop: '12px' }}>
-          How much?
+          How much? (${symbol})
         </div>
         <br/>
         <input style={{ color: 'black', background: 'white', border: 'none' }} onChange={this.inputUpdate}>
 
         </input>
         <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
-          You get:
+          Costs:
         </div>
         <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
-          {utils.fromWei(this.state.youGet.toString())} {symbol.toLowerCase()}
+          {utils.fromWei(this.state.cost.toString())} eth
         </div>
         {/* <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
           In time:
@@ -528,7 +527,7 @@ const InvestScreen = inject('web3Store')(observer(class InvestScreen extends Rea
 const ExitScreen = inject('web3Store')(observer(class ExitScreen extends React.Component<any,any> {
   state = {
     inputVal: 0,
-    returnVal: 0,
+    sellReturn: 0,
   }
 
   inputUpdate = (evt: any) => {
@@ -544,7 +543,7 @@ const ExitScreen = inject('web3Store')(observer(class ExitScreen extends React.C
     // console.log(returnVal)
     this.setState({
       inputVal: value,
-      returnVal,
+      sellReturn: returnVal,
     })
   }
 
@@ -580,7 +579,7 @@ const ExitScreen = inject('web3Store')(observer(class ExitScreen extends React.C
           Return:
         </div>
         <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
-          ~ {web3Store.web3.utils.fromWei(this.state.returnVal.toString())} eth
+          ~ {web3Store.web3.utils.fromWei(this.state.sellReturn.toString())} eth
         </div>
         {/* <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
           In time:

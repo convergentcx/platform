@@ -287,6 +287,12 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
     })
   }
 
+  // TODO check implementation of this account on log in and post a comment if an upgrade is needed
+  upgrade = () => {
+    // console.log(this.props.match.params.account)
+    this.props.web3Store.upgrade(this.props.match.params.account)
+  }
+
   render() {
     const { active } = this.state;
 
@@ -360,7 +366,9 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
               </>
           }
         </DashboardMiddle>
-        <DashboardRight/>
+        <DashboardRight>
+          <button onClick={this.upgrade}>Upgrade</button>
+        </DashboardRight>
       </>
     )
   }

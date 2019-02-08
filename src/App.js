@@ -14,23 +14,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faCamera, 
   faCog,
-  faArrowRight, 
-  faArrowLeft, 
   faCoins,
-  faBong,
-  faFastForward,
-  faHome,
   faUserLock,
   faGlobeEurope,
-  faDatabase,
-  faDesktop,
-  faIndustry,
-  faUsersCog,
   faRocket,
   faQuestion,
 } from '@fortawesome/free-solid-svg-icons';
-
 import { faEthereum } from '@fortawesome/free-brands-svg-icons';
+
 /// Components
 import Dashboard from './components/Dashboard';
 import Home from './components/Home';

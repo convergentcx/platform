@@ -2,41 +2,63 @@ import { observable, action } from 'mobx';
 import ipfsClient from 'ipfs-http-client';
 import Web3 from 'web3';
 
-import Account from '../assets/artifacts/Account.json';
-import ConvergentBeta from '../assets/artifacts/ConvergentBeta.json';
+// import Account from '../assets/artifacts/Account.json';
+import ConvergentBeta2 from '../assets/artifacts2/ConvergentBeta.json';
+import Account2 from '../assets/artifacts2/Account.json';
 
 import Polynomial from '../lib/polynomial';
-import { toDecimal } from '../lib/util';
+// import { toDecimal } from '../lib/util';
 
-import { AccountData, b32IntoMhash, mhashIntoBytes32 } from '../lib/ipfs-util';
+import { AccountData, b32IntoMhash } from '../lib/ipfs-util';
 
-const CB_PROXY_ADDR = "0x93bd15db2cbb045604d5df11f037203a1b57c23a";
+// const CB_PROXY_ADDR = "0x93bd15db2cbb045604d5df11f037203a1b57c23a";
+const CB2_PROXY_ADDR = "0x130ce5d82ae4174a0284027f9ec1d0dcaa748ced";
 
 type CbAccount = {
   creator: string,
   blockNumber: number,
 };
 
-type BetaCacheObject = {
-  price: string,
-  marketCap: string,
-  rr: string,
-  vs: string,
-  vr: string,
-  ts: string,
-  symbol: string,
+// type BetaCacheObject = {
+//   price: string,
+//   marketCap: string,
+//   rr: string,
+//   vs: string,
+//   vr: string,
+//   ts: string,
+//   symbol: string,
+//   metadata: string,
+//   poly: Polynomial,
+//   heldContributions: string,
+//   name: string,
+// };
+
+type NewBetaCache = {
   metadata: string,
-  poly: Polynomial,
-  heldContributions: string,
+  curServiceIndex: string,
+  reserve: string,
+  contributions: string,
+  curPrice: string,
+  marketCap: string,
+  totalSupply: string,
+  rAsset: string,
+  beneficiary: string,
+  slopeN: string,
+  slopeD: string,
+  exponent: string,
+  spreadN: string,
+  spreadD: string,
+  symbol: string,
   name: string,
-};
+}
 
 export default class Web3Store {
   @observable account: string = ''; // Main unlocked account
   @observable accountsCache: Set<string> = new Set();
-  @observable betaCache: Map<string, BetaCacheObject> = new Map(); // Will update through polling every 2000 ms
+  @observable betaCache: Map<string, NewBetaCache> = new Map(); // Will update through polling every 2000 ms
   @observable cbAccounts: Map<string, CbAccount> = new Map(); // Will update any time a new account event comes (contains less data)
   @observable convergentBeta = null; // The contract instance
+  @observable convergentBeta2 = null; // The contract instance
   @observable ipfs: any = null;   // Global IPFS object
   @observable ipfsCache: Map<string, AccountData> = new Map();
   @observable ipfsLock: boolean = false;  // Locks for IPFS
@@ -49,7 +71,6 @@ export default class Web3Store {
   updateAccount = async () => {
     if (!this.web3) { return; }
     const main = (await this.web3.eth.getAccounts())[0];
-    // console.log('setting account ', main);
     this.account = main;
     this.cacheAccounts();
   }
@@ -75,36 +96,43 @@ export default class Web3Store {
   }
 
   @action
+  upgrade = async (address: string) => {
+    const tx = await (this.convergentBeta as any).methods.upgradeAccount(address).send(
+      { from: this.account }
+    );
+    console.log(tx)
+  }
+
+  @action
   sendContribution = async (address: string) => {
     if (this.readonly) throw new Error('Cannot perform this action of sending contributions in readonly mode.');
 
-    const { abi } = Account;
+    const { abi } = Account2;
     const acc = new this.web3.eth.Contract(abi, address);
     const ret = await acc.methods.sendContributions().send({ from: this.account });
     // console.log(ret)
   }
 
   @action
-  getSellReturn = async (address: string, value: string) => {
-    const { abi } = Account;
+  getSellReturn = async (address: string, howMuch: string) => {
+    const { abi } = Account2;
     const acc = new this.web3.eth.Contract(abi, address);
 
-    const ret = await acc.methods.sellReturn(value).call();
-    return ret;
+    const sellReturn = await acc.methods.returnForSell(howMuch).call();
+    return sellReturn;
   }
 
   @action
-  sell = async (address: string, value: string) => {
+  sell = async (address: string, howMuch: string) => {
     if (!this.account) {
       throw new Error('No account!!!');
     }
 
-    const { abi } = Account;
+    const { abi } = Account2;
     const acc = new this.web3.eth.Contract(abi, address);
-    const ret = await acc.methods.sell(
-      value,
+    const tx = await acc.methods.sell(
+      howMuch,
       0,
-      0
     ).send({
       from: this.account,
       gasPrice: this.web3.utils.toWei('2', 'gwei'),
@@ -114,27 +142,25 @@ export default class Web3Store {
 
   @action
   getBuyReturn = async (address: string, value: string) =>{
-    const { abi } = Account;
+    const { abi } = Account2;
     const acc = new this.web3.eth.Contract(abi, address);
-    // console.log(acc)
-    const ret = await acc.methods.purchaseReturn(value).call();
-    return ret;
+    const price = await acc.methods.priceToBuy(value).call();
+    return price;
   }
 
   @action
-  buy = async (address: string, value: string) => {
+  buy = async (address: string, howMuch: string, cost: string) => {
     if (!this.account) {
       throw new Error('No account!!');
     }
-    const { abi } = Account;
+    const { abi } = Account2;
     const acc = new this.web3.eth.Contract(abi, address);
     const ret = await acc.methods.buy(
-      value,
-      0,
-      0
+      howMuch,
+      cost,
     ).send({
       from: this.account,
-      value,
+      value: cost,
       gasPrice: this.web3.utils.toWei('2', 'gwei'),
     });
     // console.log(ret)
@@ -227,20 +253,18 @@ export default class Web3Store {
       console.error('Unable to instantiate Convergent Beta');
     }
 
-    const { abi } = ConvergentBeta;
-    const convergentBeta = new this.web3.eth.Contract(
-      abi,
-      CB_PROXY_ADDR,
+    const { abi: abi2 } = ConvergentBeta2;
+    const convergentBeta2 = new this.web3.eth.Contract(
+      abi2,
+      CB2_PROXY_ADDR,
     );
-
-    this.convergentBeta = convergentBeta;
-    // console.log('convergent beta instantiated');
-    // console.log(this.convergentBeta);
+    this.convergentBeta = convergentBeta2;
     this.cacheAccounts();
-    // console.log('HERERERERE')
     await this.startCachingAccounts();
   }
 
+  // This function gets minimal data and is launched every time a new account event comes in.
+  // TODO: it should trigger a full data caching for this address.
   @action
   startCachingAccounts = async () => {
     if (!this.convergentBeta) {
@@ -248,46 +272,42 @@ export default class Web3Store {
     }
 
     const initAccounts = await (this.convergentBeta as any).getPastEvents('NewAccount', {fromBlock: 0, toBlock: 'latest'});
-    // console.log(initAccounts)
-    // console.log(typeof initAccounts);
+
     initAccounts.forEach((event: any) => {
-      // console.log(event)
       const { returnValues: { account, creator }, blockNumber } = event;
-      // console.log(account, creator, blockNumber)
+
       this.cbAccounts.set(account, {
         creator,
         blockNumber,
       });
+
     });
     
 
-    // this.cbAccounts = initAccounts;
     // Now start watching the accounts.
     (this.convergentBeta as any).events.NewAccount({fromBlock: 0})
     .on('data', (event: any) => {
-      // console.log(event);
       const { returnValues: { account, creator }, blockNumber } = event;
-      // console.log(account, creator, blockNumber)
       this.cbAccounts.set(account, {
         creator,
         blockNumber,
       });
-
-      this.pollAllTehData();
-      this.pollIPFS();
     });
+
+    this.pollAllTehData();
+    this.pollIPFS();
   }
 
   @action
   pollAllTehData = async () => {
     for (const [account, _] of this.cbAccounts) {
-      this.getContractDataAndCache(account);
+      this.getAccountDataAndCache(account);
     }
 
     setInterval(() => {
       // console.log('web3 polling round');
       for (const [account, _] of this.cbAccounts) {
-        this.getContractDataAndCache(account);
+        this.getAccountDataAndCache(account);
       }
     }, 30000);
   }
@@ -313,24 +333,22 @@ export default class Web3Store {
 
   @action
   ipfsGetDataAndCache = async (metadata: string) => {
-    // console.log('metadata: ', metadata)
     const obj = {
       digest: metadata,
       hashFunction: 18,
       size: 32,
     };
-    // console.log('obj', obj)
 
     const contentAddress = b32IntoMhash(obj);
     const raw = await this.ipfs.get(contentAddress);
     const data: AccountData = JSON.parse(raw[0].content.toString());
 
-    // Cannot cache picture because it 
+    // TODO: Cannot cache picture because it will slow down the whole DApp.
     this.ipfsCache = this.ipfsCache.set(metadata, data);
   }
 
   @action
-  getContractDataAndCache = async (address: string) => {
+  getAccountDataAndCache = async (address: string) => {
     // Check for web3
     if (!this.web3) {
       console.error('Web3 not enabled!');
@@ -338,77 +356,68 @@ export default class Web3Store {
     }
     // Validate address
     if (!this.web3.utils.isAddress(address)) {
-      console.error('incorrect address');
+      console.error('Address unable to be validated!');
       return;
     }
 
-    const { abi } = Account;
+    const { abi } = Account2;
     const acc = new this.web3.eth.Contract(abi, address);
 
-    const rr = await (acc as any).methods.reserveRatio().call();
-    const vs = await (acc as any).methods.virtualSupply().call();
-    const vr = await (acc as any).methods.virtualReserve().call();
-    const ts = await (acc as any).methods.totalSupply().call();
-    const symbol = await (acc as any).methods.symbol().call();
+    // These will change and should be polled
     const metadata = await (acc as any).methods.metadata().call();
-    const heldContributions = await (acc as any).methods.heldContributions().call();
+    const curServiceIndex = await (acc as any).methods.curServiceIndex().call();
+    const reserve = await (acc as any).methods.reserve().call(); 
+    const contributions = await (acc as any).methods.contributions().call();
+    const curPrice = await (acc as any).methods.currentPrice().call()
+    const marketCap = await (acc as any).methods.marketCap().call();
+    const totalSupply = await (acc as any).methods.totalSupply().call();
+
+    // These SHOULD never change (at least in mvp)
+    const rAsset = await (acc as any).methods.reserveAsset().call();
+    const beneficiary = await (acc as any).methods.beneficiary().call();
+    const slopeN = await (acc as any).methods.slopeN().call();
+    const slopeD = await (acc as any).methods.slopeD().call();
+    const exponent = await (acc as any).methods.exponent().call();
+    const spreadN = await (acc as any).methods.spreadN().call();
+    const spreadD = await (acc as any).methods.spreadD().call();
+    const symbol = await (acc as any).methods.symbol().call();
     const name = await (acc as any).methods.name().call();
 
-    const poly = Polynomial.fromBancorParams(
-      toDecimal(vs.toString()),
-      toDecimal(vr.toString()),
-      toDecimal(rr.toString()),
-      toDecimal('1000000'),
-    );
-
-    // console.log(vs)
-
-    const supplyWVS = toDecimal(vs).add(toDecimal(ts));
-
-    const vsPrice = poly.y(
-      toDecimal(vs)
-    );
-
-    const vsMC = vsPrice.mul(toDecimal(vs)); // doesnt divide out decimals
-
-    const price = poly.y(
-      supplyWVS,
-    );
-
-    // IN the below you've gotta subtract the mc of just virtual stuff
-    const marketCap = price.mul(toDecimal(ts)).div(toDecimal(10).pow(18)).toString();
-
     this.betaCache.set(
-      address,  
+      address,
       {
-        price: price.div(toDecimal(10).pow(18)).toString(),
-        marketCap,
-        rr,
-        vs,
-        vr,
-        ts,
-        symbol,
         metadata,
-        poly,
-        heldContributions,
+        curServiceIndex,
+        reserve,
+        contributions,
+        curPrice,
+        marketCap,
+        totalSupply,
+        rAsset,
+        beneficiary,
+        slopeN,
+        slopeD,
+        exponent,
+        spreadN,
+        spreadD,
+        symbol,
         name,
-      },
+      }
     );
-
-    // console.log('cached metadata: ', metadata);
 
     const nowBlock = await this.web3.eth.getBlockNumber();
-    (acc as any).events.MetadataUpdated({fromBlock: nowBlock})
+    (acc as any).events.MetadataUpdated({ fromBlock: nowBlock })
     .on('data', (event: any) => {
-      const md = event.returnValues.newMetadata;
+      const { newMetadata } = event.returnValues;
       const oldEntry = this.betaCache.get(address);
-      if ((oldEntry as any).metadata !== md) {
-        const newEntry = Object.assign(oldEntry, { metadata: md });
+      if (newMetadata !== (oldEntry as any).metadata) {
+        const newEntry = Object.assign(oldEntry, { metadata: newMetadata });
         this.betaCache.set(address, newEntry);
-      };
+      }
     });
   }
 
+  // TODO: why is this function here?
   @action
   updateMetadata = async (economy: string, metadata: string) => {
     if (!this.web3) {
@@ -420,7 +429,7 @@ export default class Web3Store {
       throw new Error('Incorrect economy address provided to updateMetadata function');
     }
 
-    const { abi } = Account;
+    const { abi } = Account2;
     const acc = new this.web3.eth.Contract(abi, economy);
 
     const tx = await acc.methods.updateMetadata(metadata).send({from: this.account});
