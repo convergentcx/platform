@@ -96,6 +96,40 @@ export default class Web3Store {
   }
 
   @action
+  request = async (address: string, serviceIndex: number, msg: string) => {
+    const { abi } = Account2;
+    const acc = new this.web3.eth.Contract(abi, address);
+    const price = await (acc as any).methods.services(serviceIndex.toString()).call()
+    console.log(price.toString())
+    const balOf = await (acc as any).methods.balanceOf(this.account).call();
+    console.log('balOf', balOf.toString());
+    const creator = await (acc as any).methods.creator().call();
+    console.log(creator)
+    console.log(serviceIndex)
+    // const allow = await (acc as any).methods.approve(address, this.web3.utils.toWei('1000', 'ether')).send({from : this.account})
+    console.log(msg)
+    const tx = await (acc as any).methods.requestService(
+      serviceIndex.toString(),
+      msg,
+    ).send(
+      { from: this.account },
+    );
+    console.log(tx);
+  }
+
+  @action
+  addService = async (address: string, price: string) => {
+    const { abi } = Account2;
+    const acc = new this.web3.eth.Contract(abi, address);
+    const tx = await (acc as any).methods.addService(
+      price
+    ).send(
+      { from: this.account },
+    );
+    console.log(tx);
+  }
+
+  @action
   upgrade = async (address: string) => {
     const tx = await (this.convergentBeta as any).methods.upgradeAccount(address).send(
       { from: this.account }

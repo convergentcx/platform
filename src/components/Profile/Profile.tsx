@@ -104,6 +104,7 @@ const InvestBox = styled.div`
   width: 50vw;
   height: 90vh;
   margin-top: 5vh;
+  ${shadowMixin}
 `;
 
 const AboutContainer = styled.div`
@@ -673,6 +674,7 @@ const TransactPage = observer(class TransactPage extends React.Component<any,any
 
   request = () => {
     console.log(this.state.msg);
+    this.props.web3Store.request(this.props.address, 0, this.state.msg);
   }
   
   render() {

@@ -46,20 +46,20 @@ const tryThrowaway = (val: any) => {
 }
 
 // Takes an array of event objects
-const sortMessages = (messages: Event[]): any[] => {
-  const sorted = messages.map((msg: Event) => {
-    const { event, blockNumber, returnValues } = msg;
-    switch (event) {
-      case MessageType.Bought:
-        const rValues = Object.keys(returnValues);
-        const elements = rValues.map((val: any) => {
-          if (!!tryThrowaway(val)) {
-            
-          }
-        })
-    }
-  })
-};
+// const sortMessages = (messages: Event[]): any[] => {
+//   const sorted = messages.map((msg: Event) => {
+//     const { event, blockNumber, returnValues } = msg;
+//     switch (event) {
+//       case MessageType.Bought:
+//         const rValues = Object.keys(returnValues);
+//         const elements = rValues.map((val: any) => {
+//           if (!!tryThrowaway(val)) {
+
+//           }
+//         })
+//     }
+//   })
+// };
 
 
 

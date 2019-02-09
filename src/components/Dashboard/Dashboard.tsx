@@ -295,17 +295,18 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
 
     if (!web3Store.account) {
       alert('Log in first! lol');
+      // Reroute somewhere else
       return
     }
 
     let imgBuf;
     try {
       imgBuf = dataUriToBuffer(this.state.file)
-      console.log('imgBuf', imgBuf);
+      // console.log('imgBuf', imgBuf);
     } catch (e) { console.error(e); }
 
     this.setState({ uploading: true });
-    console.log(imgBuf)
+    // console.log(imgBuf)
 
     const data = {
       bio: this.state.bio,
@@ -329,6 +330,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
     // TODO Cache it
     const b32 = ipfsStore.getBytes32(hash[0].path);
     await web3Store.updateMetadata(this.props.match.params.account, b32);
+    await web3Store.addService(this.props.match.params.account, data.services[0].price)
     
   }
 
