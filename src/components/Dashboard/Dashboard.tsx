@@ -9,10 +9,9 @@ import makeBlockie from 'ethereum-blockies-base64';
 import { RingLoader } from 'react-spinners';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
+import { faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons';
 
 import { colors } from '../../common';
-import { render } from 'react-dom';
 
 const DashboardContainer = styled.div`
   width: 100%;
@@ -79,6 +78,7 @@ const DisplayContainer = styled.div<any>`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-flow: row wrap;
 `;
 
 const InputDisplay = styled.div`
@@ -89,7 +89,7 @@ const InputDisplay = styled.div`
   justify-content: space-around;
 `;
 
-const BioInput = styled.input`
+const BioInput = styled.textarea`
   width: 100%;
   background: #E9EDF2;
   height: 60%;
@@ -144,6 +144,7 @@ const CommitButton = styled.button`
 
 const DisplayHeading = styled.h4`
   margin-bottom: 8px;
+  width: 100%;
 `;
 
 // const AddButton = styled.button`
@@ -203,9 +204,16 @@ const MessageRow = styled.div`
   display: flex;
   flex-flow: row wrap;
   width: 100%;
-  height: 60px;
+  height: 40px;
   background: white;
   align-items: center;
+  border: solid;
+  border-color: #2684FF;
+  cursor: pointer;
+  transition: 0.4s;
+  :hover {
+    background: rgba(255,255,255, 0.2);
+  }
 `;
 
 const MessageTitle = styled.div`
@@ -215,7 +223,6 @@ const MessageTitle = styled.div`
   font-size: 11px;
   width: 25%;
   height: 100%;
-  background: rgba(0,0,0,0.2);
 `;
 
 const MessageBlockNumber = styled.div`
@@ -225,7 +232,6 @@ const MessageBlockNumber = styled.div`
   font-size: 11px;
   width: 25%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
 `;
 
 const MessagePreview = styled.div`
@@ -235,7 +241,6 @@ const MessagePreview = styled.div`
   font-size: 11px;
   width: 35%;
   height: 100%;
-  background: rgba(0,0,0,0.8);
 `;
 
 const MessageButtonContainer = styled.div`
@@ -251,22 +256,41 @@ const MessageExpand = styled.div<any>`
   display: ${props => props.show ? 'flex' : 'none'};
   width: 100%;
   height: ${props => props.show ? '60px' : '0px'};
-  background: green;
   justify-content: center;
   align-items: center;
+  font-size: 11px;
+  background: grey;
 `;
 
 const MessageShowMore = styled.button`
-  
+  border: none;
+  background: transparent;
+  color: #2684FF;
 `;
 
 const DashboardRight = styled.div`
   width: 20%;
   height: 100%;
   background: #2299AA;
+  display: flex;
+  justify-content: center;
 `;
 
-const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboard extends React.Component<any,any> {
+const UpgradeButton = styled.button`
+  border: solid;
+  border-color: black;
+  background: transparent;
+  height: 80px;
+  width: 120px;
+  cursor: pointer;
+  transition: 0.2s;
+  :hover {
+    background: black;
+    color: white;
+  }
+`;
+
+const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class InteriorDashboard extends React.Component<any,any> {
   state = {
     active: 0,
     bio: '',
@@ -280,14 +304,47 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
     serviceDescription1: '',
     servicePrice1: '',
     messages: [],
+    downloading: false,
   }
 
-  componentDidMount = () => {
+  componentDidMount = async () => {
     const { web3Store, match: { params: { account } } } = this.props;
 
+    await web3Store.getAccountDataAndCache(account)
+    // await web3Store.ipfsGetDataAndCache(web3Store.betaCache.get(account).metadata);
+    this.getData()
     if (web3Store.web3) {
       web3Store.syncMessages(account).then((res: any) => this.setState({messages: res}));
     } else { setTimeout(() => web3Store.syncMessages(account).then((res: any) => this.setState({ messages: res})), 3000)}
+  }
+
+  getData = async () => {
+    const { web3Store, match: { params: { account } } } = this.props;
+
+    if (!web3Store.betaCache.has(account)) {
+      setTimeout(() => this.getData(), 4000);
+      return;
+    }
+
+    this.setState({ downloading: true, });
+    await this.props.web3Store.ipfsGetDataAndCache(
+      this.props.web3Store.betaCache.get(
+        this.props.match.params.account,
+      ).metadata,
+    );
+
+    let bio,location,pic,services;
+    if (web3Store.betaCache.has(account) && web3Store.ipfsCache.has(web3Store.betaCache.get(account).metadata)) {
+      const data = web3Store.ipfsCache.get(web3Store.betaCache.get(account).metadata);
+      // const json = JSON.parse(data);
+      // console.log('json, ', data)
+      bio = data.bio || '';
+      location = data.location || '';
+      pic = data.pic || '';
+      services = data.services || [];
+      this.makePreview(pic);
+    }
+    this.setState({ downloading: false, });
   }
 
   commit = async () => {
@@ -369,7 +426,15 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
     this.props.web3Store.upgrade(this.props.match.params.account)
   }
 
+  makePreview = (pic: any) => {
+    if (!pic) return;
+    this.setState({
+      preview: `data:image/jpeg;base64,${Buffer.from(pic.data).toString('base64')}`,
+    })
+  }
+
   render() {
+    const { web3Store, match: { params: { account} } } = this.props;
     const { active, messages } = this.state;
 
     let vari: any[] = [];
@@ -377,7 +442,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
     if (messages.length) {
       vari = messages.map((eventObj: any) => {
         const { event, blockNumber, returnValues } = eventObj;
-        if (event == 'Transfer' || !event) return;
+        if (event == 'Transfer' || !event || event == 'Approval') return;
 
         let values: any[] = [];
         Object.keys(returnValues).forEach((value: any) => {
@@ -389,6 +454,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
         })
         return (
           <MessageItem
+            key={Math.random()}
             title={event}
             blockNumber={blockNumber}
             content={values.join('-----')}
@@ -397,11 +463,23 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
       })
     }
 
+    let bio,location,pic,services;
+    if (web3Store.betaCache.has(account) && web3Store.ipfsCache.has(web3Store.betaCache.get(account).metadata)) {
+      const data = web3Store.ipfsCache.get(web3Store.betaCache.get(account).metadata);
+      // const json = JSON.parse(data);
+      // console.log('json, ', data)
+      bio = data.bio || '';
+      location = data.location || '';
+      pic = data.pic || '';
+      services = data.services || [];
+      // this.makePreview(pic);
+    }
+
     return (
       <>
         <DashboardLeft>
           <DashboardLink active={active === 0} id={0} onClick={this.setActive}>
-            Details
+            Profile
           </DashboardLink>
           <DashboardLink active={active === 1} id={1} onClick={this.setActive}>
             Inbox
@@ -411,17 +489,22 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
           {
             active === 0 &&
               <>
-              <h1>Details</h1>
+              {/* <h1>Details</h1> */}
               <DisplayContainer>
                 <Subject upload={this.upload} preview={this.state.preview}/>
                 <InputDisplay>
+                  <h4>Your Bio:</h4>
                   <BioInput
                     name="bio"
                     onChange={this.inputUpdate}
+                    rows={7}
+                    defaultValue={bio}
                   />
+                  <h4>Location:</h4>
                   <LocationInput
                     name="location"
                     onChange={this.inputUpdate}
+                    defaultValue={location}
                   />
                 </InputDisplay>
               </DisplayContainer>
@@ -438,18 +521,21 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
                 <DisplayHeading>
                   What will you offer?
                 </DisplayHeading>
-                {
-                  this.state.serviceEdit ?
-                    <ServiceBox>
-                      <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate}/>
-                      <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate}/>
-                      <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate}/>  
-                    </ServiceBox>
-                    : ''
-                }
-                <AddServiceButton onClick={() => this.setState({ serviceEdit: true })}>
-                  +
-                </AddServiceButton>
+                <br/>
+                <div style={{ display: 'flex', width: '100%'}}>
+                  {
+                    this.state.serviceEdit ?
+                      <ServiceBox>
+                        <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate} placeholder="title" defaultValue={services[0].title}/>
+                        <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate} placeholder="description" defaultValue={services[0].description}/>
+                        <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate} placeholder="price" defaultValue={services[0].price}/>  
+                      </ServiceBox>
+                      : ''
+                  }
+                  <AddServiceButton onClick={() => this.setState({ serviceEdit: true })}>
+                    +
+                  </AddServiceButton>
+                </div>
               </DisplayContainer>
               <CommitButton onClick={this.commit}>
                 Commit to Ethereum
@@ -462,22 +548,27 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
             ||
             active == 1 &&
               <>
-              <h1>Inbox</h1>
-              <div style={{ height: '100%', width: '100%', background: 'maroon' }}>
-                {vari}
+              {/* <h1>Inbox</h1> */}
+              <div style={{ height: '100%', width: '100%'}}>
+                {
+                  this.state.messages.length < 1 ?
+                    <div style={{ height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <RingLoader/>
+                    </div>
+                    :
+                  vari.reverse()
+                }
               </div>
-              {/* {this.state.messages} */}
-              {/* <RingLoader/> */}
               </>
           }
         </DashboardMiddle>
         <DashboardRight>
-          <button onClick={this.upgrade}>Upgrade</button>
+          <UpgradeButton onClick={this.upgrade}>Upgrade</UpgradeButton>
         </DashboardRight>
       </>
     )
   }
-});
+}));
 
 class MessageItem extends React.Component<any,any> {
   state = {
@@ -491,7 +582,7 @@ class MessageItem extends React.Component<any,any> {
   render() {
     return (
       <>
-      <MessageRow>
+      <MessageRow onClick={this.toggleExpand}>
         <MessageTitle>
           {this.props.title}
         </MessageTitle>
@@ -502,8 +593,8 @@ class MessageItem extends React.Component<any,any> {
           
         </MessagePreview>
         <MessageButtonContainer>
-          <MessageShowMore onClick={this.toggleExpand}>
-            <FontAwesomeIcon icon={faCaretDown}/>
+          <MessageShowMore>
+            <FontAwesomeIcon icon={this.state.show ? faCaretUp : faCaretDown}/>
           </MessageShowMore>
         </MessageButtonContainer>
       </MessageRow>

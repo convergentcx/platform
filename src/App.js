@@ -24,6 +24,7 @@ import Home from './components/Home';
 import List from './components/List';
 import FAQ from './components/FAQ';
 import Profile from './components/Profile';
+import { number } from 'prop-types';
 
 /// Styled-Components
 // Pallette
@@ -380,7 +381,7 @@ const SpeedDial = withRouter(observer(class SpeedDial extends React.Component {
                 locked && 
                 <Floater component={<SpeedFloater>log in</SpeedFloater>} placement="top" event="hover" eventDelay={0}>
                   <SpeedDialButton 
-                    alt
+                    alt="true"
                     offset={4}
                     onClick={() => {
                       this.setState({ open: false });

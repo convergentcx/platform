@@ -1,11 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { colors } from '../../common';
+
 const FAQContainer = styled.div`
   width: 100%;
   min-height: 100vh;
   padding-top: 80px;
-  background: #05021A;
+  background: ${colors.BgGrey};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -13,7 +15,7 @@ const FAQContainer = styled.div`
 `;
 
 const FAQItem = styled.div`
-  color: #FFF;
+  color: #000;
   max-width: 80%;
   margin-bottom: 80px;
 `;

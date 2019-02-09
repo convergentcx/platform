@@ -726,6 +726,14 @@ const TransactPage = observer(class TransactPage extends React.Component<any,any
 });
 
 const ProfilePage = withRouter(observer(class ProfilePage extends React.Component<any,any> {
+  componentDidMount = async () => {
+    const { web3Store, match: { params: { address } } } = this.props;
+    
+    // Fills data for this profile
+    await web3Store.getAccountDataAndCache(address);
+    await web3Store.ipfsGetDataAndCache(web3Store.betaCache.get(address).metadata);
+  }
+  
   render() {
     const { web3Store, match: { params: { address } } } = this.props;
     if (web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata)) {

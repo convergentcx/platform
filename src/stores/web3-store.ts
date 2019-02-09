@@ -33,6 +33,19 @@ type CbAccount = {
 //   name: string,
 // };
 
+type ServiceObject = {
+  title: string,
+  description: string,
+  price: string,
+}
+
+type IPFSCacheObject = {
+  bio: string,
+  location: string,
+  pic: string,
+  services: ServiceObject[],
+}
+
 type NewBetaCache = {
   metadata: string,
   curServiceIndex: string,
@@ -58,9 +71,8 @@ export default class Web3Store {
   @observable betaCache: Map<string, NewBetaCache> = new Map(); // Will update through polling every 2000 ms
   @observable cbAccounts: Map<string, CbAccount> = new Map(); // Will update any time a new account event comes (contains less data)
   @observable convergentBeta = null; // The contract instance
-  @observable convergentBeta2 = null; // The contract instance
   @observable ipfs: any = null;   // Global IPFS object
-  @observable ipfsCache: Map<string, AccountData> = new Map();
+  @observable ipfsCache: Map<string, IPFSCacheObject> = new Map();
   @observable ipfsLock: boolean = false;  // Locks for IPFS
   @observable readonly = false;  // App starts in readonly mode
   @observable toaster: any = null;  // The toast manager
@@ -87,10 +99,12 @@ export default class Web3Store {
       filter: {
         creator: this.account,
       },
-    }).on('data', (event: any) => {
+    }).on('data', async (event: any) => {
       const myAccount = event.returnValues.account;
       if (!this.accountsCache.has(myAccount)) {
         this.accountsCache.add(myAccount);
+        await this.getAccountDataAndCache(myAccount);
+        await this.ipfsGetDataAndCache((this.betaCache as any).get(myAccount).metadata);
       }
     });
   }
@@ -99,13 +113,13 @@ export default class Web3Store {
   request = async (address: string, serviceIndex: number, msg: string) => {
     const { abi } = Account2;
     const acc = new this.web3.eth.Contract(abi, address);
-    const price = await (acc as any).methods.services(serviceIndex.toString()).call()
-    console.log(price.toString())
-    const balOf = await (acc as any).methods.balanceOf(this.account).call();
-    console.log('balOf', balOf.toString());
-    const creator = await (acc as any).methods.creator().call();
-    console.log(creator)
-    console.log(serviceIndex)
+    // const price = await (acc as any).methods.services(serviceIndex.toString()).call()
+    // console.log(price.toString())
+    // const balOf = await (acc as any).methods.balanceOf(this.account).call();
+    // console.log('balOf', balOf.toString());
+    // const creator = await (acc as any).methods.creator().call();
+    // console.log(creator)
+    // console.log(serviceIndex)
     // const allow = await (acc as any).methods.approve(address, this.web3.utils.toWei('1000', 'ether')).send({from : this.account})
     console.log(msg)
     const tx = await (acc as any).methods.requestService(
@@ -372,7 +386,7 @@ export default class Web3Store {
         // console.log(address, data)
         this.ipfsGetDataAndCache(data.metadata);
       }
-    }, 30000);
+    }, 60000);
   }
 
   // TODO, when a profile page is viewed, update the data in the background, and poll it more often
@@ -387,7 +401,7 @@ export default class Web3Store {
 
     const contentAddress = b32IntoMhash(obj);
     const raw = await this.ipfs.get(contentAddress);
-    const data: AccountData = JSON.parse(raw[0].content.toString());
+    const data: IPFSCacheObject = JSON.parse(raw[0].content.toString());
 
     // TODO: Cannot cache picture because it will slow down the whole DApp.
     this.ipfsCache = this.ipfsCache.set(metadata, data);
