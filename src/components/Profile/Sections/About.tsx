@@ -12,7 +12,7 @@ const AboutContainer = styled.div`
   margin-top: 5vh;
   ${shadowMixin}
   @media (max-width: 450px) {
-    width: 94%;
+    width: 94vw;
     margin-bottom: 8%;
   }
 `;

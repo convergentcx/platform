@@ -17,6 +17,7 @@ import makeBlockie from 'ethereum-blockies-base64';
 
 import AboutSection from './Sections/About';
 import InvestSection from './Sections/Invest';
+import Transact from './Sections/Transact';
 
 const NavBox = styled.div`
   width: 50%;
@@ -114,6 +115,15 @@ const RequestButton = styled.button`
   }
 `;
 
+const TransactContainer = styled.div`
+  width: 50vw;
+  margin-top: 5vh;
+  height: 90vh;
+  @media (max-width: 450px) {
+    width: 94vw;
+    margin-bottom: 8%;
+  }
+`;
 const TransactPage = observer(class TransactPage extends React.Component<any,any> {
   state = {
     msg: '',
@@ -137,7 +147,7 @@ const TransactPage = observer(class TransactPage extends React.Component<any,any
     }
 
     return (
-      <div style={{ width: '45vw', marginLeft: '5%', marginTop: '5vh', height: '90vh' }}>
+      <TransactContainer>
         <div style={{ display: 'flex', width: '100%' }}>
           <div style={{ fontSize: '64px', width: '60%', textAlign: 'left'}}>
             {title}
@@ -167,7 +177,7 @@ const TransactPage = observer(class TransactPage extends React.Component<any,any
         <hr/>
         Three
         <hr/> */}
-      </div>
+      </TransactContainer>
     )
   }
 });

@@ -24,9 +24,8 @@ const InvestBox = styled.div`
   margin-top: 5vh;
   ${shadowMixin}
   @media (max-width: 450px) {
-    width: 95vw;
-    margin-left: 5px;
-    height: 100vh;
+    min-width: 94vw;
+    margin-bottom: 8%;
   }
 `;
 
