@@ -29,7 +29,7 @@ const LaunchButton = styled.button`
   ${shadowMixin}
   :hover {
     color: #FFF;
-    background: #000;
+    background: maroon;
     box-shadow: 0 15px 35px rgba(50,50,93,.9), 0 5px 15px rgba(0,0,0,.87);
   }
 `;
@@ -89,17 +89,19 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
   }
 
   mouseClick = () => {
-    if (this.props.web3Store.readonly) {
-      alert('Log in first!');
-      return;
-    }
-    this.setState({ launching: true });
+    alert('Please contribute for early access.');
+    // if (this.props.web3Store.readonly) {
+      // alert('Log in first!');
+      // return;
+    // }
+    // this.setState({ launching: true });
   }
 
   mouseEnter = () => {
     this.setState({ text: '' });
     setTimeout(() => {
-      this.setState({ text: 'LAUNCH' })
+      this.setState({ text: 'LOCKED' })
+      // this.setState({ text: 'LAUNCH' })
     }, 600);
   }
 

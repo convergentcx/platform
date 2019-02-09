@@ -1,4 +1,4 @@
-enum MessageType {
+export enum MessageType {
   Bought = "Bought",
   Contributed = "Contributed",
   MetadataUpdated = "MetadataUpdated",

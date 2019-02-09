@@ -377,6 +377,17 @@ export default class Web3Store {
     this.ipfsCache = this.ipfsCache.set(metadata, data);
   }
 
+  ipfsTransmute = async (metadata: string) => {
+    const obj = {
+      digest: metadata,
+      hashFunction: 18,
+      size: 32,
+    };
+
+    const contentAddress = b32IntoMhash(obj);
+    return contentAddress;
+  }
+
   @action
   getAccountDataAndCache = async (address: string) => {
     // Check for web3

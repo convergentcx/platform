@@ -6,6 +6,15 @@ import { inject } from 'mobx-react';
 
 import makeBlockie from 'ethereum-blockies-base64';
 
+import { MessageType } from '../../lib/messageUtil';
+
+import Web3 from 'web3';
+import { colors } from '../../common';
+import { b32IntoMhash } from '../../lib/ipfs-util';
+
+const { utils } = Web3;
+
+
 const MessageRow = styled.div`
   display: flex;
   flex-flow: row wrap;
@@ -74,6 +83,14 @@ const MessageShowMore = styled.div`
   font-size: 24px;
 `;
 
+const ClickableSpan = styled.span`
+  color: ${colors.CvgTeal};
+  cursor: pointer;
+  :hover {
+    color: ${colors.SoftBlue};
+  } 
+`;
+
 type MessageItemProps = {
   title: string,
   blockNumber: number,
@@ -87,7 +104,7 @@ type MessageItemState = {
 }
 
 const sort = (type: string, content: any) => {
-  if (type === 'ServiceRequested') {
+  if (type === MessageType.ServiceRequested) {
     const { requestor, serviceIndex, message } = content;
     const blockie = makeBlockie(requestor);
     return (
@@ -100,6 +117,64 @@ const sort = (type: string, content: any) => {
           {message}
         </div>
       </div>
+    )
+  }
+  if (type === MessageType.Sold) {
+    const { seller, amount, reserveReturned } = content;
+    const blockie = makeBlockie(seller);
+    return (
+      <div style={{ display: 'flex', width: '100%', height: '100%'}}>
+      <img style={{ width: '60px', height: '60px'}} src={blockie} alt={seller}/>
+      <div style={{ width: '30%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        SOLD {utils.fromWei(amount)} cvg
+      </div>
+      <div style={{ width: '30%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+        RETURNED {utils.fromWei(reserveReturned)} eth
+      </div>
+    </div>
+    )
+  }
+  if (type === MessageType.Bought) {
+    const { buyer, amount, paid } = content;
+    const blockie = makeBlockie(buyer);
+    return (
+      <div style={{ display: 'flex', width: '100%', height: '100%'}}>
+      <img style={{ width: '60px', height: '60px'}} src={blockie} alt={buyer}/>
+      <div style={{ width: '30%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        BOUGHT {utils.fromWei(amount)} cvg
+      </div>
+      <div style={{ width: '30%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+        PAID {utils.fromWei(paid)} eth
+      </div>
+    </div>
+    )
+  }
+  if (type === MessageType.Contributed) {
+    const { buyer, contribution } = content;
+    const blockie = makeBlockie(buyer);
+    return (
+      <div style={{ display: 'flex', width: '100%', height: '100%'}}>
+      <img style={{ width: '60px', height: '60px'}} src={blockie} alt={buyer}/>
+      <div style={{ width: '30%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        CONTRIBUTED {utils.fromWei(contribution)} eth
+      </div>
+    </div>
+    )
+  }
+  if (type === MessageType.MetadataUpdated) {
+    const { newMetadata } = content;
+    const contentAddr = b32IntoMhash({
+      digest: newMetadata,
+      hashFunction: 18,
+      size: 32,
+    });
+    const url = 'https://gateway.ipfs.io/ipfs/' + contentAddr;
+    return (
+      <div style={{ display: 'flex', width: '100%', height: '100%'}}>
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        YOU UPDATED YOUR DATA: &nbsp;<ClickableSpan onClick={() => window.open(url)}>{newMetadata.slice(0,6) + '...' + newMetadata.slice(-4)}</ClickableSpan>
+      </div>
+    </div>
     )
   }
   return JSON.stringify(content);
