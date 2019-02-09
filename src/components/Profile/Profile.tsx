@@ -23,6 +23,8 @@ import { RingLoader } from 'react-spinners';
 
 import MyChart from './Chart';
 
+import AboutSection from './Sections/About';
+
 const NavBox = styled.div`
   width: 260px;
   background-color: #FFF;
@@ -105,20 +107,11 @@ const InvestBox = styled.div`
   height: 90vh;
   margin-top: 5vh;
   ${shadowMixin}
-`;
-
-const AboutContainer = styled.div`
-  background: #FFF;
-  border-radius: 10px;
-  width: 50vw;
-  height: 90vh;
-  margin-top: 5vh;
-  ${shadowMixin}
-`;
-
-const AboutInner = styled.div`
-  padding: 32px;
-  display: flex;
+  @media (max-width: 450px) {
+    width: 95vw;
+    margin-left: 5px;
+    height: 100vh;
+  }
 `;
 
 const TradeScreenTab = styled.button<any>`
@@ -653,19 +646,6 @@ class InvestPage extends React.Component<any, any> {
   }
 };
 
-const AboutPage = inject('ipfsStore')(observer((props: any) => (
- <AboutContainer>
-   <AboutInner>
-    {
-      (props.web3Store.betaCache.has(props.address) && props.web3Store.ipfsCache.get(props.web3Store.betaCache.get(props.address).metadata))
-      ?
-        props.web3Store.ipfsCache.get(props.web3Store.betaCache.get(props.address).metadata).bio.replace(/\\n/g, '\n')
-      : 'User has no description'
-    }
-  </AboutInner>
- </AboutContainer>
-)));
-
 const TransactPage = observer(class TransactPage extends React.Component<any,any> {
   state = {
     msg: '',
@@ -798,7 +778,7 @@ const ProfilePage = withRouter(observer(class ProfilePage extends React.Componen
           </NavBox>
         </Left>
         <Middle>
-          <Route path={`/profile/${address}/about`} render={() => <AboutPage address={address} web3Store={web3Store}/>}/>
+          <Route path={`/profile/${address}/about`} render={() => <AboutSection address={address} web3Store={web3Store}/>}/>
           {/* <Route path='/profile/feed' component={ContentPage}/> */}
           <Route path={`/profile/${address}/invest`} render={() => <InvestPage address={address} web3Store={web3Store}/>}/>
           <Route path={`/profile/${address}/transact`} render={() => <TransactPage address={address} web3Store={web3Store}/>}/>

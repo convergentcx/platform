@@ -6,4 +6,6 @@ export default {
   CvgPurp: '#411999',
   DarkPurp: '#05021A',
   BgGrey: '#E9EDF2',
+  SoftGreen: '#36B37E',
+  SoftBlue: '#2684FF',
 };

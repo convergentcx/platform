@@ -24,7 +24,6 @@ import Home from './components/Home';
 import List from './components/List';
 import FAQ from './components/FAQ';
 import Profile from './components/Profile';
-import { number } from 'prop-types';
 
 /// Styled-Components
 // Pallette
@@ -203,13 +202,14 @@ const SpeedDialButton = styled.div`
 `;
 
 const SpeedFloater = styled.div`
-  height: 60px;
-  width: 100px;
+  height: 50px;
+  width: 90px;
   display: flex;
   justify-content: center;
   align-items: center;
   color: #666;
   background: #FFF;
+  border-radius: 5px;
 `;
 
 // class HoverableContent extends Component {

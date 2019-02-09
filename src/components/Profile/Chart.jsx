@@ -4,26 +4,7 @@ import { RingLoader } from 'react-spinners';
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
-// import {
-//   CrossHair,
-//   XAxis,
-//   YAxis,
-//   AreaSeries,
-//   PatternLines,
-//   HorizontalReferenceLine,
-//   XYChart,
-//   Brush,
-// } from '@data-ui/xy-chart';
-
-// const data = [
-//   {x: 1, buy: 4000, sell: 2400},
-//   {x: 2, buy: 3000, sell: 1398},
-//   {x: 3, buy: 2000, sell: 9800},
-//   {x: 4, buy: 2780, sell: 3908},
-//   {x: 5, buy: 1890, sell: 4800},
-//   {x: 6, buy: 2390, sell: 3800},
-//   {x: 7, buy: 3490, sell: 4300},
-// ];
+import { colors } from '../../common';
 
 const BondingCurve = inject('web3Store')(observer(class BondingCurve extends React.Component {
   render() {
@@ -57,14 +38,14 @@ const BondingCurve = inject('web3Store')(observer(class BondingCurve extends Rea
         {
           data 
           ?
-            <AreaChart width={600} height={400} data={data} margin={{top: 10, right: 30, left: 0, bottom: 10}} style={{ fontSize: '10px' }}>
+            <AreaChart width={600} height={400} data={data} margin={{top: 10, right: 30, left: 0, bottom: 10 }} style={{ fontSize: '10px', color: 'black' }}>
               <CartesianGrid strokeDasharray="5 5"/>
               <XAxis dataKey="x" type={ 'number' } domain={[0, 500]} tickCount={6}/>
               <YAxis/>
               <Tooltip/>
-              <Area type='monotone' dataKey='buy' stackId="1" stroke='green' fill='none' />
-              <Area type='monotone' dataKey='sell' stackId="2" stroke='red' fill='none' />
-              <Area type='monotone' dataKey='reserved' stackId='3' stroke='none' fill='red'/>
+              <Area type='monotone' dataKey='buy' stackId="1" stroke={colors.SoftGreen} fill='none' />
+              <Area type='monotone' dataKey='sell' stackId="2" stroke={colors.SoftBlue} fill='none' />
+              <Area type='monotone' dataKey='reserved' stackId='3' stroke='none' fill={colors.SoftBlue}/>
             </AreaChart>
           :
             <RingLoader/>

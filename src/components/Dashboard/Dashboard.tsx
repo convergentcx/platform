@@ -1,15 +1,13 @@
+import dataUriToBuffer from 'data-uri-to-buffer';
+import makeBlockie from 'ethereum-blockies-base64';
+import { observer, inject } from 'mobx-react';
 import React from 'react';
 import { Link, Route, withRouter } from 'react-router-dom';
-import styled from 'styled-components';
-import { observer, inject } from 'mobx-react';
-import dataUriToBuffer from 'data-uri-to-buffer';
-
-import Subject from '../Dropzone.jsx';
-import makeBlockie from 'ethereum-blockies-base64';
 import { RingLoader } from 'react-spinners';
+import styled from 'styled-components';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons';
+import MessageItem from './MessageItem';
+import Subject from '../Dropzone.jsx';
 
 import { colors } from '../../common';
 
@@ -200,93 +198,38 @@ const AddServiceButton = styled.button`
 //   margin-top: 8px;
 // `;
 
-const MessageRow = styled.div`
-  display: flex;
-  flex-flow: row wrap;
-  width: 100%;
-  height: 40px;
-  background: white;
-  align-items: center;
-  border: solid;
-  border-color: #2684FF;
-  cursor: pointer;
-  transition: 0.4s;
-  :hover {
-    background: rgba(255,255,255, 0.2);
-  }
-`;
-
-const MessageTitle = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 11px;
-  width: 25%;
-  height: 100%;
-`;
-
-const MessageBlockNumber = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 11px;
-  width: 25%;
-  height: 100%;
-`;
-
-const MessagePreview = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 11px;
-  width: 35%;
-  height: 100%;
-`;
-
-const MessageButtonContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 11px;
-  width: 15%;
-  height: 100%;
-`;
-
-const MessageExpand = styled.div<any>`
-  display: ${props => props.show ? 'flex' : 'none'};
-  width: 100%;
-  height: ${props => props.show ? '60px' : '0px'};
-  justify-content: center;
-  align-items: center;
-  font-size: 11px;
-  background: grey;
-`;
-
-const MessageShowMore = styled.button`
-  border: none;
-  background: transparent;
-  color: #2684FF;
-`;
-
 const DashboardRight = styled.div`
   width: 20%;
   height: 100%;
   background: #2299AA;
   display: flex;
   justify-content: center;
+  flex-flow: row wrap;
+  align-items: flex-start;
 `;
 
-const UpgradeButton = styled.button`
-  border: solid;
-  border-color: black;
-  background: transparent;
-  height: 80px;
-  width: 120px;
+// const UpgradeButton = styled.button`
+//   border: solid;
+//   border-color: black;
+//   background: transparent;
+//   height: 80px;
+//   width: 120px;
+//   cursor: pointer;
+//   transition: 0.2s;
+//   :hover {
+//     background: black;
+//     color: white;
+//   }
+// `;
+
+const WidthdrawButton = styled.button`
+  background: #232323;
+  border: none;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.3s;
+  width: 100%;
   :hover {
-    background: black;
-    color: white;
+    background: #696969
   }
 `;
 
@@ -434,7 +377,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
   }
 
   render() {
-    const { web3Store, match: { params: { account} } } = this.props;
+    const { web3Store, match: { params: { account } } } = this.props;
     const { active, messages } = this.state;
 
     let vari: any[] = [];
@@ -444,20 +387,19 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
         const { event, blockNumber, returnValues } = eventObj;
         if (event == 'Transfer' || !event || event == 'Approval') return;
 
-        let values: any[] = [];
+        let values: {} = {};
         Object.keys(returnValues).forEach((value: any) => {
           if (!parseInt(value) && parseInt(value) !== 0) {
-            values.push(
-              `${value} - ${returnValues[value]}`
-            )
+            Object.assign(values, { [value]: returnValues[value] });
           }
         })
         return (
           <MessageItem
+            address={account}
             key={Math.random()}
             title={event}
             blockNumber={blockNumber}
-            content={values.join('-----')}
+            content={values}
           />
         );
       })
@@ -563,48 +505,28 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
           }
         </DashboardMiddle>
         <DashboardRight>
-          <UpgradeButton onClick={this.upgrade}>Upgrade</UpgradeButton>
+          <div style={{ width: '100%', height: '160px', display: 'flex', flexFlow: 'row wrap', padding: '16px', background: '#CCC', margin: '8px' }}>
+            <div style={{ width: '100%' }}>
+              You have 0 contributions to withdraw.
+            </div>
+            <WidthdrawButton>
+              Withdraw
+            </WidthdrawButton>
+          </div>
+          <div style={{ width: '100%', height: '160px', display: 'flex', flexFlow: 'row wrap', padding: '16px', background: '#CCC', margin: '8px' }}>
+            <div style={{ width: '100%' }}>
+              You are on the current release.
+            </div>
+            <WidthdrawButton onClick={this.upgrade}>
+              Upgrade
+            </WidthdrawButton>
+          </div>
+          
         </DashboardRight>
       </>
     )
   }
 }));
-
-class MessageItem extends React.Component<any,any> {
-  state = {
-    show: false,
-  }
-
-  toggleExpand = () => {
-    this.setState({ show: !this.state.show });
-  }
-
-  render() {
-    return (
-      <>
-      <MessageRow onClick={this.toggleExpand}>
-        <MessageTitle>
-          {this.props.title}
-        </MessageTitle>
-        <MessageBlockNumber>
-          {this.props.blockNumber}
-        </MessageBlockNumber>
-        <MessagePreview>
-          
-        </MessagePreview>
-        <MessageButtonContainer>
-          <MessageShowMore>
-            <FontAwesomeIcon icon={this.state.show ? faCaretUp : faCaretDown}/>
-          </MessageShowMore>
-        </MessageButtonContainer>
-      </MessageRow>
-      <MessageExpand show={this.state.show}>
-        {this.props.content}
-      </MessageExpand>
-      </>
-    );
-  }
-}
 
 const DashboardPage = withRouter(observer(
   class DashboardPage extends React.Component<any,any>{
