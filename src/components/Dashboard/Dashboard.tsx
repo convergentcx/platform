@@ -8,7 +8,11 @@ import Subject from '../Dropzone.jsx';
 import makeBlockie from 'ethereum-blockies-base64';
 import { RingLoader } from 'react-spinners';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
+
 import { colors } from '../../common';
+import { render } from 'react-dom';
 
 const DashboardContainer = styled.div`
   width: 100%;
@@ -142,15 +146,15 @@ const DisplayHeading = styled.h4`
   margin-bottom: 8px;
 `;
 
-const AddButton = styled.button`
-  display: flex;
-  width: 32px;
-  height: 32px;
-  border-radius: 16px;
-  justify-content: center;
-  align-items: center;
-  font-weight: 900;
-`;
+// const AddButton = styled.button`
+//   display: flex;
+//   width: 32px;
+//   height: 32px;
+//   border-radius: 16px;
+//   justify-content: center;
+//   align-items: center;
+//   font-weight: 900;
+// `;
 
 const AddServiceButton = styled.button`
   display: flex;
@@ -162,22 +166,22 @@ const AddServiceButton = styled.button`
   font-weight: 900;
 `;
 
-const TagContainer = styled.div`
-  display: flex;
-  width: 100%;
-  flex-flow: row wrap;
-`;
+// const TagContainer = styled.div`
+//   display: flex;
+//   width: 100%;
+//   flex-flow: row wrap;
+// `;
 
-const Tag =styled.button`
-  display: flex;
-  width: 96px;
-  height: 32px;
-  font-size: 10px;
-  border-radius: 16px;
-  justify-content: center;
-  align-items: center;
-  margin-right: 8px;
-`;
+// const Tag =styled.button`
+//   display: flex;
+//   width: 96px;
+//   height: 32px;
+//   font-size: 10px;
+//   border-radius: 16px;
+//   justify-content: center;
+//   align-items: center;
+//   margin-right: 8px;
+// `;
 
 // const PolaroidCard = styled.div`
 //   width: 400px;
@@ -194,6 +198,67 @@ const Tag =styled.button`
 //   height: 30px;
 //   margin-top: 8px;
 // `;
+
+const MessageRow = styled.div`
+  display: flex;
+  flex-flow: row wrap;
+  width: 100%;
+  height: 60px;
+  background: white;
+  align-items: center;
+`;
+
+const MessageTitle = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 11px;
+  width: 25%;
+  height: 100%;
+  background: rgba(0,0,0,0.2);
+`;
+
+const MessageBlockNumber = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 11px;
+  width: 25%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+`;
+
+const MessagePreview = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 11px;
+  width: 35%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+`;
+
+const MessageButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 11px;
+  width: 15%;
+  height: 100%;
+`;
+
+const MessageExpand = styled.div<any>`
+  display: ${props => props.show ? 'flex' : 'none'};
+  width: 100%;
+  height: ${props => props.show ? '60px' : '0px'};
+  background: green;
+  justify-content: center;
+  align-items: center;
+`;
+
+const MessageShowMore = styled.button`
+  
+`;
 
 const DashboardRight = styled.div`
   width: 20%;
@@ -214,6 +279,15 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
     serviceTitle1: '',
     serviceDescription1: '',
     servicePrice1: '',
+    messages: [],
+  }
+
+  componentDidMount = () => {
+    const { web3Store, match: { params: { account } } } = this.props;
+
+    if (web3Store.web3) {
+      web3Store.syncMessages(account).then((res: any) => this.setState({messages: res}));
+    } else { setTimeout(() => web3Store.syncMessages(account).then((res: any) => this.setState({ messages: res})), 3000)}
   }
 
   commit = async () => {
@@ -294,7 +368,32 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
   }
 
   render() {
-    const { active } = this.state;
+    const { active, messages } = this.state;
+
+    let vari: any[] = [];
+
+    if (messages.length) {
+      vari = messages.map((eventObj: any) => {
+        const { event, blockNumber, returnValues } = eventObj;
+        if (event == 'Transfer' || !event) return;
+
+        let values: any[] = [];
+        Object.keys(returnValues).forEach((value: any) => {
+          if (!parseInt(value) && parseInt(value) !== 0) {
+            values.push(
+              `${value} - ${returnValues[value]}`
+            )
+          }
+        })
+        return (
+          <MessageItem
+            title={event}
+            blockNumber={blockNumber}
+            content={values.join('-----')}
+          />
+        );
+      })
+    }
 
     return (
       <>
@@ -362,7 +461,11 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
             active == 1 &&
               <>
               <h1>Inbox</h1>
-              <RingLoader/>
+              <div style={{ height: '100%', width: '100%', background: 'maroon' }}>
+                {vari}
+              </div>
+              {/* {this.state.messages} */}
+              {/* <RingLoader/> */}
               </>
           }
         </DashboardMiddle>
@@ -373,6 +476,42 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(class InteriorDashboa
     )
   }
 });
+
+class MessageItem extends React.Component<any,any> {
+  state = {
+    show: false,
+  }
+
+  toggleExpand = () => {
+    this.setState({ show: !this.state.show });
+  }
+
+  render() {
+    return (
+      <>
+      <MessageRow>
+        <MessageTitle>
+          {this.props.title}
+        </MessageTitle>
+        <MessageBlockNumber>
+          {this.props.blockNumber}
+        </MessageBlockNumber>
+        <MessagePreview>
+          
+        </MessagePreview>
+        <MessageButtonContainer>
+          <MessageShowMore onClick={this.toggleExpand}>
+            <FontAwesomeIcon icon={faCaretDown}/>
+          </MessageShowMore>
+        </MessageButtonContainer>
+      </MessageRow>
+      <MessageExpand show={this.state.show}>
+        {this.props.content}
+      </MessageExpand>
+      </>
+    );
+  }
+}
 
 const DashboardPage = withRouter(observer(
   class DashboardPage extends React.Component<any,any>{

@@ -123,6 +123,18 @@ export default class Web3Store {
   }
 
   @action
+  syncMessages = async (address: string) => {
+    const { abi } = Account2;
+    const acc = new this.web3.eth.Contract(abi, address);
+
+    const messages = await (acc as any).getPastEvents('allEvents', { fromBlock: 0 });
+    return messages; // TODO if logged in, record messages for your accounts for updates lol
+  }
+
+  // @action
+  // sortMessages = async ()
+
+  @action
   sell = async (address: string, howMuch: string) => {
     if (!this.account) {
       throw new Error('No account!!!');
