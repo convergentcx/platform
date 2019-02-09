@@ -20,7 +20,7 @@ import InvestSection from './Sections/Invest';
 import Transact from './Sections/Transact';
 
 const NavBox = styled.div`
-  width: 50%;
+  width: 12em;
   background-color: #FFF;
   position: sticky;
   margin-top: 16%;
@@ -30,7 +30,7 @@ const NavBox = styled.div`
   margin-right: auto;
   ${shadowMixin}
   @media (max-width: 450px) {
-    width: 70%;
+    width: 12em;
     margin-top: 8%;
     top: 8%;
   }
@@ -77,7 +77,7 @@ const ProfileContainer = styled.div`
   max-width: 100%;
   min-height: 100vh;
   background: #E9EDF2;
-`;
+`
 
 const Left = styled.div`
   width: calc(40%);
@@ -212,7 +212,7 @@ const ProfilePage = withRouter(observer(class ProfilePage extends React.Componen
               :
                 <img src={blockie} alt="noneya" style={{ width: '100%', height: '12em', borderRadius: '10px 10px 0 0' }}/>
             }
-            <NavName>{web3Store.betaCache.get(address) ? web3Store.betaCache.get(address).name : '???'}</NavName>
+            <NavName>{web3Store.betaCache.get(address) ? web3Store.betaCache.get(address).name + ` (${web3Store.betaCache.get(address).symbol}) ` : '???'}</NavName>
             <div style={{ fontSize: '10px', paddingLeft: '24px', marginTop: '-12px' }}>
               <FontAwesomeIcon icon={faMapMarkerAlt} size="sm"/>
               &nbsp;
