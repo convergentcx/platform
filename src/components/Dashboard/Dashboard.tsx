@@ -279,8 +279,6 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     let bio,location,pic,services;
     if (web3Store.betaCache.has(account) && web3Store.ipfsCache.has(web3Store.betaCache.get(account).metadata)) {
       const data = web3Store.ipfsCache.get(web3Store.betaCache.get(account).metadata);
-      // const json = JSON.parse(data);
-      // console.log('json, ', data)
       bio = data.bio || '';
       location = data.location || '';
       pic = data.pic || '';
@@ -365,7 +363,6 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
 
   // TODO check implementation of this account on log in and post a comment if an upgrade is needed
   upgrade = () => {
-    // console.log(this.props.match.params.account)
     this.props.web3Store.upgrade(this.props.match.params.account)
   }
 
@@ -374,6 +371,15 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     this.setState({
       preview: `data:image/jpeg;base64,${Buffer.from(pic.data).toString('base64')}`,
     })
+  }
+
+  sendContributions = () => {
+    const { web3Store, match: { params: { account } } } = this.props;
+    if (!web3Store.account) {
+      alert('You must be logged in to do this action!');
+      return;
+    }
+    web3Store.sendContribution(account);
   }
 
   render() {
@@ -408,14 +414,13 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     let bio,location,pic,services;
     if (web3Store.betaCache.has(account) && web3Store.ipfsCache.has(web3Store.betaCache.get(account).metadata)) {
       const data = web3Store.ipfsCache.get(web3Store.betaCache.get(account).metadata);
-      // const json = JSON.parse(data);
-      // console.log('json, ', data)
       bio = data.bio || '';
       location = data.location || '';
       pic = data.pic || '';
       services = data.services || [];
-      // this.makePreview(pic);
     }
+
+    const contributionsWaiting = web3Store.betaCache.has(account) ? web3Store.web3.utils.fromWei(web3Store.betaCache.get(account).contributions).slice(0,6) : '?';
 
     return (
       <>
@@ -431,7 +436,6 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
           {
             active === 0 &&
               <>
-              {/* <h1>Details</h1> */}
               <DisplayContainer>
                 <Subject upload={this.upload} preview={this.state.preview}/>
                 <InputDisplay>
@@ -507,9 +511,9 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
         <DashboardRight>
           <div style={{ width: '100%', height: '160px', display: 'flex', flexFlow: 'row wrap', padding: '16px', background: '#CCC', margin: '8px' }}>
             <div style={{ width: '100%' }}>
-              You have 0 contributions to withdraw.
+              You have {contributionsWaiting} eth in contributions to withdraw.
             </div>
-            <WidthdrawButton>
+            <WidthdrawButton onClick={this.sendContributions}>
               Withdraw
             </WidthdrawButton>
           </div>

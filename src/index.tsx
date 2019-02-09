@@ -13,7 +13,7 @@ import { ToastProvider } from 'react-toast-notifications';
 
 ReactDOM.render(
   <Router>
-    <ToastProvider placement="bottom-left" autoDismissTimeout={2000}>
+    <ToastProvider placement="bottom-left" autoDismissTimeout={3000}>
       <Provider ipfsStore ={new IpfsStore()} web3Store={new Web3Store()}>
         <App/>
       </Provider>

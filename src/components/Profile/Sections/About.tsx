@@ -11,11 +11,16 @@ const AboutContainer = styled.div`
   height: 90vh;
   margin-top: 5vh;
   ${shadowMixin}
+  @media (max-width: 450px) {
+    width: 94%;
+    margin-bottom: 8%;
+  }
 `;
 
 const AboutInner = styled.div`
   padding: 32px;
   display: flex;
+  text-align: left;
 `;
 
 type AboutSectionProps = {

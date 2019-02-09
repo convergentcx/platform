@@ -8,4 +8,5 @@ export default {
   BgGrey: '#E9EDF2',
   SoftGreen: '#36B37E',
   SoftBlue: '#2684FF',
+  Orange: '#FF5630'
 };

@@ -2,36 +2,17 @@ import { observable, action } from 'mobx';
 import ipfsClient from 'ipfs-http-client';
 import Web3 from 'web3';
 
-// import Account from '../assets/artifacts/Account.json';
 import ConvergentBeta2 from '../assets/artifacts2/ConvergentBeta.json';
 import Account2 from '../assets/artifacts2/Account.json';
 
-import Polynomial from '../lib/polynomial';
-// import { toDecimal } from '../lib/util';
-
 import { AccountData, b32IntoMhash } from '../lib/ipfs-util';
 
-// const CB_PROXY_ADDR = "0x93bd15db2cbb045604d5df11f037203a1b57c23a";
 const CB2_PROXY_ADDR = "0x130ce5d82ae4174a0284027f9ec1d0dcaa748ced";
 
 type CbAccount = {
   creator: string,
   blockNumber: number,
 };
-
-// type BetaCacheObject = {
-//   price: string,
-//   marketCap: string,
-//   rr: string,
-//   vs: string,
-//   vr: string,
-//   ts: string,
-//   symbol: string,
-//   metadata: string,
-//   poly: Polynomial,
-//   heldContributions: string,
-//   name: string,
-// };
 
 type ServiceObject = {
   title: string,
@@ -113,15 +94,6 @@ export default class Web3Store {
   request = async (address: string, serviceIndex: number, msg: string) => {
     const { abi } = Account2;
     const acc = new this.web3.eth.Contract(abi, address);
-    // const price = await (acc as any).methods.services(serviceIndex.toString()).call()
-    // console.log(price.toString())
-    // const balOf = await (acc as any).methods.balanceOf(this.account).call();
-    // console.log('balOf', balOf.toString());
-    // const creator = await (acc as any).methods.creator().call();
-    // console.log(creator)
-    // console.log(serviceIndex)
-    // const allow = await (acc as any).methods.approve(address, this.web3.utils.toWei('1000', 'ether')).send({from : this.account})
-    console.log(msg)
     const tx = await (acc as any).methods.requestService(
       serviceIndex.toString(),
       msg,
@@ -157,8 +129,14 @@ export default class Web3Store {
 
     const { abi } = Account2;
     const acc = new this.web3.eth.Contract(abi, address);
-    const ret = await acc.methods.sendContributions().send({ from: this.account });
-    // console.log(ret)
+    const ret = await acc.methods.withdraw().send({ from: this.account });
+    this.handleTransactionReturn(ret);
+  }
+
+  handleTransactionReturn = (tx: any) => {
+    tx.receipt.status === true
+      ? this.toaster.add(`Transaction succeeded! Check it out here ${tx.transactionHash}`, { appearance: 'success', autoDismiss: true })
+      : this.toaster.add('Transaction failed!', { appearance: 'error', autoDismiss: true });
   }
 
   @action
@@ -179,9 +157,6 @@ export default class Web3Store {
     return messages; // TODO if logged in, record messages for your accounts for updates lol
   }
 
-  // @action
-  // sortMessages = async ()
-
   @action
   sell = async (address: string, howMuch: string) => {
     if (!this.account) {
@@ -197,6 +172,7 @@ export default class Web3Store {
       from: this.account,
       gasPrice: this.web3.utils.toWei('2', 'gwei'),
     });
+    this.handleTransactionReturn(tx);
     // console.log(ret)
   }
 
@@ -223,6 +199,7 @@ export default class Web3Store {
       value: cost,
       gasPrice: this.web3.utils.toWei('2', 'gwei'),
     });
+    this.handleTransactionReturn(ret);
     // console.log(ret)
   }
 
@@ -241,7 +218,7 @@ export default class Web3Store {
     );
 
     this.ipfs = ipfs;
-    this.toaster.add('IPFS initialized!', {appearance: 'info'})
+    this.toaster.add('IPFS initialized!', {appearance: 'info', autoDismiss: true})
     // console.log('IPFS connected');
   }
 
@@ -257,10 +234,9 @@ export default class Web3Store {
   @action
   initReadonly = async () => {
     const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws/v3/7121204aac9a45dcb9c2cc825fb85159'));
-    // console.log('READONLY MODE')
     this.readonly = true;
     this.web3 = web3;
-    this.toaster.add(`App started in READONLY mode using Infura node. You will not be able to interact with Ethereum until you log in.`, {appearance: 'info'})
+    this.toaster.add(`App started in READONLY mode using Infura node. You will not be able to interact with Ethereum until you log in.`, {appearance: 'error', autoDismiss: true})
     await this.instantiateConvergentBeta();
   }
 
@@ -271,8 +247,6 @@ export default class Web3Store {
 
   @action
   turnOnWeb3 = async () => {
-    // console.log('enabling web3');
-    // console.log(window);
     const _window = window as any;
     if (_window.ethereum) {
       // modern web3 provider
@@ -283,12 +257,9 @@ export default class Web3Store {
     } else if (_window.web3) {
       _window.web3 = new Web3(_window.web3.currentProvider);
     } else {
-      // console.log('Browser is not ethereum enabled');
-      // console.log('falling back');
       return;
     }
     const netId = await _window.web3.eth.net.getId();
-    // console.log('netId', netId)
     if (netId !== 4) {
       _window.alert('Please tune in on the Rinkeby test network!');
       return;
@@ -296,10 +267,9 @@ export default class Web3Store {
     this.updateWeb3(_window.web3);
     this.readonly = false;
     await this.updateAccount();
-    this.toaster.add(`Logged in to ${this.account.slice(0,10) + '...' + this.account.slice(-4)}. You may now interact with Ethereum.`, {appearance: 'success'})
+    this.toaster.add(`Logged in to ${this.account.slice(0,10) + '...' + this.account.slice(-4)}. You may now interact with Ethereum.`, {appearance: 'success', autoDismiss: true})
     // await this.signWelcome();
     await this.instantiateConvergentBeta();
-    // console.log('enabled');
   }
 
   @action
@@ -475,6 +445,7 @@ export default class Web3Store {
         this.betaCache.set(address, newEntry);
       }
     });
+    this.ipfsGetDataAndCache(metadata);
   }
 
   // TODO: why is this function here?

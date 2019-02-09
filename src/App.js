@@ -25,6 +25,8 @@ import List from './components/List';
 import FAQ from './components/FAQ';
 import Profile from './components/Profile';
 
+import { colors, shadowMixin } from './common';
+
 /// Styled-Components
 // Pallette
 // const colors = {
@@ -37,7 +39,7 @@ import Profile from './components/Profile';
 // };
 
 // Mixins
-const shadowMixin = 'box-shadow: 0 15px 35px rgba(50,50,93,.1), 0 5px 15px rgba(0,0,0,.07);'
+// const shadowMixin = 'box-shadow: 0 15px 35px rgba(50,50,93,.1), 0 5px 15px rgba(0,0,0,.07);'
 
 // Components
 /*
@@ -167,13 +169,14 @@ const SpeedDialAnchor = observer(styled.div`
   border-radius: 28px;
   ${shadowMixin}
   background: ${props => props.open ? '#232323' : '#000'};
-  color: ${props => props.locked ? (props.readonly ? '#2684FF' : 'red') : '#36B37E'};
+  color: ${props => props.locked ? (props.readonly ? colors.SoftBlue : 'red') : colors.SoftGreen};
   display: flex;
   justify-content: center;
   align-items: center;
   transition: 0.3s;
   font-size: 24px;
   font-weight: 900;
+  z-index: 10;
   :hover {
     color: ;
     background: #232323;
@@ -189,14 +192,14 @@ const SpeedDialButton = styled.div`
   right: calc(2% + 4px);
   border-radius: 24px;
   ${shadowMixin}
-  background: ${props => props.alt ? '#36B37E' : '#0044DD'};
-  color: #CCC;
+  background: ${props => props.alt ? '#36B37E' : colors.SoftBlue};
+  color: #FFF;
   display: flex;
   justify-content: center;
   align-items: center;
   transition: 0.3s;
   :hover {
-    background: ${props => props.alt ? '#008800' : '#2424D0'};
+    background: ${props => props.alt ? '#0d4f02' : colors.CvgTeal};
     color: #FFF;
   }
 `;
