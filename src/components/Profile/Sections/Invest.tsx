@@ -15,6 +15,7 @@ import {
 
 import MyChart from '../Chart';
 import { colors, shadowMixin } from '../../../common';
+import Web3Store from '../../../stores/web3-store';
 
 const InvestBox = styled.div`
   background: #FFF;
@@ -35,10 +36,10 @@ const TradeScreenTab = styled.button<any>`
   background: ${(props: any) => props.active ? '#CCC' : '#FFF'};
   border: none;
   border-radius: 10px 0 0 0;
-  color: ${(props: any) => props.active ? '#2424D0' : '#000'};
+  color: ${(props: any) => props.active ? colors.SoftBlue : '#000'};
   transition: 0.3s;
   :hover {
-    color: #2424D0;
+    color: ${colors.SoftBlue}
   }
 `;
 
@@ -143,7 +144,7 @@ const ConfirmButton = styled.button`
 `;
 
 const InnerDisplay = observer((props: any) => (
-  <div style={{ paddingTop: '32px' }}>
+  <div style={{ paddingTop: '32px'}}>
     {props.title}
     <hr/>
     <div style={{ color: 'black', height: '100%', fontSize: '64px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -151,6 +152,56 @@ const InnerDisplay = observer((props: any) => (
     </div>
   </div>
 ));
+
+const StatsDisplay = inject('web3Store')(observer((props: any) => (
+  <div style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'space-between', padding: '16px', height: 'auto', width: 'auto', background: 'green'}}>
+
+    <div style={{ display: 'flex', flexDirection: 'column', margin: '6px', padding: '2px', borderRadius: '10px', justifyContent: 'flex-start', alignItems: 'center', height: '70px', width: '120px', background: 'silver' }}>
+      <div style={{ fontSize: '11px'}}>
+        Current Price
+      </div>
+      <div style={{ display: 'flex', height: '100%', justifyContent: 'center', alignItems: 'center'}}>
+        {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).curPrice).slice(0,5)} eth
+      </div>
+    </div>
+
+    <div style={{ display: 'flex', flexDirection: 'column', margin: '6px', padding: '2px', borderRadius: '10px', justifyContent: 'flex-start', alignItems: 'center', height: '70px', width: '120px', background: 'silver' }}>
+      <div style={{ fontSize: '11px'}}>
+        Market Cap
+      </div>
+      <div style={{ display: 'flex', height: '100%', justifyContent: 'center', alignItems: 'center'}}>
+        {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).marketCap).slice(0,5)} eth
+      </div>
+    </div>
+
+    <div style={{ display: 'flex', flexDirection: 'column', margin: '6px', padding: '2px', borderRadius: '10px', justifyContent: 'flex-start', alignItems: 'center', height: '70px', width: '120px', background: 'silver' }}>
+      <div style={{ fontSize: '11px'}}>
+        Total Supply
+      </div>
+      <div style={{ display: 'flex', height: '100%', justifyContent: 'center', alignItems: 'center'}}>
+        {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).totalSupply).slice(0,5)} {props.web3Store.betaCache.get(props.address).symbol}
+      </div>
+    </div>
+
+    <div style={{ display: 'flex', flexDirection: 'column', margin: '6px', padding: '2px', borderRadius: '10px', justifyContent: 'flex-start', alignItems: 'center', height: '70px', width: '120px', background: 'silver' }}>
+      <div style={{ fontSize: '11px'}}>
+        Reserve
+      </div>
+      <div style={{ display: 'flex', height: '100%', justifyContent: 'center', alignItems: 'center'}}>
+        {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).reserve).slice(0,5)} eth
+      </div>
+    </div>
+
+    <div style={{ display: 'flex', flexDirection: 'column', margin: '6px', padding: '2px', borderRadius: '10px', justifyContent: 'flex-start', alignItems: 'center', height: '70px', width: '120px', background: 'silver' }}>
+      <div style={{ fontSize: '11px'}}>
+        Contributors
+      </div>
+      <div style={{ display: 'flex', height: '100%', justifyContent: 'center', alignItems: 'center'}}>
+        14
+      </div>
+    </div>
+  </div>
+)));
 
 type TradeScreenProps = {address: string, web3Store: any};
 type TradeScreenState = {active: number, loaded: boolean};
@@ -212,9 +263,9 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
             id={0}
             onClick={() => this.setActive(0)}
           >
-            <FontAwesomeIcon icon={faDollarSign}/>
+            <FontAwesomeIcon icon={faCoins}/>
           </TradeScreenTab>
-          <TradeScreenTab
+          {/* <TradeScreenTab
             active={this.state.active === 1} 
             id ="1"
             onClick={() => this.setActive(1)}
@@ -234,7 +285,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
             onClick={() => this.setActive(3)}
           >
             <FontAwesomeIcon icon={faUserFriends}/>
-          </TradeScreenTab>
+          </TradeScreenTab> */}
           <TradeScreenTab
             active={this.state.active === 4} 
             id ="4"
@@ -248,17 +299,20 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
             (
               active === 0
               &&
-              <InnerDisplay
-                title="Price"
-              >
-                {
+              // <InnerDisplay
+              //   title="Price"
+              // >
+                
                   this.state.loaded
                   ?
-                    `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).curPrice)} eth`
+                    <StatsDisplay address={address}/>
+                    // `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).curPrice)} eth`
                   :
-                    <RingLoader/>
-                }
-              </InnerDisplay>
+                    <div style={{ display: 'flex', height: '100%', width: 'auto', justifyContent: 'center', alignItems: 'cetner'}}>
+                      <RingLoader/>
+                    </div>
+                
+              // </InnerDisplay>
             ) ||
             (
               active === 1

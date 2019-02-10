@@ -10,10 +10,11 @@ import * as serviceWorker from './serviceWorker';
 
 import { ToastProvider } from 'react-toast-notifications';
 
+const placement = window.innerWidth < 480 ? 'top-center' : 'bottom-left';
 
 ReactDOM.render(
   <Router>
-    <ToastProvider placement="bottom-left" autoDismissTimeout={3000}>
+    <ToastProvider placement={placement} autoDismissTimeout={3000}>
       <Provider ipfsStore ={new IpfsStore()} web3Store={new Web3Store()}>
         <App/>
       </Provider>

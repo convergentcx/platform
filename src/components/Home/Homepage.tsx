@@ -2,6 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { colors, shadowMixin } from '../../common/index';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLock } from '@fortawesome/free-solid-svg-icons';
 
 const HomeContainer = styled.div`
   width: 100%;
@@ -45,6 +47,7 @@ type HomePageState = {
   launching: boolean,
   text: string,
   [x: number]: any,
+  mobile: boolean,
 };
 
 class HomePage extends React.Component<{web3Store: any}, HomePageState> {
@@ -53,6 +56,11 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
     accountTicker: null,
     launching: false,
     text: 'CONVERGENT',
+    mobile: false,
+  }
+
+  componentDidMount = () => {
+    this.setState({ mobile: innerWidth <= 480 });
   }
 
   deploy = async () => {
@@ -145,7 +153,13 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
               onMouseEnter={this.mouseEnter}
               onMouseLeave={this.mouseExit}
             >
-              {this.state.text}
+              {
+                this.state.mobile
+                ?
+                  <FontAwesomeIcon icon={faLock} style={{ color: 'white', fontSize: '40px'}}/> 
+                :
+                  this.state.text
+              }
             </LaunchButton>
         }
       </HomeContainer>
