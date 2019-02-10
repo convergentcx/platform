@@ -13,7 +13,7 @@ import { colors } from '../../common';
 
 const DashboardContainer = styled.div`
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   background: ${colors.BgGrey};
   display: flex;
   justify-content: center;
@@ -40,8 +40,8 @@ const AccountLink = styled(Link)`
 
 const DashboardLeft = styled.div`
   width: 20%;
-  height: 100%;
-  background: #005566;
+  height: 100vh;
+  background: ;
 `;
 
 const DashboardLink = styled.div<any>`
@@ -63,11 +63,12 @@ const DashboardLink = styled.div<any>`
 
 const DashboardMiddle = styled.div`
   width: 60%;
-  height: 100%;
-  background: #117788;
+  height: 100vh;
+  background: ;
   align-items: center;
   display: flex;
   flex-direction: column;
+  overflow-y: scroll;
 `;
 
 const DisplayContainer = styled.div<any>`
@@ -200,12 +201,22 @@ const AddServiceButton = styled.button`
 
 const DashboardRight = styled.div`
   width: 20%;
-  height: 100%;
-  background: #2299AA;
+  height: 100vh;
+  background: ;
   display: flex;
   justify-content: center;
-  flex-flow: row wrap;
   align-items: flex-start;
+  flex-flow: row wrap;
+`;
+
+const DashboardRightBox = styled.div`
+  width: 100%;
+  height: 160px;
+  display: flex;
+  flex-flow: row wrap;
+  padding: 16px;
+  background: #CCC;
+  margin: 8px;
 `;
 
 // const UpgradeButton = styled.button`
@@ -509,22 +520,22 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
           }
         </DashboardMiddle>
         <DashboardRight>
-          <div style={{ width: '100%', height: '160px', display: 'flex', flexFlow: 'row wrap', padding: '16px', background: '#CCC', margin: '8px' }}>
+          <DashboardRightBox>
             <div style={{ width: '100%' }}>
               You have {contributionsWaiting} eth in contributions to withdraw.
             </div>
             <WidthdrawButton onClick={this.sendContributions}>
               Withdraw
             </WidthdrawButton>
-          </div>
-          <div style={{ width: '100%', height: '160px', display: 'flex', flexFlow: 'row wrap', padding: '16px', background: '#CCC', margin: '8px' }}>
+          </DashboardRightBox>
+          <DashboardRightBox>
             <div style={{ width: '100%' }}>
               You are on the current release.
             </div>
             <WidthdrawButton onClick={this.upgrade}>
               Upgrade
             </WidthdrawButton>
-          </div>
+          </DashboardRightBox>
           
         </DashboardRight>
       </>

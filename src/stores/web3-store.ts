@@ -35,6 +35,7 @@ type NewBetaCache = {
   curPrice: string,
   marketCap: string,
   totalSupply: string,
+  contributorCount: number,
   rAsset: string,
   beneficiary: string,
   slopeN: string,
@@ -58,7 +59,7 @@ export default class Web3Store {
   @observable readonly = false;  // App starts in readonly mode
   @observable toaster: any = null;  // The toast manager
   @observable web3: any|null = null;  // Global Web3 object
-  // @observable test: string = 'not updated';
+  @observable balancesCache: Map<string, string> = new Map(); // Keeps map of address => account balance
 
   @action
   updateAccount = async () => {
@@ -412,6 +413,7 @@ export default class Web3Store {
     const curPrice = await (acc as any).methods.currentPrice().call()
     const marketCap = await (acc as any).methods.marketCap().call();
     const totalSupply = await (acc as any).methods.totalSupply().call();
+    const contributorCount = await this.getContributorCount(address);
 
     // These SHOULD never change (at least in mvp)
     const rAsset = await (acc as any).methods.reserveAsset().call();
@@ -424,6 +426,8 @@ export default class Web3Store {
     const symbol = await (acc as any).methods.symbol().call();
     const name = await (acc as any).methods.name().call();
 
+    // await this.getBalance(this.account);
+
     this.betaCache.set(
       address,
       {
@@ -434,6 +438,7 @@ export default class Web3Store {
         curPrice,
         marketCap,
         totalSupply,
+        contributorCount,
         rAsset,
         beneficiary,
         slopeN,
@@ -457,6 +462,33 @@ export default class Web3Store {
       }
     });
     this.ipfsGetDataAndCache(metadata);
+  }
+
+  @action
+  getContributorCount = async (address: string) => {
+    const { abi } = Account2;
+    const acc = new this.web3.eth.Contract(abi, address);
+    const buyEvents = await (acc as any).getPastEvents('Bought', { fromBlock: 0 });
+    let buyers = new Set();
+    buyEvents.forEach((event: any) => {
+      const { buyer } = event.returnValues;
+      if (!buyers.has(buyer)) {
+        buyers.add(buyer);
+      }
+    })
+    return buyers.size;
+  }
+
+  @action
+  getBalance = async (address: string) => {
+    if (!this.account) {
+      this.balancesCache.set(address, '0');
+      return;
+    }
+    const { abi } = Account2;
+    const acc = new this.web3.eth.Contract(abi, address);
+    const bal = await acc.methods.balanceOf(this.account).call();
+    this.balancesCache.set(address, bal);
   }
 
   // TODO: why is this function here?

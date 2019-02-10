@@ -47,6 +47,9 @@ const TradeScreenContent = styled.div`
   width: 100%;
   height: 92%;
   background: rgba(0,0,0,0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 type ButtonProps = {exiting: boolean, investing: boolean};
@@ -143,6 +146,44 @@ const ConfirmButton = styled.button`
   }
 `;
 
+const StatsContainer = styled.div`
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+  padding: 0;
+  height: auto;
+  width: auto;
+  align-self: flex-start;
+`;
+
+const StatsBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin: 32px;
+  padding: 2px;
+  padding-top: 8px;
+  border-radius: 10px;
+  justify-content: flex-start;
+  align-items: center;
+  height: 70px;
+  width: 120px;
+  background: #EEE;
+  @media (max-width: 480px) {
+    margin: 8px;
+  }
+`;
+
+const StatsBoxHeader = styled.div`
+  font-size: 11px;
+`;
+
+const StatsBoxContent = styled.div`
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+`;
+
 const InnerDisplay = observer((props: any) => (
   <div style={{ paddingTop: '32px'}}>
     {props.title}
@@ -154,53 +195,64 @@ const InnerDisplay = observer((props: any) => (
 ));
 
 const StatsDisplay = inject('web3Store')(observer((props: any) => (
-  <div style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'space-between', padding: '16px', height: 'auto', width: 'auto', background: 'green'}}>
+  <StatsContainer>
 
-    <div style={{ display: 'flex', flexDirection: 'column', margin: '6px', padding: '2px', borderRadius: '10px', justifyContent: 'flex-start', alignItems: 'center', height: '70px', width: '120px', background: 'silver' }}>
-      <div style={{ fontSize: '11px'}}>
+    <StatsBox>
+      <StatsBoxHeader>
         Current Price
-      </div>
-      <div style={{ display: 'flex', height: '100%', justifyContent: 'center', alignItems: 'center'}}>
+      </StatsBoxHeader>
+      <StatsBoxContent>
         {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).curPrice).slice(0,5)} eth
-      </div>
-    </div>
+      </StatsBoxContent>
+    </StatsBox>
 
-    <div style={{ display: 'flex', flexDirection: 'column', margin: '6px', padding: '2px', borderRadius: '10px', justifyContent: 'flex-start', alignItems: 'center', height: '70px', width: '120px', background: 'silver' }}>
-      <div style={{ fontSize: '11px'}}>
+    <StatsBox>
+      <StatsBoxHeader>
         Market Cap
-      </div>
-      <div style={{ display: 'flex', height: '100%', justifyContent: 'center', alignItems: 'center'}}>
+      </StatsBoxHeader>
+      <StatsBoxContent>
         {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).marketCap).slice(0,5)} eth
-      </div>
-    </div>
+      </StatsBoxContent>
+    </StatsBox>
 
-    <div style={{ display: 'flex', flexDirection: 'column', margin: '6px', padding: '2px', borderRadius: '10px', justifyContent: 'flex-start', alignItems: 'center', height: '70px', width: '120px', background: 'silver' }}>
-      <div style={{ fontSize: '11px'}}>
+    <StatsBox>
+      <StatsBoxHeader>
         Total Supply
-      </div>
-      <div style={{ display: 'flex', height: '100%', justifyContent: 'center', alignItems: 'center'}}>
+      </StatsBoxHeader>
+      <StatsBoxContent>
         {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).totalSupply).slice(0,5)} {props.web3Store.betaCache.get(props.address).symbol}
-      </div>
-    </div>
+      </StatsBoxContent>
+    </StatsBox>
 
-    <div style={{ display: 'flex', flexDirection: 'column', margin: '6px', padding: '2px', borderRadius: '10px', justifyContent: 'flex-start', alignItems: 'center', height: '70px', width: '120px', background: 'silver' }}>
-      <div style={{ fontSize: '11px'}}>
+    <StatsBox>
+      <StatsBoxHeader>
         Reserve
-      </div>
-      <div style={{ display: 'flex', height: '100%', justifyContent: 'center', alignItems: 'center'}}>
+      </StatsBoxHeader>
+      <StatsBoxContent>
         {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).reserve).slice(0,5)} eth
-      </div>
-    </div>
+      </StatsBoxContent>
+    </StatsBox>
 
-    <div style={{ display: 'flex', flexDirection: 'column', margin: '6px', padding: '2px', borderRadius: '10px', justifyContent: 'flex-start', alignItems: 'center', height: '70px', width: '120px', background: 'silver' }}>
-      <div style={{ fontSize: '11px'}}>
+    <StatsBox>
+      <StatsBoxHeader>
         Contributors
-      </div>
-      <div style={{ display: 'flex', height: '100%', justifyContent: 'center', alignItems: 'center'}}>
-        14
-      </div>
-    </div>
-  </div>
+      </StatsBoxHeader>
+      <StatsBoxContent>
+        {props.web3Store.betaCache.get(props.address).contributorCount}
+      </StatsBoxContent>
+    </StatsBox>
+{/* 
+    <StatsBox>
+      <StatsBoxHeader>
+        You Own
+      </StatsBoxHeader>
+      <StatsBoxContent>
+        {props.web3Store.web3.utils.fromWei(props.web3Store.balancesCache.get(props.address)).slice(0,5)} {props.web3Store.betaCache.get(props.address).symbol}
+      </StatsBoxContent>
+    </StatsBox> */}
+
+    {/* <button onClick={() => props.web3Store.getContributorCount(props.address)}>Click</button> */}
+  </StatsContainer>
 )));
 
 type TradeScreenProps = {address: string, web3Store: any};
@@ -303,15 +355,13 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
               //   title="Price"
               // >
                 
-                  this.state.loaded
+                  (this.state.loaded
                   ?
                     <StatsDisplay address={address}/>
                     // `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).curPrice)} eth`
                   :
-                    <div style={{ display: 'flex', height: '100%', width: 'auto', justifyContent: 'center', alignItems: 'cetner'}}>
-                      <RingLoader/>
-                    </div>
-                
+                    <RingLoader/>
+                  )
               // </InnerDisplay>
             ) ||
             (
@@ -367,11 +417,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
             (
               active === 4
               &&
-              <InnerDisplay
-                title="Bonding Curve"
-              >
-                <MyChart address={address}/>
-              </InnerDisplay>
+              <MyChart address={address}/>
             )
           }
         </TradeScreenContent>

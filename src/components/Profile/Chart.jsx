@@ -2,7 +2,7 @@ import React from 'react';
 import { inject, observer } from 'mobx-react';
 import { RingLoader } from 'react-spinners';
 
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 import { colors } from '../../common';
 
@@ -38,15 +38,17 @@ const BondingCurve = inject('web3Store')(observer(class BondingCurve extends Rea
         {
           data 
           ?
-            <AreaChart width={600} height={400} data={data} margin={{top: 10, right: 30, left: 0, bottom: 10 }} style={{ fontSize: '10px', color: 'black' }}>
-              <CartesianGrid strokeDasharray="5 5"/>
-              <XAxis dataKey="x" type={ 'number' } domain={[0, 500]} tickCount={6}/>
-              <YAxis/>
-              <Tooltip/>
-              <Area type='monotone' dataKey='buy' stackId="1" stroke={colors.SoftGreen} fill='none' />
-              <Area type='monotone' dataKey='sell' stackId="2" stroke={colors.SoftBlue} fill='none' />
-              <Area type='monotone' dataKey='reserved' stackId='3' stroke='none' fill={colors.SoftBlue}/>
-            </AreaChart>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data} margin={{top: 20, right: 30, left: -10, bottom: 10 }} style={{ fontSize: '10px', color: 'black' }}>
+                <CartesianGrid strokeDasharray="5 5" stroke="grey"/>
+                <XAxis dataKey="x" type={ 'number' } domain={[0, 500]} tickCount={6}/>
+                <YAxis/>
+                <Tooltip/>
+                <Area type='monotone' dataKey='buy' stackId="1" stroke={colors.SoftGreen} fill='none' />
+                <Area type='monotone' dataKey='sell' stackId="2" stroke={colors.SoftBlue} fill='none' />
+                <Area type='monotone' dataKey='reserved' stackId='3' stroke='none' fill={colors.SoftBlue}/>
+              </AreaChart>
+            </ResponsiveContainer>
           :
             <RingLoader/>
         }
