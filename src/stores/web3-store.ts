@@ -135,8 +135,11 @@ export default class Web3Store {
   }
 
   handleTransactionReturn = (tx: any) => {
-    tx.receipt.status === true
-      ? this.toaster.add(`Transaction succeeded! Check it out here ${tx.transactionHash}`, { appearance: 'success', autoDismiss: true })
+    // console.log(tx)
+    tx.status === true
+      ? this.toaster.add(`Transaction succeeded! Check it out here ${
+        tx.transactionHash.slice(0,5) + '...' + tx.transactionHash.slice(-4)
+      }`, { appearance: 'success', autoDismiss: true })
       : this.toaster.add('Transaction failed!', { appearance: 'error', autoDismiss: true });
   }
 
@@ -426,7 +429,9 @@ export default class Web3Store {
     const symbol = await (acc as any).methods.symbol().call();
     const name = await (acc as any).methods.name().call();
 
-    // await this.getBalance(this.account);
+    // if (this.account) {
+    //   this.getBalance(this.account);
+    // }
 
     this.betaCache.set(
       address,
@@ -481,14 +486,13 @@ export default class Web3Store {
 
   @action
   getBalance = async (address: string) => {
-    if (!this.account) {
-      this.balancesCache.set(address, '0');
-      return;
-    }
+    if (!this.account) { return; }
+    // if (this.balancesCache.has())
     const { abi } = Account2;
     const acc = new this.web3.eth.Contract(abi, address);
     const bal = await acc.methods.balanceOf(this.account).call();
-    this.balancesCache.set(address, bal);
+    this.balancesCache.set(address, bal.toString());
+    // console.log(bal.toString());
   }
 
   // TODO: why is this function here?

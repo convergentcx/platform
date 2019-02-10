@@ -14,7 +14,7 @@ import { colors } from '../../common';
 const DashboardContainer = styled.div`
   width: 100%;
   min-height: 100vh;
-  background: ${colors.BgGrey};
+  background: ${colors.CvgTeal};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -69,6 +69,7 @@ const DashboardMiddle = styled.div`
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
+  justify-content: center;
 `;
 
 const DisplayContainer = styled.div<any>`

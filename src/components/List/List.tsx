@@ -46,10 +46,12 @@ const List = (props: any) => {
 
       let MC = '???'
       let name = '???'
+      let curPrice = '???'
       if (props.web3Store.betaCache.has(account)) {
         MC = props.web3Store.web3.utils.fromWei(
           Math.floor(props.web3Store.betaCache.get(account).marketCap).toString()
         ).slice(0,5);
+        curPrice = props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(account).curPrice).slice(0,5)
         name = props.web3Store.betaCache.get(account).name;
       }
 
@@ -59,6 +61,7 @@ const List = (props: any) => {
           {/* <br/>
           Creator: {obj.creator} */}
           <div>{name}</div>
+          <div>{curPrice}</div>
           <div>{MC}</div>
           {obj.blockNumber}
         </ListItem>

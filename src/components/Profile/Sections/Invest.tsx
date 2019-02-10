@@ -241,6 +241,19 @@ const StatsDisplay = inject('web3Store')(observer((props: any) => (
         {props.web3Store.betaCache.get(props.address).contributorCount}
       </StatsBoxContent>
     </StatsBox>
+
+    {
+      (props.web3Store.account && props.web3Store.balancesCache.has(props.address))
+      &&
+        <StatsBox>
+          <StatsBoxHeader>
+            You Own
+          </StatsBoxHeader>
+          <StatsBoxContent>
+            {props.web3Store.web3.utils.fromWei(props.web3Store.balancesCache.get(props.address)).slice(0,5)} {props.web3Store.betaCache.get(props.address).symbol}
+          </StatsBoxContent>
+        </StatsBox>
+    }
 {/* 
     <StatsBox>
       <StatsBoxHeader>
@@ -251,7 +264,7 @@ const StatsDisplay = inject('web3Store')(observer((props: any) => (
       </StatsBoxContent>
     </StatsBox> */}
 
-    {/* <button onClick={() => props.web3Store.getContributorCount(props.address)}>Click</button> */}
+    <button onClick={() => props.web3Store.getBalance(props.address)}>Check Balance</button>
   </StatsContainer>
 )));
 
