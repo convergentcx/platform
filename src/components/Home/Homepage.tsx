@@ -69,7 +69,7 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
       alert('Log in first!');
     }
     const randBytes32 = web3Store.web3.utils.randomHex(32);
-    const tx = await web3Store.convergentBeta2.methods.newAccount(
+    const tx = await web3Store.convergentBeta.methods.newAccount(
       "0x0000000000000000000000000000000000000000", // reserve asset
       "1", // slopeN
       "1000", // slopeD
@@ -97,19 +97,19 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
   }
 
   mouseClick = () => {
-    alert('Please contribute for early access.');
-    // if (this.props.web3Store.readonly) {
-      // alert('Log in first!');
-      // return;
-    // }
-    // this.setState({ launching: true });
+    // alert('Please contribute for early access.');
+    if (this.props.web3Store.readonly) {
+      alert('Log in first!');
+      return;
+    }
+    this.setState({ launching: true });
   }
 
   mouseEnter = () => {
     this.setState({ text: '' });
     setTimeout(() => {
-      this.setState({ text: 'LOCKED' })
-      // this.setState({ text: 'LAUNCH' })
+      // this.setState({ text: 'LOCKED' })
+      this.setState({ text: 'LAUNCH' })
     }, 600);
   }
 

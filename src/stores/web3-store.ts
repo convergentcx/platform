@@ -234,7 +234,7 @@ export default class Web3Store {
     this.ipfsLock = false;
     return ipfsHash;
   }
-
+  
   @action
   initReadonly = async () => {
     const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws/v3/7121204aac9a45dcb9c2cc825fb85159'));

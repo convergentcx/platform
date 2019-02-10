@@ -192,9 +192,9 @@ const ProfilePage = withRouter(observer(class ProfilePage extends React.Componen
   
   render() {
     const { web3Store, match: { params: { address } } } = this.props;
-    if (web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata)) {
-      console.log(Buffer.from(web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata).pic.data).toString('base64'));
-    }
+    // if (web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata)) {
+      // console.log(Buffer.from(web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata).pic.data).toString('base64'));
+    // }
 
     const blockie = makeBlockie(address);
 
