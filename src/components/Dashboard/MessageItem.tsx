@@ -12,7 +12,7 @@ import Web3 from 'web3';
 import { colors } from '../../common';
 import { b32IntoMhash } from '../../lib/ipfs-util';
 
-const { utils } = Web3;
+const { utils } = require('web3');
 
 
 const MessageRow = styled.div`

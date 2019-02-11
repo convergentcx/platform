@@ -44,7 +44,7 @@ const BondingCurve = inject('web3Store')(observer(class BondingCurve extends Rea
                 <XAxis dataKey="x" type={ 'number' } domain={[0, 500]} tickCount={6}/>
                 <YAxis/>
                 <Tooltip/>
-                <Area type='monotone' dataKey='buy' stackId="1" stroke={colors.SoftGreen} fill='none' />
+                <Area type='monotone' dataKey='buy' stackId="1" stroke={colors.SoftGreenDark} fill='none' />
                 <Area type='monotone' dataKey='sell' stackId="2" stroke={colors.SoftBlue} fill='none' />
                 <Area type='monotone' dataKey='reserved' stackId='3' stroke='none' fill={colors.SoftBlue}/>
               </AreaChart>

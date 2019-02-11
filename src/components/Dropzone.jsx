@@ -28,7 +28,7 @@ const Subject = (props) => (
           {...getRootProps()}
         >
           <input {...getInputProps()}/>
-          {props.preview ? <img src={props.preview} style={{ width: '100%', height: '100%' }}/> : 'Click to upload'}
+          {props.preview ? <img src={props.preview} style={{ width: '100%', height: '100%' }} alt="preview"/> : 'Click to upload'}
         </Container>
       )
     }}
