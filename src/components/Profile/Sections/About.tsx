@@ -39,7 +39,7 @@ const AboutSection = observer((props: AboutSectionProps) => (
        : 'User has no description'
      }
    </AboutInner>
-   </AboutContainer>
+  </AboutContainer>
 ));
 
 export default AboutSection;
