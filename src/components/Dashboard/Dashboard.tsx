@@ -9,21 +9,34 @@ import styled from 'styled-components';
 import MessageItem from './MessageItem';
 import Subject from '../Dropzone.jsx';
 
-import { colors } from '../../common';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import {
+  faEnvelope,
+  faUserAstronaut
+} from '@fortawesome/free-solid-svg-icons';
+
+import { colors, shadowMixin } from '../../common';
 
 const DashboardContainer = styled.div`
   width: 100%;
   min-height: 100vh;
-  background: ${colors.CvgTeal};
+  ${colors.BgGrey};
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+  @media (max-width: 450px) {
+    width: 94vw;
+    margin-bottom: 8%;
+  }
 `;
+
 
 const YourAccounts = observer(styled.div`
   max-width: 80%;
   display: flex;
   flex-direction: column;
+  overflow-y: scroll;
 `);
 
 const AccountLink = styled(Link)`
@@ -39,9 +52,13 @@ const AccountLink = styled(Link)`
 `;
 
 const DashboardLeft = styled.div`
-  width: 20%;
+  width: 15%;
   height: 100vh;
   background: ;
+  max-width: 80%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
 `;
 
 const DashboardLink = styled.div<any>`
@@ -62,14 +79,33 @@ const DashboardLink = styled.div<any>`
 `;
 
 const DashboardMiddle = styled.div`
-  width: 60%;
-  height: 100vh;
-  background: ;
+  // width: 60%;
+  // height: 100vh;
+  background: #FFF;
   align-items: center;
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
   justify-content: center;
+  border-radius: 60px;
+  border-width: 10px;
+  width: 50vw;
+  height: 90vh;
+  margin-top: 5vh;
+  ${shadowMixin};
+`;
+
+const TradeScreenTab = styled.button<any>`
+  border: none;
+  cursor: pointer;
+  width: 20%;
+  background: #FFF;
+  border-radius: 60px 0 0 0;
+  color: ${(props: any) => props.active ? colors.SoftBlue : '#000'};
+  transition: 0.3s;
+  :hover {
+    color: ${colors.SoftBlue}
+  }
 `;
 
 const DisplayContainer = styled.div<any>`
@@ -245,7 +281,7 @@ const WidthdrawButton = styled.button`
   }
 `;
 
-const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class InteriorDashboard extends React.Component<any,any> {
+const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class InteriorDashboard extends React.Component<any, any> {
   state = {
     active: 0,
     bio: '',
@@ -269,8 +305,8 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     // await web3Store.ipfsGetDataAndCache(web3Store.betaCache.get(account).metadata);
     this.getData()
     if (web3Store.web3) {
-      web3Store.syncMessages(account).then((res: any) => this.setState({messages: res}));
-    } else { setTimeout(() => web3Store.syncMessages(account).then((res: any) => this.setState({ messages: res})), 3000)}
+      web3Store.syncMessages(account).then((res: any) => this.setState({ messages: res }));
+    } else { setTimeout(() => web3Store.syncMessages(account).then((res: any) => this.setState({ messages: res })), 3000) }
   }
 
   getData = async () => {
@@ -288,7 +324,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
       ).metadata,
     );
 
-    let bio,location,pic,services;
+    let bio, location, pic, services;
     if (web3Store.betaCache.has(account) && web3Store.ipfsCache.has(web3Store.betaCache.get(account).metadata)) {
       const data = web3Store.ipfsCache.get(web3Store.betaCache.get(account).metadata);
       bio = data.bio || '';
@@ -341,7 +377,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     const b32 = ipfsStore.getBytes32(hash[0].path);
     await web3Store.updateMetadata(this.props.match.params.account, b32);
     await web3Store.addService(this.props.match.params.account, data.services[0].price)
-    
+
   }
 
   inputUpdate = (evt: any) => {
@@ -367,7 +403,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     };
 
     reader.readAsDataURL(files[0]);
-    
+
     this.setState({
       preview: URL.createObjectURL(files[0]),
     })
@@ -423,7 +459,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
       })
     }
 
-    let bio,location,pic,services;
+    let bio, location, pic, services;
     if (web3Store.betaCache.has(account) && web3Store.ipfsCache.has(web3Store.betaCache.get(account).metadata)) {
       const data = web3Store.ipfsCache.get(web3Store.betaCache.get(account).metadata);
       bio = data.bio || '';
@@ -432,41 +468,42 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
       services = data.services || [];
     }
 
-    const contributionsWaiting = web3Store.betaCache.has(account) ? web3Store.web3.utils.fromWei(web3Store.betaCache.get(account).contributions).slice(0,6) : '?';
+    const contributionsWaiting = web3Store.betaCache.has(account) ? web3Store.web3.utils.fromWei(web3Store.betaCache.get(account).contributions).slice(0, 6) : '?';
 
     return (
       <>
-        <DashboardLeft>
-          <DashboardLink active={active === 0} id={0} onClick={this.setActive}>
-            Profile
-          </DashboardLink>
-          <DashboardLink active={active === 1} id={1} onClick={this.setActive}>
-            Inbox
-          </DashboardLink>
-        </DashboardLeft>
         <DashboardMiddle>
-          {
-            active === 0 &&
+
+            <div style={{ width: '100%', height: '8%', paddingLeft: '10px' }}>
+              <TradeScreenTab active={active === 0} id={0} onClick={this.setActive}>
+                <FontAwesomeIcon icon={faUserAstronaut} />
+              </TradeScreenTab>
+              <TradeScreenTab active={active === 1} id={1} onClick={this.setActive}>
+                <FontAwesomeIcon icon={faEnvelope} />
+              </TradeScreenTab>
+            </div>
+            {
+              active === 0 &&
               <>
-              <DisplayContainer>
-                <Subject upload={this.upload} preview={this.state.preview}/>
-                <InputDisplay>
-                  <h4>Your Bio:</h4>
-                  <BioInput
-                    name="bio"
-                    onChange={this.inputUpdate}
-                    rows={7}
-                    defaultValue={bio}
-                  />
-                  <h4>Location:</h4>
-                  <LocationInput
-                    name="location"
-                    onChange={this.inputUpdate}
-                    defaultValue={location}
-                  />
-                </InputDisplay>
-              </DisplayContainer>
-              {/* <DisplayContainer halfsize>
+                <DisplayContainer>
+                  <Subject upload={this.upload} preview={this.state.preview} />
+                  <InputDisplay>
+                    <h4>Your Bio:</h4>
+                    <BioInput
+                      name="bio"
+                      onChange={this.inputUpdate}
+                      rows={7}
+                      defaultValue={bio}
+                    />
+                    <h4>Location:</h4>
+                    <LocationInput
+                      name="location"
+                      onChange={this.inputUpdate}
+                      defaultValue={location}
+                    />
+                  </InputDisplay>
+                </DisplayContainer>
+                {/* <DisplayContainer halfsize>
                 <DisplayHeading>
                   Your tags:
                 </DisplayHeading>
@@ -475,50 +512,50 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
                   <AddButton>+</AddButton>
                 </TagContainer>
               </DisplayContainer> */}
-              <DisplayContainer halfsize>
-                <DisplayHeading>
-                  What will you offer?
+                <DisplayContainer halfsize>
+                  <DisplayHeading>
+                    What will you offer?
                 </DisplayHeading>
-                <br/>
-                <div style={{ display: 'flex', width: '100%'}}>
-                  {
-                    this.state.serviceEdit ?
-                      <ServiceBox>
-                        <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate} placeholder="title" defaultValue={services[0].title}/>
-                        <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate} placeholder="description" defaultValue={services[0].description}/>
-                        <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate} placeholder="price" defaultValue={services[0].price}/>  
-                      </ServiceBox>
-                      : ''
-                  }
-                  <AddServiceButton onClick={() => this.setState({ serviceEdit: true })}>
-                    +
+                  <br />
+                  <div style={{ display: 'flex', width: '100%' }}>
+                    {
+                      this.state.serviceEdit ?
+                        <ServiceBox>
+                          <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate} placeholder="title" defaultValue={services[0].title} />
+                          <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate} placeholder="description" defaultValue={services[0].description} />
+                          <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate} placeholder="price" defaultValue={services[0].price} />
+                        </ServiceBox>
+                        : ''
+                    }
+                    <AddServiceButton onClick={() => this.setState({ serviceEdit: true })}>
+                      +
                   </AddServiceButton>
-                </div>
-              </DisplayContainer>
-              <CommitButton onClick={this.commit}>
-                Commit to Ethereum
+                  </div>
+                </DisplayContainer>
+                <CommitButton onClick={this.commit}>
+                  Commit to Ethereum
               </CommitButton>
-              {
-                this.state.uploading ?
-                'Uploading!' : ''
-              }
-              </>
-            ||
-            active == 1 &&
-              <>
-              {/* <h1>Inbox</h1> */}
-              <div style={{ height: '100%', width: '100%'}}>
                 {
-                  this.state.messages.length < 1 ?
-                    <div style={{ height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                      <RingLoader/>
-                    </div>
-                    :
-                  vari.reverse()
+                  this.state.uploading ?
+                    'Uploading!' : ''
                 }
-              </div>
               </>
-          }
+              ||
+              active == 1 &&
+              <>
+                {/* <h1>Inbox</h1> */}
+                <div style={{ height: '100%', width: '100%' }}>
+                  {
+                    this.state.messages.length < 1 ?
+                      <div style={{ height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <RingLoader />
+                      </div>
+                      :
+                      vari.reverse()
+                  }
+                </div>
+              </>
+            }
         </DashboardMiddle>
         <DashboardRight>
           <DashboardRightBox>
@@ -531,13 +568,21 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
           </DashboardRightBox>
           <DashboardRightBox>
             <div style={{ width: '100%' }}>
+              You have XXX of your own token.
+            </div>
+            <WidthdrawButton>
+              Sell
+            </WidthdrawButton>
+          </DashboardRightBox>
+          <DashboardRightBox>
+            <div style={{ width: '100%' }}>
               You are on the current release.
             </div>
             <WidthdrawButton onClick={this.upgrade}>
               Upgrade
             </WidthdrawButton>
           </DashboardRightBox>
-          
+
         </DashboardRight>
       </>
     )
@@ -545,34 +590,35 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
 }));
 
 const DashboardPage = withRouter(observer(
-  class DashboardPage extends React.Component<any,any>{
+  class DashboardPage extends React.Component<any, any>{
 
-  render() {
-    const { web3Store } = this.props;
+    render() {
+      const { web3Store } = this.props;
 
-    const items = Array.from(web3Store.accountsCache).map((address: any) => {
-      const blockie = makeBlockie(address);
-       return <AccountLink to={`/dashboard/${address}`} key={Math.random()}>
-        <img src={blockie} style={{ width: '50px', height: '50px', borderRadius: '25px' }} alt={address}/>
-        {address}
+      const items = Array.from(web3Store.accountsCache).map((address: any) => {
+        const blockie = makeBlockie(address);
+        return <AccountLink to={`/dashboard/${address}`} key={Math.random()}>
+          <img src={blockie} style={{ width: '50px', height: '50px', borderRadius: '25px' }} alt={address} />
+          {/* {address} */}
+          Token Name
        </AccountLink>;
-    });
+      });
 
-    return (
-      <DashboardContainer>
-        <Route path='/dashboard' exact render={() => (
-          web3Store.account
-            ?
-              <YourAccounts>
+      return (
+        <DashboardContainer>
+          <Route path='/dashboard' render={() => (
+            web3Store.account
+              ?
+              <DashboardLeft>
                 {items}
-              </YourAccounts>
-            :
+              </DashboardLeft>
+              :
               <h1>Please log in</h1>
-        )}/>
-        <Route path='/dashboard/:account' render={(props: any) => <InteriorDashboard {...props} web3Store={web3Store}/>}/>
-      </DashboardContainer>
-    )
-  }
-}));
+          )} />
+          <Route path='/dashboard/:account' render={(props: any) => <InteriorDashboard {...props} web3Store={web3Store} />} />
+        </DashboardContainer>
+      )
+    }
+  }));
 
 export default DashboardPage;
