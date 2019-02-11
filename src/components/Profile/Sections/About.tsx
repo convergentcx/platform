@@ -6,7 +6,8 @@ import { shadowMixin } from '../../../common';
 
 const AboutContainer = styled.div`
   background: #FFF;
-  border-radius: 10px;
+  border-radius: 60px;
+  border-width: 10px;
   width: 50vw;
   height: 90vh;
   margin-top: 5vh;
@@ -18,7 +19,7 @@ const AboutContainer = styled.div`
 `;
 
 const AboutInner = styled.div`
-  padding: 32px;
+  padding: 70px;
   display: flex;
   text-align: left;
 `;

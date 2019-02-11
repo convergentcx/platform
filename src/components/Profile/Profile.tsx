@@ -17,7 +17,7 @@ import makeBlockie from 'ethereum-blockies-base64';
 
 import AboutSection from './Sections/About';
 import InvestSection from './Sections/Invest';
-import Transact from './Sections/Transact';
+import TransactSection from './Sections/Transact';
 
 const NavBox = styled.div`
   width: 12em;
@@ -99,84 +99,6 @@ const Middle = styled.div`
     align-items: center;
   }
 `;
-
-const RequestButton = styled.button`
-  height: 32px;
-  cursor: pointer;
-  width: 100%;
-  background: ${colors.SoftBlue};
-  color: #FFF;
-  border: none;
-  border-radius: 0 0 10px 10px;
-  transition: 0.3s;
-  :hover {
-    color: #FFF;
-    background: ${colors.CvgPurp};
-  }
-`;
-
-const TransactContainer = styled.div`
-  width: 50vw;
-  margin-top: 5vh;
-  height: 90vh;
-  @media (max-width: 450px) {
-    width: 94vw;
-    margin-bottom: 8%;
-  }
-`;
-const TransactPage = observer(class TransactPage extends React.Component<any,any> {
-  state = {
-    msg: '',
-    service: {},
-  }
-
-  request = () => {
-    this.props.web3Store.request(this.props.address, 0, this.state.msg);
-  }
-  
-  render() {
-    const { address, web3Store } = this.props;
-    const { betaCache, ipfsCache } = web3Store;
-    let title,description,price;
-    if (betaCache.has(address) && ipfsCache.has(betaCache.get(address).metadata)) {
-      const { metadata } = betaCache.get(address);
-      const { services } = ipfsCache.get(metadata);
-      title = services[0].title;
-      description = services[0].description;
-      price = services[0].price;
-    }
-
-    return (
-      <TransactContainer>
-        <div style={{ display: 'flex', width: '100%' }}>
-          <div style={{ fontSize: '64px', width: '60%', textAlign: 'left'}}>
-            {title}
-          </div>
-          <div style={{ fontSize: '128px', alignSelf: 'center', justifySelf: 'center', width: '50%' }}>
-            {price}
-          </div>
-        </div>
-        <div style={{ fontSize: '16px', textAlign: 'left' }}>
-          {description}
-        </div>
-        <br/>
-        <input 
-          style={{ border: 'solid', borderColor: 'black', color: 'black', borderWidth: '1px', background: 'white', width: '80%'}}
-          name="msg"
-          onChange={(e) => this.setState({ [e.target.name]: e.target.value })}
-        />
-        <br/>
-        <br/>
-        <RequestButton
-          onClick={this.request}
-        >
-          Request
-        </RequestButton>
-        <hr/>
-      </TransactContainer>
-    )
-  }
-});
 
 const ProfilePage = withRouter(observer(class ProfilePage extends React.Component<any,any> {
   state = {
@@ -266,7 +188,7 @@ const ProfilePage = withRouter(observer(class ProfilePage extends React.Componen
           <Route path={`/profile/${address}/about`} render={() => <AboutSection address={address} web3Store={web3Store}/>}/>
           {/* <Route path='/profile/feed' component={ContentPage}/> */}
           <Route path={`/profile/${address}/invest`} render={() => <InvestSection address={address} web3Store={web3Store}/>}/>
-          <Route path={`/profile/${address}/transact`} render={() => <TransactPage address={address} web3Store={web3Store}/>}/>
+          <Route path={`/profile/${address}/transact`} render={() => <TransactSection address={address} web3Store={web3Store}/>}/>
           {this.props.children}
         </Middle>
       </ProfileContainer>
