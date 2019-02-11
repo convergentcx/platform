@@ -6,11 +6,11 @@ import { inject } from 'mobx-react';
 
 import makeBlockie from 'ethereum-blockies-base64';
 
-import { MessageType } from '../../lib/messageUtil';
+import { MessageType } from '../../../lib/messageUtil';
 
 import Web3 from 'web3';
-import { colors } from '../../common';
-import { b32IntoMhash } from '../../lib/ipfs-util';
+import { colors } from '../../../common';
+import { b32IntoMhash } from '../../../lib/ipfs-util';
 
 const { utils } = require('web3');
 
@@ -190,7 +190,7 @@ const MessageItem = inject('web3Store')(class MessageItem extends React.Componen
   }
 
   render() {
-    const { web3Store } = this.props;
+    // const { web3Store } = this.props;
     // const { services } = web3Store.web3Store.betaCache.get(this.props.address).metadata
     return (
       <>

@@ -35,7 +35,7 @@ type NewBetaCache = {
   curPrice: string,
   marketCap: string,
   totalSupply: string,
-  contributorCount: number,
+  contributorCount?: number,
   rAsset: string,
   beneficiary: string,
   slopeN: string,
@@ -320,25 +320,32 @@ export default class Web3Store {
         blockNumber,
       });
 
+      this.getAccountDataAndCache(account);
+
     });
     
 
     // Now start watching the accounts.
-    (this.convergentBeta as any).events.NewAccount({fromBlock: 0})
+    const nowBlock = await this.web3.eth.getBlockNumber();
+    (this.convergentBeta as any).events.NewAccount({ fromBlock: nowBlock })
     .on('data', (event: any) => {
       const { returnValues: { account, creator }, blockNumber } = event;
       this.cbAccounts.set(account, {
         creator,
         blockNumber,
       });
+      this.getAccountDataAndCache(account);
     });
 
-    this.pollAllTehData();
+    // this.pollAllTehData();
     this.pollIPFS();
   }
 
   @action
   pollAllTehData = async () => {
+    // this.cbAccounts.forEach((account: any) => {
+    //   this.getAccountDataAndCache(account);
+    // });
     for (const [account, _] of this.cbAccounts) {
       this.getAccountDataAndCache(account);
     }
@@ -400,8 +407,9 @@ export default class Web3Store {
   @action
   getAccountDataAndCache = async (address: string) => {
     if (!this.betaCache.has(address)) {
-      this.firstFill(address);
+      await this.firstFill(address);
     }
+    this.getContributorCount(address);
   }
 
   @action
@@ -429,7 +437,7 @@ export default class Web3Store {
     const marketCap = await (acc as any).methods.marketCap().call();
     const totalSupply = await (acc as any).methods.totalSupply().call();
     // This takes longer.
-    const contributorCount = await this.getContributorCount(address);
+    this.getContributorCount(address);
 
     // These SHOULD never change (at least in mvp)
     const rAsset = await (acc as any).methods.reserveAsset().call();
@@ -456,7 +464,6 @@ export default class Web3Store {
         curPrice,
         marketCap,
         totalSupply,
-        contributorCount,
         rAsset,
         beneficiary,
         slopeN,
@@ -492,7 +499,7 @@ export default class Web3Store {
       const reserve = await (acc as any).methods.reserve().call(); 
       const contributions = await (acc as any).methods.contributions().call();
       // This takes longer.
-      const contributorCount = await this.getContributorCount(address);
+      this.getContributorCount(address);
       //
       const oldEntry = this.betaCache.get(address);
       const newEntry = Object.assign(oldEntry, {
@@ -501,7 +508,6 @@ export default class Web3Store {
         totalSupply,
         reserve,
         contributions,
-        contributorCount,
       });
       this.betaCache.set(address, newEntry);
     });
@@ -521,6 +527,7 @@ export default class Web3Store {
         reserve,
       });
       this.betaCache.set(address, newEntry);
+      this.getContributorCount(address);
     });
 
     this.ipfsGetDataAndCache(metadata);
@@ -543,7 +550,16 @@ export default class Web3Store {
         buyers.add(buyer);
       }
     })
-    return buyers.size;
+    if (this.betaCache.has(address)) {
+      if ((this.betaCache as any).get(address).contributorCount !== buyers.size) {
+        console.log('HERE')
+        const oldEntry = this.betaCache.get(address);
+        const newEntry = Object.assign(oldEntry, { contributorCount: buyers.size});
+        // console.log(JSON.stringify(oldEntry));
+        // console.log(JSON.stringify(newEntry));
+        this.betaCache.set(address, newEntry);
+      }
+    }
   }
 
   @action

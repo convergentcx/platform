@@ -300,7 +300,7 @@ const StatsDisplay = inject('web3Store')(observer((props: any) => (
         Contributors
       </StatsBoxHeader>
       <StatsBoxContent>
-        {props.web3Store.betaCache.get(props.address).contributorCount}
+        {props.web3Store.betaCache.get(props.address).contributorCount || 0}
       </StatsBoxContent>
     </StatsBox>
 
