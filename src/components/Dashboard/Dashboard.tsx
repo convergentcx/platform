@@ -3,10 +3,9 @@ import makeBlockie from 'ethereum-blockies-base64';
 import { observer, inject } from 'mobx-react';
 import React from 'react';
 import { Link, Route, withRouter } from 'react-router-dom';
-import { RingLoader } from 'react-spinners';
 import styled from 'styled-components';
 
-import MessageItem from './MessageItem';
+import Inbox from './Inbox/Inbox';
 import Subject from '../Dropzone.jsx';
 
 import { colors } from '../../common';
@@ -258,7 +257,6 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     serviceTitle1: '',
     serviceDescription1: '',
     servicePrice1: '',
-    messages: [],
     downloading: false,
   }
 
@@ -268,9 +266,6 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     await web3Store.getAccountDataAndCache(account)
     // await web3Store.ipfsGetDataAndCache(web3Store.betaCache.get(account).metadata);
     this.getData()
-    if (web3Store.web3) {
-      web3Store.syncMessages(account).then((res: any) => this.setState({messages: res}));
-    } else { setTimeout(() => web3Store.syncMessages(account).then((res: any) => this.setState({ messages: res})), 3000)}
   }
 
   getData = async () => {
@@ -396,32 +391,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
 
   render() {
     const { web3Store, match: { params: { account } } } = this.props;
-    const { active, messages } = this.state;
-
-    let vari: any[] = [];
-
-    if (messages.length) {
-      vari = messages.map((eventObj: any) => {
-        const { event, blockNumber, returnValues } = eventObj;
-        if (event == 'Transfer' || !event || event == 'Approval') return;
-
-        let values: {} = {};
-        Object.keys(returnValues).forEach((value: any) => {
-          if (!parseInt(value) && parseInt(value) !== 0) {
-            Object.assign(values, { [value]: returnValues[value] });
-          }
-        })
-        return (
-          <MessageItem
-            address={account}
-            key={Math.random()}
-            title={event}
-            blockNumber={blockNumber}
-            content={values}
-          />
-        );
-      })
-    }
+    const { active } = this.state;
 
     let bio,location,pic,services;
     if (web3Store.betaCache.has(account) && web3Store.ipfsCache.has(web3Store.betaCache.get(account).metadata)) {
@@ -505,19 +475,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
               </>
             ||
             active == 1 &&
-              <>
-              {/* <h1>Inbox</h1> */}
-              <div style={{ height: '100%', width: '100%'}}>
-                {
-                  this.state.messages.length < 1 ?
-                    <div style={{ height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                      <RingLoader/>
-                    </div>
-                    :
-                  vari.reverse()
-                }
-              </div>
-              </>
+              <Inbox address={account}/>
           }
         </DashboardMiddle>
         <DashboardRight>
