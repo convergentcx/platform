@@ -9,8 +9,9 @@ import {
   faCoins,
   faUserFriends,
   faDollarSign,
-  faMoneyBill, 
+  faMoneyBill,
   faChartLine,
+  faSyncAlt
 } from '@fortawesome/free-solid-svg-icons';
 
 import MyChart from '../Chart';
@@ -19,7 +20,7 @@ import Web3Store from '../../../stores/web3-store';
 
 const InvestBox = styled.div`
   background: #FFF;
-  border-radius: 10px;
+  border-radius: 60px;
   width: 50vw;
   height: 90vh;
   margin-top: 5vh;
@@ -31,11 +32,11 @@ const InvestBox = styled.div`
 `;
 
 const TradeScreenTab = styled.button<any>`
+  border: none;
   cursor: pointer;
   width: 20%;
-  background: ${(props: any) => props.active ? '#CCC' : '#FFF'};
-  border: none;
-  border-radius: 10px 0 0 0;
+  background: #FFF;
+  border-radius: 60px 0 0 0;
   color: ${(props: any) => props.active ? colors.SoftBlue : '#000'};
   transition: 0.3s;
   :hover {
@@ -45,43 +46,48 @@ const TradeScreenTab = styled.button<any>`
 
 const TradeScreenContent = styled.div`
   width: 100%;
-  height: 92%;
-  background: rgba(0,0,0,0.2);
+  height: 80%;
+  background: #FFF;
   display: flex;
   justify-content: center;
   align-items: center;
 `;
 
-type ButtonProps = {exiting: boolean, investing: boolean};
+type ButtonProps = { exiting: boolean, investing: boolean };
 
 const InvestButton = styled.button<ButtonProps>`
   cursor: pointer;
   width: 50%;
   background: #FFF;
-  border-radius: 0 0 0 10px;
-  border-color: ${colors.SoftGreen};
-  color: ${colors.SoftGreen};
+  border-radius: 0 0 0 60px;
+  color: #FFF;
+  font-weight: 600;
+  font-style: italic;
+  border-color: ${colors.SoftGreenDark};
+  background: ${colors.SoftGreenDark};
   transition: 0.2s;
   :hover {
-    color: #FFF;
     background: ${colors.SoftGreen};
+    border-color: ${colors.SoftGreen};
   }
   ${props => props.investing &&
-  `
+    `
   background: ${colors.SoftGreen};
-  color: #FFF;
+  border-color: ${colors.SoftGreen};
+  color: #666666;
   `
   }
   ${props => props.exiting &&
-  `
+    `
   background: #232323;
   color: #464646;
   border-color: #232323;
   :hover {
     background: #232323;
     color: #464646;
+    border-color: black;
   }
-  ` 
+  `
   }
 `;
 
@@ -89,35 +95,40 @@ const ExitButton = styled.button<ButtonProps>`
   cursor: pointer;
   width: 50%;
   background: #FFF;
-  border-radius: 0 0 10px 0;
-  border-color: ${colors.Orange};
-  color: ${colors.Orange};
+  border-radius: 0 0 60px 0;
+  color: #FFF;
+  font-weight: 600;
+  font-style: italic;
+  border-color: ${colors.OrangeDark};
+  background: ${colors.OrangeDark};
   transition: 0.2s;
   :hover {
-    color: #FFF;
     background: ${colors.Orange};
+    border-color: ${colors.Orange};
   }
   ${props => props.exiting &&
-  `
+    `
   background: ${colors.Orange};
-  color: #FFF;
+  border-color: ${colors.Orange};
+  color: #666666;
   `
   }
   ${props => props.investing &&
-  `
+    `
   background: #232323;
   color: #464646;
   border-color: #232323;
   :hover {
     background: #232323;
     color: #464646;
+    border-color: black;
   }
-  ` 
+  `
   }
 `;
 
 const QuitButton = styled.button`
-  color: ${colors.SoftBlue};
+  color: white;
   padding-right: 4%;
   background: transparent;
   border: none;
@@ -125,59 +136,83 @@ const QuitButton = styled.button`
   font-weight: 900;
   cursor: pointer;
   :hover {
-    color: ${colors.Orange};
+    color: ${colors.SoftBlue}
   }
 `;
 
-const ConfirmButton = styled.button`
+type ConfirmButtonProps = { exiting: boolean, investing: boolean };
+
+
+const ConfirmButton = styled.button<ConfirmButtonProps>`
   border-radius: 50px;
-  background: #2424D0;
   transition: 0.3s;
-  height: 80px;
-  width: 160px;
+  height: 70px;
+  width: 40%;
+  margin-top: 40px;
   color: #FFF;
   border-color: #000;
   font-weight: 600;
   cursor: pointer;
   :hover {
-    background: #05021A;
-    color: orange;
     border-color: #232323;
+    background: ${colors.SoftBlue}
+    ;
   }
+  ${props => props.exiting &&
+    `
+    background: ${colors.OrangeDark};
+    `
+  }
+  ${props => props.investing &&
+    `
+    background: ${colors.SoftGreenDark};
+    `
+  }
+
 `;
 
 const StatsContainer = styled.div`
   display: flex;
   flex-flow: row wrap;
-  justify-content: space-around;
+  justify-content: center;
   padding: 0;
+  padding-top: 50px;
   height: auto;
-  width: auto;
+  width: 100%;
   align-self: flex-start;
 `;
 
 const StatsBox = styled.div`
   display: flex;
   flex-direction: column;
-  margin: 32px;
-  padding: 2px;
-  padding-top: 8px;
+  margin: 2%;
+  padding: 8px;
+  padding-top: 15px;
   border-radius: 10px;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
   height: 70px;
-  width: 120px;
+  width: 38%;
   background: #EEE;
   @media (max-width: 480px) {
     margin: 8px;
   }
+  position: relative;
 `;
 
 const StatsBoxHeader = styled.div`
   font-size: 11px;
 `;
 
+const BalanceRefreshButton = styled.div`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+`;
+
 const StatsBoxContent = styled.div`
+  font-size: 25px;
   display: flex;
   height: 100%;
   justify-content: center;
@@ -185,9 +220,9 @@ const StatsBoxContent = styled.div`
 `;
 
 const InnerDisplay = observer((props: any) => (
-  <div style={{ paddingTop: '32px'}}>
+  <div style={{ paddingTop: '32px' }}>
     {props.title}
-    <hr/>
+    <hr />
     <div style={{ color: 'black', height: '100%', fontSize: '64px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       {props.children}
     </div>
@@ -202,7 +237,7 @@ const StatsDisplay = inject('web3Store')(observer((props: any) => (
         Current Price
       </StatsBoxHeader>
       <StatsBoxContent>
-        {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).curPrice).slice(0,5)} eth
+        {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).curPrice).slice(0, 5)} eth
       </StatsBoxContent>
     </StatsBox>
 
@@ -211,7 +246,7 @@ const StatsDisplay = inject('web3Store')(observer((props: any) => (
         Market Cap
       </StatsBoxHeader>
       <StatsBoxContent>
-        {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).marketCap).slice(0,5)} eth
+        {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).marketCap).slice(0, 5)} eth
       </StatsBoxContent>
     </StatsBox>
 
@@ -220,7 +255,7 @@ const StatsDisplay = inject('web3Store')(observer((props: any) => (
         Total Supply
       </StatsBoxHeader>
       <StatsBoxContent>
-        {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).totalSupply).slice(0,5)} {props.web3Store.betaCache.get(props.address).symbol}
+        {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).totalSupply).slice(0, 5)} {props.web3Store.betaCache.get(props.address).symbol}
       </StatsBoxContent>
     </StatsBox>
 
@@ -229,7 +264,7 @@ const StatsDisplay = inject('web3Store')(observer((props: any) => (
         Reserve
       </StatsBoxHeader>
       <StatsBoxContent>
-        {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).reserve).slice(0,5)} eth
+        {props.web3Store.web3.utils.fromWei(props.web3Store.betaCache.get(props.address).reserve).slice(0, 5)} eth
       </StatsBoxContent>
     </StatsBox>
 
@@ -242,19 +277,23 @@ const StatsDisplay = inject('web3Store')(observer((props: any) => (
       </StatsBoxContent>
     </StatsBox>
 
-    {
-      (props.web3Store.account && props.web3Store.balancesCache.has(props.address))
-      &&
-        <StatsBox>
-          <StatsBoxHeader>
-            You Own
+    <StatsBox>
+      <StatsBoxHeader>
+        You Own
           </StatsBoxHeader>
-          <StatsBoxContent>
-            {props.web3Store.web3.utils.fromWei(props.web3Store.balancesCache.get(props.address)).slice(0,5)} {props.web3Store.betaCache.get(props.address).symbol}
-          </StatsBoxContent>
-        </StatsBox>
-    }
-{/* 
+      <BalanceRefreshButton onClick={() => props.web3Store.getBalance(props.address)}>
+        <FontAwesomeIcon icon={faSyncAlt} size={"xs"} />
+      </BalanceRefreshButton>
+      <StatsBoxContent>
+        {
+          (props.web3Store.account && props.web3Store.balancesCache.has(props.address))
+            ? props.web3Store.web3.utils.fromWei(props.web3Store.balancesCache.get(props.address)).slice(0, 5) + ' ' + props.web3Store.betaCache.get(props.address).symbol
+            : '???' + ' ' + props.web3Store.betaCache.get(props.address).symbol
+        }
+      </StatsBoxContent>
+    </StatsBox>
+
+    {/* 
     <StatsBox>
       <StatsBoxHeader>
         You Own
@@ -264,12 +303,11 @@ const StatsDisplay = inject('web3Store')(observer((props: any) => (
       </StatsBoxContent>
     </StatsBox> */}
 
-    <button onClick={() => props.web3Store.getBalance(props.address)}>Check Balance</button>
   </StatsContainer>
 )));
 
-type TradeScreenProps = {address: string, web3Store: any};
-type TradeScreenState = {active: number, loaded: boolean};
+type TradeScreenProps = { address: string, web3Store: any };
+type TradeScreenState = { active: number, loaded: boolean };
 
 const TradeScreen = observer(class TradeScreen extends React.Component<TradeScreenProps, TradeScreenState> {
   state = {
@@ -317,18 +355,18 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
 
     const data = web3Store.betaCache.get(address);
     if (!data) {
-      
+
     }
 
     return (
-      <div style={{ height: '90%' }}>
-        <div style={{ width: '100%', height: '8%', display: 'flex', flexDirection: 'row' }}>
+      <div style={{ height: '90%', padding: '5px' }}>
+        <div style={{ width: '100%', height: '8%', display: 'flex', flexDirection: 'row', paddingLeft: '10px' }}>
           <TradeScreenTab
             active={this.state.active === 0}
             id={0}
             onClick={() => this.setActive(0)}
           >
-            <FontAwesomeIcon icon={faCoins}/>
+            <FontAwesomeIcon icon={faCoins} />
           </TradeScreenTab>
           {/* <TradeScreenTab
             active={this.state.active === 1} 
@@ -352,11 +390,11 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
             <FontAwesomeIcon icon={faUserFriends}/>
           </TradeScreenTab> */}
           <TradeScreenTab
-            active={this.state.active === 4} 
-            id ="4"
+            active={this.state.active === 4}
+            id="4"
             onClick={() => this.setActive(4)}
           >
-            <FontAwesomeIcon icon={faChartLine}/>
+            <FontAwesomeIcon icon={faChartLine} />
           </TradeScreenTab>
         </div>
         <TradeScreenContent>
@@ -367,14 +405,14 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
               // <InnerDisplay
               //   title="Price"
               // >
-                
-                  (this.state.loaded
-                  ?
-                    <StatsDisplay address={address}/>
-                    // `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).curPrice)} eth`
-                  :
-                    <RingLoader/>
-                  )
+
+              (this.state.loaded
+                ?
+                <StatsDisplay address={address} />
+                // `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).curPrice)} eth`
+                :
+                <RingLoader />
+              )
               // </InnerDisplay>
             ) ||
             (
@@ -383,12 +421,12 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
               <InnerDisplay title="Market Cap">
                 {
                   this.state.loaded
-                  ?
+                    ?
                     `${
-                      web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).marketCap).slice(0,9)
+                    web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).marketCap).slice(0, 9)
                     } eth`
-                  :
-                      <RingLoader/>
+                    :
+                    <RingLoader />
                 }
               </InnerDisplay>
             ) ||
@@ -400,10 +438,10 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
               >
                 {
                   this.state.loaded
-                  ?
-                    `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).totalSupply).slice(0,9)} ${web3Store.betaCache.get(address).symbol.toLowerCase()}`
-                  :
-                    <RingLoader/>
+                    ?
+                    `${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).totalSupply).slice(0, 9)} ${web3Store.betaCache.get(address).symbol.toLowerCase()}`
+                    :
+                    <RingLoader />
                 }
               </InnerDisplay>
             ) ||
@@ -415,11 +453,11 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
               >
                 {
                   this.state.loaded
-                  ?
+                    ?
                     `${web3Store.betaCache.get(address).name} has ${web3Store.web3.utils.fromWei(web3Store.betaCache.get(address).contributions)} contributions waiting.`
                     : 'Loading...'
                 }
-                <br/>
+                <br />
                 <button
                   onClick={this.sendContributions}
                 >
@@ -430,7 +468,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
             (
               active === 4
               &&
-              <MyChart address={address}/>
+              <MyChart address={address} />
             )
           }
         </TradeScreenContent>
@@ -439,7 +477,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
   }
 });
 
-const InvestScreen = inject('web3Store')(observer(class InvestScreen extends React.Component<any,any> {
+const InvestScreen = inject('web3Store')(observer(class InvestScreen extends React.Component<any, any> {
   state = {
     howMuch: 0,
     cost: 0,
@@ -487,17 +525,17 @@ const InvestScreen = inject('web3Store')(observer(class InvestScreen extends Rea
     }
 
     return (
-      <div style={{ height: '90%', background: 'rgba(0,0,0,0.8)', borderRadius: '10px 10px 0 0', textAlign: 'center' }}>
-        <div style={{ width: '100%', background: '', height: '8%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', borderRadius: '10px 10px 0 0' }}>
+      <div style={{ height: '90%', background: 'rgba(0,0,0,0.8)', borderRadius: '60px 60px 0 0', textAlign: 'center' }}>
+        <div style={{ width: '100%', background: '', height: '22%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', borderRadius: '10px 10px 0 0' }}>
           <QuitButton onClick={this.props.quit}>
             X
           </QuitButton>
         </div>
         <div style={{ color: 'white', fontSize: '32px', paddingTop: '12px' }}>
-          How much? (${symbol})
+          How much? ({symbol})
         </div>
-        <br/>
-        <input style={{ color: 'black', background: 'white', border: 'none' }} onChange={this.inputUpdate}>
+        <br />
+        <input type={'number'} style={{ color: 'black', marginTop: '20px', background: 'white', border: 'none', width: '30%', height: '50px', fontSize: '40px', textAlign: 'center'  }} onChange={this.inputUpdate}>
 
         </input>
         <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
@@ -506,8 +544,10 @@ const InvestScreen = inject('web3Store')(observer(class InvestScreen extends Rea
         <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
           {utils.fromWei(this.state.cost.toString())} eth
         </div>
-        <br/>
+        <br />
         <ConfirmButton
+          investing={true}
+          exiting={false}
           onClick={this.buy}
         >
           BUY
@@ -517,7 +557,7 @@ const InvestScreen = inject('web3Store')(observer(class InvestScreen extends Rea
   }
 }));
 
-const ExitScreen = inject('web3Store')(observer(class ExitScreen extends React.Component<any,any> {
+const ExitScreen = inject('web3Store')(observer(class ExitScreen extends React.Component<any, any> {
   state = {
     inputVal: 0,
     sellReturn: 0,
@@ -553,13 +593,13 @@ const ExitScreen = inject('web3Store')(observer(class ExitScreen extends React.C
     }
     await web3Store.sell(this.props.address, this.state.inputVal);
   }
-  
+
   render() {
     const { web3Store } = this.props;
 
     return (
-      <div style={{ height: '90%', background: 'rgba(0,0,0,0.8)', borderRadius: '10px 10px 0 0', textAlign: 'center' }}>
-        <div style={{ width: '100%', background: '', height: '8%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', borderRadius: '10px 10px 0 0' }}>
+      <div style={{ height: '90%', background: 'rgba(0,0,0,0.8)', borderRadius: '60px 60px 0 0', textAlign: 'center' }}>
+        <div style={{ width: '100%', background: '', height: '22%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', borderRadius: '10px 10px 0 0' }}>
           <QuitButton onClick={this.props.quit}>
             X
           </QuitButton>
@@ -567,16 +607,18 @@ const ExitScreen = inject('web3Store')(observer(class ExitScreen extends React.C
         <div style={{ color: 'white', fontSize: '32px', paddingTop: '12px' }}>
           Leaving so soon?
         </div>
-        <br/>
-        <input style={{ color: 'black', background: 'white', border: 'none' }} onChange={this.inputUpdate}/>
+        <br />
+        <input type={'number'} style={{ color: 'black', marginTop: '20px', background: 'white', border: 'none', width: '30%', height: '50px', fontSize: '40px', textAlign: 'center' }} onChange={this.inputUpdate} />
         <div style={{ color: 'white', fontSize: '32px', paddingTop: '32px' }}>
           Returns:
         </div>
         <div style={{ color: 'grey', fontSize: '28px', paddingTop: '8px' }}>
           {web3Store.web3.utils.fromWei(this.state.sellReturn.toString())} eth
         </div>
-        <br/>
+        <br />
         <ConfirmButton
+          investing={false}
+          exiting={true}
           onClick={this.sell}
         >
           SELL
@@ -620,19 +662,19 @@ class InvestSection extends React.Component<any, any> {
       <div>
         <InvestBox>
           {
-            (investing && <InvestScreen address={address} quit={this.quit}/>)
+            (investing && <InvestScreen address={address} quit={this.quit} />)
             ||
-            (exiting && <ExitScreen address={address} quit={this.quit}/>)
+            (exiting && <ExitScreen address={address} quit={this.quit} />)
             ||
-            <TradeScreen address={address} web3Store={this.props.web3Store}/>
-          }
+            <TradeScreen address={address} web3Store={this.props.web3Store} />
+          } 
           <div style={{ height: '10%', display: 'flex' }}>
-          <InvestButton investing={investing} exiting={exiting} onClick={this.startInvest}>
-            Invest
-          </InvestButton>
-          <ExitButton onClick={this.startExit} investing={investing} exiting={exiting}>
-            Exit
-          </ExitButton>
+            <InvestButton investing={investing} exiting={exiting} onClick={this.startInvest}>
+              INVEST
+            </InvestButton>
+            <ExitButton onClick={this.startExit} investing={investing} exiting={exiting}>
+              EXIT
+            </ExitButton>
           </div>
         </InvestBox>
       </div>

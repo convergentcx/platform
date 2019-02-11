@@ -169,7 +169,7 @@ const SpeedDialAnchor = observer(styled.div`
   border-radius: 28px;
   ${shadowMixin}
   background: ${props => props.open ? '#232323' : '#000'};
-  color: ${props => props.locked ? (props.readonly ? colors.SoftBlue : 'red') : colors.SoftGreen};
+  color: ${props => props.locked ? (props.readonly ? colors.OrangeDark : 'red') : colors.SoftGreenDark};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -192,14 +192,14 @@ const SpeedDialButton = styled.div`
   right: calc(2% + 4px);
   border-radius: 24px;
   ${shadowMixin}
-  background: ${props => props.alt ? '#36B37E' : colors.SoftBlue};
+  background: ${props => props.alt ? colors.Orange : colors.SoftBlue};
   color: #FFF;
   display: flex;
   justify-content: center;
   align-items: center;
   transition: 0.3s;
   :hover {
-    background: ${props => props.alt ? '#0d4f02' : colors.CvgTeal};
+    background: ${props => props.alt ? colors.OrangeDark : colors.CvgTeal};
     color: #FFF;
   }
 `;

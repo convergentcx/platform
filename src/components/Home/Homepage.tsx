@@ -31,7 +31,7 @@ const LaunchButton = styled.button`
   ${shadowMixin}
   :hover {
     color: #FFF;
-    background: maroon;
+    background: ${colors.OrangeDark};
     box-shadow: 0 15px 35px rgba(50,50,93,.9), 0 5px 15px rgba(0,0,0,.87);
   }
 `;
@@ -140,6 +140,13 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
               <input
                 name="accountTicker"
                 onChange={this.inputUpdate}
+              />
+
+              What do you want to tokenize:
+              <input
+                name="service"
+                onChange={this.inputUpdate}
+                style={{height: '30px'}}
               />
               <DeployButton
                 onClick={this.deploy}
