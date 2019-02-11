@@ -4,7 +4,6 @@ import styled from 'styled-components';
 
 import { colors, shadowMixin } from '../../../common';
 
-
 const TransactContainer = styled.div`
   background: #FFF;
   border-radius: 60px;
@@ -39,7 +38,6 @@ const StatsBoxHeader = styled.div`
   font-size: 11px;
 `;
 
-
 const StatsBoxContent = styled.div`
   font-size: 25px;
   display: flex;
@@ -47,7 +45,6 @@ const StatsBoxContent = styled.div`
   justify-content: center;
   align-items: center;
 `;
-
 
 const StatsBox = styled.div`
   display: flex;
@@ -87,95 +84,90 @@ const RequestButton = styled.button`
   }
 `;
 
-// const TransactContainer = styled.div`
-//   width: 50vw;
-//   margin-top: 5vh;
-//   height: 90vh;
-//   @media (max-width: 450px) {
-//     width: 94vw;
-//     margin-bottom: 8%;
-//   }
-// `;
+const RequestTextArea = styled.textarea`
+  width: 100%;
+  margin-top: 30px;
+  background: #EEE;
+  color: #000;
+`;
 
 const TransactSection = observer(class TransactPage extends React.Component<any, any> {
-    state = {
-        msg: '',
-        service: {},
+  state = {
+    msg: '',
+    service: {},
+  }
+
+  request = () => {
+    this.props.web3Store.request(this.props.address, 0, this.state.msg);
+  }
+
+  render() {
+    const { address, web3Store } = this.props;
+    const { betaCache, ipfsCache } = web3Store;
+    let title, description, price;
+    if (betaCache.has(address) && ipfsCache.has(betaCache.get(address).metadata)) {
+      const { metadata } = betaCache.get(address);
+      const { services } = ipfsCache.get(metadata);
+      title = services[0].title;
+      description = services[0].description;
+      price = services[0].price;
     }
 
-    request = () => {
-        this.props.web3Store.request(this.props.address, 0, this.state.msg);
-    }
-
-    render() {
-        const { address, web3Store } = this.props;
-        const { betaCache, ipfsCache } = web3Store;
-        let title, description, price;
-        if (betaCache.has(address) && ipfsCache.has(betaCache.get(address).metadata)) {
-            const { metadata } = betaCache.get(address);
-            const { services } = ipfsCache.get(metadata);
-            title = services[0].title;
-            description = services[0].description;
-            price = services[0].price;
-        }
-
-        return (
-            <TransactContainer>
-                <div style={{ height: '90%' }}>
-                    <TransactInner>
-                        Here goes the title of the service
-                        <StatsContainer>
-                        <StatsBox>
-                            <StatsBoxHeader>
-                                Price in Token
-                            </StatsBoxHeader>
-                            <StatsBoxContent>
-                                1 CVG
-                            </StatsBoxContent>
-                        </StatsBox>
-                        <StatsBox>
-                            <StatsBoxHeader>
-                                Current price in ETH
-                            </StatsBoxHeader>
-                            <StatsBoxContent>
-                                4 eth
-                            </StatsBoxContent>
-                        </StatsBox>
-                        </StatsContainer>
-                        <ServiceDescription>
-                            Here goes the long description that people will hopefully add and be able to add some day and that users might actually find valuable under certain conditions.
-                            Here goes the long description that people will hopefully add and be able to add some day and that users might actually find valuable under certain conditions.
-                        </ServiceDescription>
-                        <div style={{ display: 'flex', width: '100%' }}>
-                            <div style={{ fontSize: '64px', width: '60%', textAlign: 'left' }}>
-                                {title}
-                            </div>
-                            <div style={{ fontSize: '128px', alignSelf: 'center', justifySelf: 'center', width: '50%' }}>
-                                {price}
-                            </div>
-                        </div>
-                        <div style={{ fontSize: '16px', textAlign: 'left' }}>
-                            {description}
-                        </div>
-                        <br />
-                        <textarea name="msg" placeholder="Enter a message with details about your request ..." rows={7} cols={30} style={{ width: '100%', marginTop: '30px' }} onChange={(e) => this.setState({ [e.target.name]: e.target.value })} />
-                        <br />
-                        <br />
-                        {/* Two
-          <hr/>
-          Three
-          <hr/> */}
-                    </TransactInner>
-
-                </div>
-                <div style={{ height: '10%', display: 'flex' }}>
-                    <RequestButton onClick={this.request}>
-                        REQUEST
-                    </RequestButton>
-                </div>
-            </TransactContainer>
-        )
-    }
+    return (
+      <TransactContainer>
+        <div style={{ height: '90%' }}>
+          <TransactInner>
+            Here goes the title of the service
+            <StatsContainer>
+              <StatsBox>
+                <StatsBoxHeader>
+                  Price in Token
+                  </StatsBoxHeader>
+                  <StatsBoxContent>
+                    1 CVG
+                  </StatsBoxContent>
+                </StatsBox>
+                <StatsBox>
+                  <StatsBoxHeader>
+                    Current price in ETH
+                  </StatsBoxHeader>
+                  <StatsBoxContent>
+                    4 eth
+                  </StatsBoxContent>
+                </StatsBox>
+            </StatsContainer>
+            <ServiceDescription>
+              Here goes the long description that people will hopefully add and be able to add some day and that users might actually find valuable under certain conditions.
+              Here goes the long description that people will hopefully add and be able to add some day and that users might actually find valuable under certain conditions.
+            </ServiceDescription>
+            <div style={{ display: 'flex', width: '100%' }}>
+              <div style={{ fontSize: '64px', width: '60%', textAlign: 'left' }}>
+                {title}
+              </div>
+              <div style={{ fontSize: '128px', alignSelf: 'center', justifySelf: 'center', width: '50%' }}>
+                {price}
+              </div>
+            </div>
+            <div style={{ fontSize: '16px', textAlign: 'left' }}>
+              {description}
+            </div>
+            <RequestTextArea 
+              name="msg" 
+              placeholder="Enter a message with details about your request ..." 
+              rows={6} 
+              cols={30} 
+              onChange={(e) => this.setState({ [e.target.name]: e.target.value })}
+            />
+          </TransactInner>
+        </div>
+        <div style={{ height: '10%', display: 'flex' }}>
+          <RequestButton onClick={this.request}>
+            REQUEST
+          </RequestButton>
+        </div>
+      </TransactContainer>
+    )
+  }
 });
 
 export default TransactSection;

@@ -127,6 +127,23 @@ const ExitButton = styled.button<ButtonProps>`
   }
 `;
 
+const InvestSlashExitContainer = styled.div`
+  height: 90%;
+  background: rgba(0,0,0,0.8);
+  border-radius: 60px 60px 0 0;
+  text-align: center;
+`;
+
+const QuitButtonContainer = styled.div`
+  width: 100%;
+  height: 16%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  border-radius: 10px 10px 0 0l
+`;
+
 const QuitButton = styled.button`
   color: white;
   padding-right: 4%;
@@ -141,7 +158,6 @@ const QuitButton = styled.button`
 `;
 
 type ConfirmButtonProps = { exiting: boolean, investing: boolean };
-
 
 const ConfirmButton = styled.button<ConfirmButtonProps>`
   border-radius: 50px;
@@ -209,6 +225,10 @@ const BalanceRefreshButton = styled.div`
   top: 10px;
   right: 10px;
   cursor: pointer;
+  transition: 0.3s;
+  :hover {
+    color: ${colors.OrangeDark};
+  }
 `;
 
 const StatsBoxContent = styled.div`
@@ -281,7 +301,13 @@ const StatsDisplay = inject('web3Store')(observer((props: any) => (
       <StatsBoxHeader>
         You Own
           </StatsBoxHeader>
-      <BalanceRefreshButton onClick={() => props.web3Store.getBalance(props.address)}>
+      <BalanceRefreshButton onClick={() => {
+        if (!props.web3Store.account) {
+          console.log('user not logged in');
+          return;
+        }
+        props.web3Store.getBalance(props.address)}
+      }>
         <FontAwesomeIcon icon={faSyncAlt} size={"xs"} />
       </BalanceRefreshButton>
       <StatsBoxContent>
@@ -292,17 +318,6 @@ const StatsDisplay = inject('web3Store')(observer((props: any) => (
         }
       </StatsBoxContent>
     </StatsBox>
-
-    {/* 
-    <StatsBox>
-      <StatsBoxHeader>
-        You Own
-      </StatsBoxHeader>
-      <StatsBoxContent>
-        {props.web3Store.web3.utils.fromWei(props.web3Store.balancesCache.get(props.address)).slice(0,5)} {props.web3Store.betaCache.get(props.address).symbol}
-      </StatsBoxContent>
-    </StatsBox> */}
-
   </StatsContainer>
 )));
 
@@ -525,12 +540,12 @@ const InvestScreen = inject('web3Store')(observer(class InvestScreen extends Rea
     }
 
     return (
-      <div style={{ height: '90%', background: 'rgba(0,0,0,0.8)', borderRadius: '60px 60px 0 0', textAlign: 'center' }}>
-        <div style={{ width: '100%', background: '', height: '22%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', borderRadius: '10px 10px 0 0' }}>
+      <InvestSlashExitContainer>
+        <QuitButtonContainer>
           <QuitButton onClick={this.props.quit}>
             X
           </QuitButton>
-        </div>
+        </QuitButtonContainer>
         <div style={{ color: 'white', fontSize: '32px', paddingTop: '12px' }}>
           How much? ({symbol})
         </div>
@@ -552,7 +567,7 @@ const InvestScreen = inject('web3Store')(observer(class InvestScreen extends Rea
         >
           BUY
         </ConfirmButton>
-      </div>
+      </InvestSlashExitContainer>
     )
   }
 }));
@@ -598,12 +613,12 @@ const ExitScreen = inject('web3Store')(observer(class ExitScreen extends React.C
     const { web3Store } = this.props;
 
     return (
-      <div style={{ height: '90%', background: 'rgba(0,0,0,0.8)', borderRadius: '60px 60px 0 0', textAlign: 'center' }}>
-        <div style={{ width: '100%', background: '', height: '22%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', borderRadius: '10px 10px 0 0' }}>
+      <InvestSlashExitContainer>
+        <QuitButtonContainer>
           <QuitButton onClick={this.props.quit}>
             X
           </QuitButton>
-        </div>
+        </QuitButtonContainer>
         <div style={{ color: 'white', fontSize: '32px', paddingTop: '12px' }}>
           Leaving so soon?
         </div>
@@ -623,7 +638,7 @@ const ExitScreen = inject('web3Store')(observer(class ExitScreen extends React.C
         >
           SELL
         </ConfirmButton>
-      </div>
+      </InvestSlashExitContainer>
     )
   }
 }));
@@ -659,7 +674,7 @@ class InvestSection extends React.Component<any, any> {
     const { investing, exiting } = this.state;
     const { address } = this.props;
     return (
-      <div>
+      <>
         <InvestBox>
           {
             (investing && <InvestScreen address={address} quit={this.quit} />)
@@ -677,7 +692,7 @@ class InvestSection extends React.Component<any, any> {
             </ExitButton>
           </div>
         </InvestBox>
-      </div>
+      </>
     );
   }
 };
