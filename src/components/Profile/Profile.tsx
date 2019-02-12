@@ -134,7 +134,7 @@ const ProfilePage = withRouter(observer(class ProfilePage extends React.Componen
         <Left>
           <NavBox>
             {
-              web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata)
+              web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata) && web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata).pic
               ?
                 <img
                   src={

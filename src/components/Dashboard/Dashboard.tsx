@@ -7,6 +7,7 @@ import styled from 'styled-components';
 
 import Inbox from './Inbox/Inbox';
 import Subject from '../Dropzone.jsx';
+import Wallet from './Wallet/Wallet';
 
 import { colors } from '../../common';
 
@@ -263,7 +264,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
   componentDidMount = async () => {
     const { web3Store, match: { params: { account } } } = this.props;
 
-    await web3Store.getAccountDataAndCache(account)
+    web3Store.getAccountDataAndCache(account)
     // await web3Store.ipfsGetDataAndCache(web3Store.betaCache.get(account).metadata);
     this.getData()
   }
@@ -286,13 +287,28 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     let bio,location,pic,services;
     if (web3Store.betaCache.has(account) && web3Store.ipfsCache.has(web3Store.betaCache.get(account).metadata)) {
       const data = web3Store.ipfsCache.get(web3Store.betaCache.get(account).metadata);
+      console.log(data.bio)
       bio = data.bio || '';
       location = data.location || '';
       pic = data.pic || '';
       services = data.services || [];
-      this.makePreview(pic);
     }
-    this.setState({ downloading: false, });
+
+    let preview = '';
+    if (pic) {
+      preview = `data:image/jpeg;base64,${Buffer.from(pic.data).toString('base64')}`;
+    }
+
+    this.setState({ 
+      downloading: false, 
+      file: pic.data,
+      bio,
+      location,
+      serviceTitle1: services[0].title,
+      serviceDescription1: services[0].description,
+      servicePrice1: services[0].price,
+      preview,
+    });
   }
 
   commit = async () => {
@@ -373,13 +389,6 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     this.props.web3Store.upgrade(this.props.match.params.account)
   }
 
-  makePreview = (pic: any) => {
-    if (!pic) return;
-    this.setState({
-      preview: `data:image/jpeg;base64,${Buffer.from(pic.data).toString('base64')}`,
-    })
-  }
-
   sendContributions = () => {
     const { web3Store, match: { params: { account } } } = this.props;
     if (!web3Store.account) {
@@ -391,16 +400,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
 
   render() {
     const { web3Store, match: { params: { account } } } = this.props;
-    const { active } = this.state;
-
-    let bio,location,pic,services;
-    if (web3Store.betaCache.has(account) && web3Store.ipfsCache.has(web3Store.betaCache.get(account).metadata)) {
-      const data = web3Store.ipfsCache.get(web3Store.betaCache.get(account).metadata);
-      bio = data.bio || '';
-      location = data.location || '';
-      pic = data.pic || '';
-      services = data.services || [];
-    }
+    const { active, bio, location, serviceTitle1, serviceDescription1, servicePrice1 } = this.state;
 
     const contributionsWaiting = web3Store.betaCache.has(account) ? web3Store.web3.utils.fromWei(web3Store.betaCache.get(account).contributions).slice(0,6) : '?';
 
@@ -413,11 +413,15 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
           <DashboardLink active={active === 1} id={1} onClick={this.setActive}>
             Inbox
           </DashboardLink>
+          {/* <DashboardLink active={active === 2} id={2} onClick={this.setActive}>
+            Wallet
+          </DashboardLink> */}
         </DashboardLeft>
         <DashboardMiddle>
           {
             active === 0 &&
               <>
+              {this.state.downloading && <div>DOWNLOADING</div>}
               <DisplayContainer>
                 <Subject upload={this.upload} preview={this.state.preview}/>
                 <InputDisplay>
@@ -454,9 +458,9 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
                   {
                     this.state.serviceEdit ?
                       <ServiceBox>
-                        <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate} placeholder="title" defaultValue={services[0].title}/>
-                        <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate} placeholder="description" defaultValue={services[0].description}/>
-                        <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate} placeholder="price" defaultValue={services[0].price}/>  
+                        <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate} placeholder="title" defaultValue={serviceTitle1}/>
+                        <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate} placeholder="description" defaultValue={serviceDescription1}/>
+                        <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate} placeholder="price" defaultValue={servicePrice1}/>  
                       </ServiceBox>
                       : ''
                   }
@@ -476,6 +480,9 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
             ||
             active == 1 &&
               <Inbox address={account}/>
+            ||
+            active == 2 &&
+              <Wallet address={account}/>
           }
         </DashboardMiddle>
         <DashboardRight>
@@ -510,10 +517,12 @@ const DashboardPage = withRouter(observer(
 
     const items = Array.from(web3Store.accountsCache).map((address: any) => {
       const blockie = makeBlockie(address);
-       return <AccountLink to={`/dashboard/${address}`} key={Math.random()}>
-        <img src={blockie} style={{ width: '50px', height: '50px', borderRadius: '25px' }} alt={address}/>
-        {address}
-       </AccountLink>;
+       return (
+        <AccountLink to={`/dashboard/${address}`} key={Math.random()}>
+          <img src={blockie} style={{ width: '50px', height: '50px', borderRadius: '25px' }} alt={address}/>
+          {address}
+        </AccountLink>
+       );
     });
 
     return (
