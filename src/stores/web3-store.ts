@@ -426,6 +426,7 @@ export default class Web3Store {
         address,
         JSON.parse(dataString),
       )
+      this.ipfsGetDataAndCache((this.betaCache as any).get(address).metadata);
       return true;
     }
     return false;
