@@ -283,7 +283,7 @@ export default class Web3Store {
 
   @action
   signWelcome = async () => {
-    await this.web3.eth.personal.sign("Welcome to Convergent Beta DApp. Happy investing in your friends!", this.account);
+    await this.web3.eth.personal.sign("Welcome to Convergent Beta DApp. By signing this message you agree to abide by the Terms of Use. Happy investing in your friends!", this.account);
   }
 
   @action
@@ -555,8 +555,6 @@ export default class Web3Store {
         console.log('HERE')
         const oldEntry = this.betaCache.get(address);
         const newEntry = Object.assign(oldEntry, { contributorCount: buyers.size});
-        // console.log(JSON.stringify(oldEntry));
-        // console.log(JSON.stringify(newEntry));
         this.betaCache.set(address, newEntry);
       }
     }
