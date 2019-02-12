@@ -121,6 +121,11 @@ export default class Web3Store {
   }
 
   @action
+  cacheIntoWindowStorage = async (address: string, dataBlob: string) => {
+    window.localStorage.setItem(address, dataBlob);
+  }
+
+  @action
   updateAccount = async () => {
     if (!this.web3) { return; }
     const main = (await this.web3.eth.getAccounts())[0];
@@ -337,7 +342,7 @@ export default class Web3Store {
       this.getAccountDataAndCache(account);
     });
 
-    // this.pollAllTehData();
+    this.pollAllTehData();
     this.pollIPFS();
   }
 
@@ -409,7 +414,21 @@ export default class Web3Store {
     if (!this.betaCache.has(address)) {
       await this.firstFill(address);
     }
+    // TODO do second fill which just pings data that changes
     this.getContributorCount(address);
+  }
+
+  @action
+  fillFromWindowStorage = async (address: string) => {
+    if (window.localStorage.getItem(address)) {
+      const dataString: string = window.localStorage.getItem(address)!;
+      this.betaCache.set(
+        address,
+        JSON.parse(dataString),
+      )
+      return true;
+    }
+    return false;
   }
 
   @action
@@ -422,6 +441,10 @@ export default class Web3Store {
     // Validate address
     if (!this.web3.utils.isAddress(address)) {
       console.error('Address unable to be validated!');
+      return;
+    }
+
+    if (await this.fillFromWindowStorage(address)) {
       return;
     }
 
@@ -454,27 +477,31 @@ export default class Web3Store {
     //   this.getBalance(this.account);
     // }
 
+    const data = {
+      metadata,
+      curServiceIndex,
+      reserve,
+      contributions,
+      curPrice,
+      marketCap,
+      totalSupply,
+      rAsset,
+      beneficiary,
+      slopeN,
+      slopeD,
+      exponent,
+      spreadN,
+      spreadD,
+      symbol,
+      name,
+    };
+
     this.betaCache.set(
       address,
-      {
-        metadata,
-        curServiceIndex,
-        reserve,
-        contributions,
-        curPrice,
-        marketCap,
-        totalSupply,
-        rAsset,
-        beneficiary,
-        slopeN,
-        slopeD,
-        exponent,
-        spreadN,
-        spreadD,
-        symbol,
-        name,
-      }
+      data,
     );
+
+    this.cacheIntoWindowStorage(address, JSON.stringify(data));
 
     const nowBlock = await this.web3.eth.getBlockNumber();
 
