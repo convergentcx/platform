@@ -115,8 +115,8 @@ export default class Web3Store {
     this.updateWeb3(_window.web3);
     this.readonly = false;
     await this.updateAccount();
-    this.toaster.add(`Logged in to ${this.account.slice(0,10) + '...' + this.account.slice(-4)}. You may now interact with Ethereum.`, {appearance: 'success', autoDismiss: true})
     await this.signWelcome();
+    this.toaster.add(`Logged in to ${this.account.slice(0,10) + '...' + this.account.slice(-4)}. You may now interact with Ethereum.`, {appearance: 'success', autoDismiss: true})
     await this.instantiateConvergentBeta();
   }
 
@@ -413,8 +413,7 @@ export default class Web3Store {
   getAccountDataAndCache = async (address: string) => {
     if (!this.betaCache.has(address)) {
       await this.firstFill(address);
-    }
-    // TODO do second fill which just pings data that changes
+    } else { this.updateValues(address); }
     this.getContributorCount(address);
   }
 
@@ -515,6 +514,7 @@ export default class Web3Store {
         const newEntry = Object.assign(oldEntry, { metadata: newMetadata });
         this.betaCache.set(address, newEntry);
       }
+      this.ipfsGetDataAndCache(newMetadata);
     });
 
     // Watch the Bought events
@@ -563,7 +563,32 @@ export default class Web3Store {
 
   // Updates the values that will change.
   @action updateValues = async (address: string) => {
+    const { abi } = Account2;
+    const acc = new this.web3.eth.Contract(abi, address);
 
+    // These will change and should be polled
+    const metadata = await (acc as any).methods.metadata().call();
+    const curServiceIndex = await (acc as any).methods.curServiceIndex().call();
+    const reserve = await (acc as any).methods.reserve().call(); 
+    const contributions = await (acc as any).methods.contributions().call();
+    const curPrice = await (acc as any).methods.currentPrice().call()
+    const marketCap = await (acc as any).methods.marketCap().call();
+    const totalSupply = await (acc as any).methods.totalSupply().call();
+    // This takes longer.
+    this.getContributorCount(address);
+
+    const oldEntry = this.betaCache.get(address);
+    const newEntry = Object.assign(oldEntry, {
+      metadata,
+      curServiceIndex,
+      reserve,
+      contributions,
+      curPrice,
+      marketCap,
+      totalSupply,
+    });
+    this.betaCache.set(address, newEntry);
+    this.cacheIntoWindowStorage(address, JSON.stringify(newEntry));
   }
 
   @action
@@ -580,7 +605,6 @@ export default class Web3Store {
     })
     if (this.betaCache.has(address)) {
       if ((this.betaCache as any).get(address).contributorCount !== buyers.size) {
-        console.log('HERE')
         const oldEntry = this.betaCache.get(address);
         const newEntry = Object.assign(oldEntry, { contributorCount: buyers.size});
         this.betaCache.set(address, newEntry);
