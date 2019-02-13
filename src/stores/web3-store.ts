@@ -248,6 +248,9 @@ export default class Web3Store {
 
   @action
   addService = async (address: string, price: string) => {
+    if (this.betaCache.has(address) && (this.betaCache.get(address) as any).curServiceIndex > 0) {
+      return;
+    }
     const { abi } = Account2;
     const acc = new this.web3.eth.Contract(abi, address);
     const tx = await (acc as any).methods.addService(
