@@ -163,11 +163,11 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
                 name="accountTicker"
                 onChange={this.inputUpdate}
               />
-              Pre-mint:
+              {/* Pre-mint:
               <UserInput
                 name="premint"
                 onChange={this.inputUpdate}
-              />
+              /> */}
               What do you want to tokenize:
               <UserInput
                 name="service"

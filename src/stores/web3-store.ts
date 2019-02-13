@@ -28,23 +28,23 @@ type IPFSCacheObject = {
 }
 
 type NewBetaCache = {
-  metadata: string,
-  curServiceIndex: string,
-  reserve: string,
-  contributions: string,
-  curPrice: string,
-  marketCap: string,
-  totalSupply: string,
+  metadata?: string,
+  curServiceIndex?: string,
+  reserve?: string,
+  contributions?: string,
+  curPrice?: string,
+  marketCap?: string,
+  totalSupply?: string,
   contributorCount?: number,
-  rAsset: string,
-  beneficiary: string,
-  slopeN: string,
-  slopeD: string,
-  exponent: string,
-  spreadN: string,
-  spreadD: string,
-  symbol: string,
-  name: string,
+  rAsset?: string,
+  beneficiary?: string,
+  slopeN?: string,
+  slopeD?: string,
+  exponent?: string,
+  spreadN?: string,
+  spreadD?: string,
+  symbol?: string,
+  name?: string,
 }
 
 export default class Web3Store {
@@ -88,7 +88,7 @@ export default class Web3Store {
     const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws/v3/7121204aac9a45dcb9c2cc825fb85159'));
     this.readonly = true;
     this.web3 = web3;
-    this.toaster.add(`App started in READONLY mode using Infura node. You will not be able to interact with Ethereum until you log in.`, {appearance: 'error', autoDismiss: true})
+    this.toaster.add(`App started in READONLY mode using Infura node. You will not be able to interact with Ethereum until you log in.`, { appearance: 'warning', autoDismiss: true })
     await this.instantiateConvergentBeta();
   }
 
@@ -105,7 +105,8 @@ export default class Web3Store {
     } else if (_window.web3) {
       _window.web3 = new Web3(_window.web3.currentProvider);
     } else {
-      return;
+      this.toaster.add('Please use a Web3-enabled browser to perform write operations to Ethereum.', { appearance: 'info', autoDismiss: true });
+      return 
     }
     const netId = await _window.web3.eth.net.getId();
     if (netId !== 4) {
@@ -118,6 +119,81 @@ export default class Web3Store {
     await this.signWelcome();
     this.toaster.add(`Logged in to ${this.account.slice(0,10) + '...' + this.account.slice(-4)}. You may now interact with Ethereum.`, {appearance: 'success', autoDismiss: true})
     await this.instantiateConvergentBeta();
+  }
+
+  @action
+  instantiateConvergentBeta = async () => {
+    if (!this.web3) {
+      console.error('Unable to instantiate Convergent Beta');
+    }
+
+    const { abi: abi2 } = ConvergentBeta2;
+    const convergentBeta2 = new this.web3.eth.Contract(
+      abi2,
+      CB2_PROXY_ADDR,
+    );
+    this.convergentBeta = convergentBeta2;
+    this.cacheAccounts();
+    await this.startCachingAccounts();
+  }
+
+  // This function gets minimal data and is launched every time a new account event comes in.
+  // TODO: it should trigger a full data caching for this address.
+  @action
+  startCachingAccounts = async () => {
+    if (!this.convergentBeta) {
+      console.error('convergent beta not initialized');
+    }
+
+    // console.log('starting sync');
+
+    // Now start watching the accounts.
+    // const nowBlock = await this.web3.eth.getBlockNumber();
+    (this.convergentBeta as any).events.NewAccount({ fromBlock: 0 })
+    .on('data', (event: any) => {
+      const { returnValues: { account, creator }, blockNumber } = event;
+      this.cbAccounts.set(account, {
+        creator,
+        blockNumber,
+      });
+      this.getAccountDataAndCache(account);
+    });
+
+    // console.log('after first block')
+
+    const initAccounts = await (this.convergentBeta as any).getPastEvents('NewAccount', {fromBlock: 0, toBlock: 'latest'});
+
+    // console.log('after fetching past events')
+
+    initAccounts.forEach((event: any) => {
+      const { returnValues: { account, creator }, blockNumber } = event;
+
+      this.cbAccounts.set(account, {
+        creator,
+        blockNumber,
+      });
+
+      this.getAccountDataAndCache(account);
+
+    });
+
+    // console.log('after for each')
+    
+
+    // Now start watching the accounts.
+    const nowBlock = await this.web3.eth.getBlockNumber();
+    (this.convergentBeta as any).events.NewAccount({ fromBlock: nowBlock })
+    .on('data', (event: any) => {
+      const { returnValues: { account, creator }, blockNumber } = event;
+      this.cbAccounts.set(account, {
+        creator,
+        blockNumber,
+      });
+      this.getAccountDataAndCache(account);
+    });
+
+    this.pollAllTehData();
+    this.pollIPFS();
   }
 
   @action
@@ -291,62 +367,7 @@ export default class Web3Store {
     await this.web3.eth.personal.sign("Welcome to Convergent Beta DApp. By signing this message you agree to abide by the Terms of Use. Happy investing in your friends!", this.account);
   }
 
-  @action
-  instantiateConvergentBeta = async () => {
-    if (!this.web3) {
-      console.error('Unable to instantiate Convergent Beta');
-    }
-
-    const { abi: abi2 } = ConvergentBeta2;
-    const convergentBeta2 = new this.web3.eth.Contract(
-      abi2,
-      CB2_PROXY_ADDR,
-    );
-    this.convergentBeta = convergentBeta2;
-    this.cacheAccounts();
-    await this.startCachingAccounts();
-  }
-
-  // This function gets minimal data and is launched every time a new account event comes in.
-  // TODO: it should trigger a full data caching for this address.
-  @action
-  startCachingAccounts = async () => {
-    if (!this.convergentBeta) {
-      console.error('convergent beta not initialized');
-    }
-
-    const initAccounts = await (this.convergentBeta as any).getPastEvents('NewAccount', {fromBlock: 0, toBlock: 'latest'});
-
-    initAccounts.forEach((event: any) => {
-      const { returnValues: { account, creator }, blockNumber } = event;
-
-      this.cbAccounts.set(account, {
-        creator,
-        blockNumber,
-      });
-
-      this.getAccountDataAndCache(account);
-
-    });
-    
-
-    // Now start watching the accounts.
-    const nowBlock = await this.web3.eth.getBlockNumber();
-    (this.convergentBeta as any).events.NewAccount({ fromBlock: nowBlock })
-    .on('data', (event: any) => {
-      const { returnValues: { account, creator }, blockNumber } = event;
-      this.cbAccounts.set(account, {
-        creator,
-        blockNumber,
-      });
-      this.getAccountDataAndCache(account);
-    });
-
-    this.pollAllTehData();
-    this.pollIPFS();
-  }
-
-  @action
+  // @action
   pollAllTehData = async () => {
     // this.cbAccounts.forEach((account: any) => {
     //   this.getAccountDataAndCache(account);
@@ -368,14 +389,14 @@ export default class Web3Store {
     if (!this.web3) throw new Error('pollIPFS failed');
 
     for (const [address, data] of this.betaCache) {
-      this.ipfsGetDataAndCache(data.metadata);
+      this.ipfsGetDataAndCache(data.metadata!);
     }
 
     setInterval(() => {
       // console.log('ipfs polling round')
       for (const [address, data] of this.betaCache) {
         // console.log(address, data)
-        this.ipfsGetDataAndCache(data.metadata);
+        this.ipfsGetDataAndCache(data.metadata!);
       }
     }, 60000);
   }
@@ -448,6 +469,8 @@ export default class Web3Store {
       return;
     }
 
+    console.log('one', address)
+
     const { abi } = Account2;
     const acc = new this.web3.eth.Contract(abi, address);
 
@@ -460,8 +483,10 @@ export default class Web3Store {
     const marketCap = await (acc as any).methods.marketCap().call();
     const totalSupply = await (acc as any).methods.totalSupply().call();
     // This takes longer.
-    this.getContributorCount(address);
+    // this.getContributorCount(address);
+    // this.updateValues(address);
 
+    console.log('two', address)
     // These SHOULD never change (at least in mvp)
     const rAsset = await (acc as any).methods.reserveAsset().call();
     const beneficiary = await (acc as any).methods.beneficiary().call();
@@ -477,6 +502,8 @@ export default class Web3Store {
     //   this.getBalance(this.account);
     // }
 
+
+    console.log('three', address)
     const data = {
       metadata,
       curServiceIndex,
@@ -500,6 +527,8 @@ export default class Web3Store {
       address,
       data,
     );
+
+    console.log('four', address)
 
     this.cacheIntoWindowStorage(address, JSON.stringify(data));
 
@@ -576,19 +605,31 @@ export default class Web3Store {
     const totalSupply = await (acc as any).methods.totalSupply().call();
     // This takes longer.
     this.getContributorCount(address);
-
-    const oldEntry = this.betaCache.get(address);
-    const newEntry = Object.assign(oldEntry, {
-      metadata,
-      curServiceIndex,
-      reserve,
-      contributions,
-      curPrice,
-      marketCap,
-      totalSupply,
-    });
-    this.betaCache.set(address, newEntry);
-    this.cacheIntoWindowStorage(address, JSON.stringify(newEntry));
+    this.ipfsGetDataAndCache(metadata);
+    if (this.betaCache.has(address)) {
+      const oldEntry = this.betaCache.get(address);
+      const newEntry = Object.assign(oldEntry, {
+        metadata,
+        curServiceIndex,
+        reserve,
+        contributions,
+        curPrice,
+        marketCap,
+        totalSupply,
+      });
+      this.betaCache.set(address, newEntry);
+      this.cacheIntoWindowStorage(address, JSON.stringify(newEntry));
+    } else {
+      this.betaCache.set(address, {
+        metadata,
+        curServiceIndex,
+        reserve,
+        contributions,
+        curPrice,
+        marketCap,
+        totalSupply,
+      });
+    }
   }
 
   @action

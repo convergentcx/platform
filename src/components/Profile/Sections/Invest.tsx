@@ -7,16 +7,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   faCoins,
-  faUserFriends,
-  faDollarSign,
-  faMoneyBill,
+  // faUserFriends,
+  // faDollarSign,
+  // faMoneyBill,
   faChartLine,
   faSyncAlt
 } from '@fortawesome/free-solid-svg-icons';
 
 import MyChart from '../Chart';
 import { colors, shadowMixin } from '../../../common';
-import Web3Store from '../../../stores/web3-store';
 
 const InvestBox = styled.div`
   background: #FFF;
@@ -35,7 +34,7 @@ const TradeScreenTab = styled.button<any>`
   border: none;
   cursor: pointer;
   width: 20%;
-  background: #FFF;
+  background: transparent;
   border-radius: 60px 0 0 0;
   color: ${(props: any) => props.active ? colors.SoftBlue : '#000'};
   transition: 0.3s;
@@ -382,7 +381,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
 
     return (
       <TradeScreenContainer>
-        <div style={{ width: '100%', height: '8%', display: 'flex', flexDirection: 'row', paddingLeft: '10px' }}>
+        <div style={{ width: '100%', height: '8%', display: 'flex', flexDirection: 'row', paddingLeft: '10px', background: 'transparent' }}>
           <TradeScreenTab
             active={this.state.active === 0}
             id={0}
