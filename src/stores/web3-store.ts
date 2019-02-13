@@ -59,6 +59,7 @@ export default class Web3Store {
   @observable readonly = false;  // App starts in readonly mode
   @observable toaster: any = null;  // The toast manager
   @observable web3: any|null = null;  // Global Web3 object
+  @observable web3Ws: any = null;
   @observable balancesCache: Map<string, string> = new Map(); // Keeps map of address => account balance
 
   // This is the first thing that will trigger when a user is on the DApp.
@@ -88,6 +89,7 @@ export default class Web3Store {
     const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://neatly-tolerant-coral.quiknode.io/73b04107-89ee-4261-9a8f-3c1e946c17b2/CyYMMeeGTb-EeIBHGwORaw==/'));
     this.readonly = true;
     this.web3 = web3;
+    this.web3Ws = web3;
     this.toaster.add(`App started in READONLY mode using Infura node. You will not be able to interact with Ethereum until you log in.`, { appearance: 'warning', autoDismiss: true })
     await this.instantiateConvergentBeta();
   }
@@ -128,7 +130,7 @@ export default class Web3Store {
     }
 
     const { abi: abi2 } = ConvergentBeta2;
-    const convergentBeta2 = new this.web3.eth.Contract(
+    const convergentBeta2 = new this.web3Ws.eth.Contract(
       abi2,
       CB_PROXY_ADDR_MAINNET,
     );
@@ -295,7 +297,7 @@ export default class Web3Store {
   @action
   syncMessages = async (address: string) => {
     const { abi } = Account2;
-    const acc = new this.web3.eth.Contract(abi, address);
+    const acc = new this.web3Ws.eth.Contract(abi, address);
 
     const messages = await (acc as any).getPastEvents('allEvents', { fromBlock: 0 });
     return messages; // TODO if logged in, record messages for your accounts for updates lol
@@ -635,7 +637,7 @@ export default class Web3Store {
   @action
   getContributorCount = async (address: string) => {
     const { abi } = Account2;
-    const acc = new this.web3.eth.Contract(abi, address);
+    const acc = new this.web3Ws.eth.Contract(abi, address);
     const buyEvents = await (acc as any).getPastEvents('Bought', { fromBlock: 0 });
     let buyers = new Set();
     buyEvents.forEach((event: any) => {

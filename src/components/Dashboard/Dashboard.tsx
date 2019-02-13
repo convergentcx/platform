@@ -378,9 +378,9 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
     return (
       <>
         {
-          downloading
-            ? <RingLoader/>
-            :
+          // downloading
+          //   ? <RingLoader/>
+          //   :
             <>
             <DisplayContainer>
               <Subject upload={this.upload} preview={this.state.preview}/>

@@ -22,6 +22,7 @@ const AboutInner = styled.div`
   padding: 70px;
   display: flex;
   text-align: left;
+  font-size: 14px;
 `;
 
 type AboutSectionProps = {
