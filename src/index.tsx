@@ -14,7 +14,7 @@ const placement = window.innerWidth < 480 ? 'top-center' : 'bottom-left';
 
 ReactDOM.render(
   <Router>
-    <ToastProvider placement={placement} autoDismissTimeout={3000}>
+    <ToastProvider placement={placement} autoDismissTimeout={8000}>
       <Provider ipfsStore ={new IpfsStore()} web3Store={new Web3Store()}>
         <App/>
       </Provider>

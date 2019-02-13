@@ -3,11 +3,11 @@ import makeBlockie from 'ethereum-blockies-base64';
 import { observer, inject } from 'mobx-react';
 import React from 'react';
 import { Link, Route, withRouter } from 'react-router-dom';
-import { RingLoader } from 'react-spinners';
 import styled from 'styled-components';
 
-import MessageItem from './MessageItem';
+import Inbox from './Inbox/Inbox';
 import Subject from '../Dropzone.jsx';
+import Wallet from './Wallet/Wallet';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -17,6 +17,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import { colors, shadowMixin } from '../../common';
+import { RingLoader } from 'react-spinners';
 
 const DashboardContainer = styled.div`
   width: 100%;
@@ -314,38 +315,28 @@ const WidthdrawButton = styled.button`
   }
 `;
 
-const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class InteriorDashboard extends React.Component<any, any> {
+const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends React.Component<any,any> {
   state = {
-    active: 0,
+    downloading: true,
     bio: '',
-    file: '',
     location: '',
-    preview: '',
-    serviceEdit: false,
-    uploading: false,
-    // TODO: something better
     serviceTitle1: '',
     serviceDescription1: '',
     servicePrice1: '',
-    messages: [],
-    downloading: false,
+    preview: null,
+    uploading: false,
+    file: '',
+    serviceEdit: false,
   }
 
   componentDidMount = async () => {
-    const { web3Store, match: { params: { account } } } = this.props;
-
-    await web3Store.getAccountDataAndCache(account)
-    // await web3Store.ipfsGetDataAndCache(web3Store.betaCache.get(account).metadata);
-    this.getData()
-    if (web3Store.web3) {
-      web3Store.syncMessages(account).then((res: any) => this.setState({ messages: res }));
-    } else { setTimeout(() => web3Store.syncMessages(account).then((res: any) => this.setState({ messages: res })), 3000) }
+    this.getData();
   }
 
   getData = async () => {
-    const { web3Store, match: { params: { account } } } = this.props;
+    const { web3Store, address } = this.props;
 
-    if (!web3Store.betaCache.has(account)) {
+    if (!web3Store.betaCache.has(address)) {
       setTimeout(() => this.getData(), 4000);
       return;
     }
@@ -353,39 +344,55 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     this.setState({ downloading: true, });
     await this.props.web3Store.ipfsGetDataAndCache(
       this.props.web3Store.betaCache.get(
-        this.props.match.params.account,
+        address,
       ).metadata,
     );
 
-    let bio, location, pic, services;
-    if (web3Store.betaCache.has(account) && web3Store.ipfsCache.has(web3Store.betaCache.get(account).metadata)) {
-      const data = web3Store.ipfsCache.get(web3Store.betaCache.get(account).metadata);
+
+    let bio,location,pic,services;
+    if (web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata)) {
+      const data = web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata);
+      console.log(data.bio)
       bio = data.bio || '';
       location = data.location || '';
       pic = data.pic || '';
       services = data.services || [];
-      this.makePreview(pic);
     }
-    this.setState({ downloading: false, });
+
+    let preview = '';
+    if (pic) {
+      preview = `data:image/jpeg;base64,${Buffer.from(pic.data).toString('base64')}`;
+    }
+
+    this.setState({ 
+      downloading: false, 
+      file: pic.data,
+      bio,
+      location,
+      serviceTitle1: services[0].title,
+      serviceDescription1: services[0].description,
+      servicePrice1: services[0].price,
+      preview,
+    });
   }
 
   commit = async () => {
-    const { ipfsStore, web3Store } = this.props;
+    const { address, ipfsStore, web3Store } = this.props;
 
     if (!web3Store.account) {
       alert('Log in first! lol');
       // Reroute somewhere else
-      return
+      return;
     }
 
     let imgBuf;
-    try {
-      imgBuf = dataUriToBuffer(this.state.file)
-      // console.log('imgBuf', imgBuf);
-    } catch (e) { console.error(e); }
+    if (this.state.file) {
+      try {
+        imgBuf = dataUriToBuffer(this.state.file)
+      } catch (e) { console.error(e); }
+    } 
 
     this.setState({ uploading: true });
-    // console.log(imgBuf)
 
     const data = {
       bio: this.state.bio,
@@ -408,22 +415,15 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
 
     // TODO Cache it
     const b32 = ipfsStore.getBytes32(hash[0].path);
-    await web3Store.updateMetadata(this.props.match.params.account, b32);
-    await web3Store.addService(this.props.match.params.account, data.services[0].price)
-
+    await web3Store.updateMetadata(address, b32);
+    await web3Store.addService(address, data.services[0].price)
+   
   }
 
   inputUpdate = (evt: any) => {
     const { name, value } = evt.target;
     this.setState({
       [name]: value,
-    });
-  }
-
-  setActive = (evt: any) => {
-    const { id } = evt.target;
-    this.setState({
-      active: parseInt(id),
     });
   }
 
@@ -442,16 +442,101 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     })
   }
 
+  render() {
+    const { bio, downloading, location, serviceTitle1, serviceDescription1, servicePrice1 } = this.state;
+
+    return (
+      <>
+        {
+          downloading
+            ? <RingLoader/>
+            :
+            <>
+            <DisplayContainer>
+              <Subject upload={this.upload} preview={this.state.preview}/>
+              <InputDisplay>
+                <h4>Your Bio:</h4>
+                <BioInput
+                  name="bio"
+                  onChange={this.inputUpdate}
+                  rows={7}
+                  defaultValue={bio}
+                />
+                <h4>Location:</h4>
+                <LocationInput
+                  name="location"
+                  onChange={this.inputUpdate}
+                  defaultValue={location}
+                />
+              </InputDisplay>
+            </DisplayContainer>
+            {/* <DisplayContainer halfsize>
+              <DisplayHeading>
+                Your tags:
+              </DisplayHeading>
+              <TagContainer>
+                <Tag>blockchain</Tag>
+                <AddButton>+</AddButton>
+              </TagContainer>
+            </DisplayContainer> */}
+            <DisplayContainer halfsize>
+              <DisplayHeading>
+                What will you offer?
+              </DisplayHeading>
+              <br/>
+              <div style={{ display: 'flex', width: '100%'}}>
+                {
+                  this.state.serviceEdit ?
+                    <ServiceBox>
+                      <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate} placeholder="title" defaultValue={serviceTitle1}/>
+                      <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate} placeholder="description" defaultValue={serviceDescription1}/>
+                      <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate} placeholder="price" defaultValue={servicePrice1}/>  
+                    </ServiceBox>
+                    : ''
+                }
+                <AddServiceButton onClick={() => this.setState({ serviceEdit: true })}>
+                  +
+                </AddServiceButton>
+              </div>
+            </DisplayContainer>
+            <CommitButton onClick={this.commit}>
+              Commit to Ethereum
+            </CommitButton>
+            {
+              this.state.uploading ?
+              'Uploading!' : ''
+            }
+            </>
+        }
+      </>
+    )
+  }
+}));
+
+const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class InteriorDashboard extends React.Component<any,any> {
+  state = {
+    active: 0,
+  }
+
+  componentDidMount = async () => {
+    const { web3Store, match: { params: { account } } } = this.props;
+
+    web3Store.getAccountDataAndCache(account)
+    if (web3Store.betaCache.has(account)) {
+      web3Store.ipfsGetDataAndCache(web3Store.betaCache.get(account).metadata);
+    }
+  }
+
+  setActive = (evt: any) => {
+    const { id } = evt.target;
+    this.setState({
+      active: parseInt(id),
+    });
+  }
+
   // TODO check implementation of this account on log in and post a comment if an upgrade is needed
   upgrade = () => {
     this.props.web3Store.upgrade(this.props.match.params.account)
-  }
-
-  makePreview = (pic: any) => {
-    if (!pic) return;
-    this.setState({
-      preview: `data:image/jpeg;base64,${Buffer.from(pic.data).toString('base64')}`,
-    })
   }
 
   sendContributions = () => {
@@ -465,136 +550,33 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
 
   render() {
     const { web3Store, match: { params: { account } } } = this.props;
-    const { active, messages } = this.state;
-
-    let vari: any[] = [];
-
-    if (messages.length) {
-      vari = messages.map((eventObj: any) => {
-        const { event, blockNumber, returnValues } = eventObj;
-        if (event == 'Transfer' || !event || event == 'Approval') return;
-
-        let values: {} = {};
-        Object.keys(returnValues).forEach((value: any) => {
-          if (!parseInt(value) && parseInt(value) !== 0) {
-            Object.assign(values, { [value]: returnValues[value] });
-          }
-        })
-        return (
-          <MessageItem
-            address={account}
-            key={Math.random()}
-            title={event}
-            blockNumber={blockNumber}
-            content={values}
-          />
-        );
-      })
-    }
-
-    let bio, location, pic, services;
-    if (web3Store.betaCache.has(account) && web3Store.ipfsCache.has(web3Store.betaCache.get(account).metadata)) {
-      const data = web3Store.ipfsCache.get(web3Store.betaCache.get(account).metadata);
-      bio = data.bio || '';
-      location = data.location || '';
-      pic = data.pic || '';
-      services = data.services || [];
-    }
 
     const contributionsWaiting = web3Store.betaCache.has(account) ? web3Store.web3.utils.fromWei(web3Store.betaCache.get(account).contributions).slice(0, 6) : '?';
 
     return (
       <>
+        <DashboardLeft>
+          <DashboardLink active={active === 0} id={0} onClick={this.setActive}>
+            Profile
+          </DashboardLink>
+          <DashboardLink active={active === 1} id={1} onClick={this.setActive}>
+            Inbox
+          </DashboardLink>
+          {/* <DashboardLink active={active === 2} id={2} onClick={this.setActive}>
+            Wallet
+          </DashboardLink> */}
+        </DashboardLeft>
         <DashboardMiddle>
-          <MainDashboardCard>
-
-            <div style={{ width: '100%', height: '8%', paddingLeft: '10px' }}>
-              <TradeScreenTab active={active === 0} id={0} onClick={this.setActive}>
-                <FontAwesomeIcon icon={faUserAstronaut} />
-              </TradeScreenTab>
-              <TradeScreenTab active={active === 1} id={1} onClick={this.setActive}>
-                <FontAwesomeIcon icon={faEnvelope} />
-              </TradeScreenTab>
-            </div>
-            {
-              active === 0 &&
-              <>
-                <div style={{ height: '90%' }}>
-                  <DisplayContainer>
-                    <Subject upload={this.upload} preview={this.state.preview} />
-                    <InputDisplay>
-                      <h4>Your Bio:</h4>
-                      <BioInput
-                        name="bio"
-                        onChange={this.inputUpdate}
-                        rows={7}
-                        defaultValue={bio}
-                      />
-                      <h4>Location:</h4>
-                      <LocationInput
-                        name="location"
-                        onChange={this.inputUpdate}
-                        defaultValue={location}
-                      />
-                    </InputDisplay>
-                  </DisplayContainer>
-                  {/* <DisplayContainer halfsize>
-                <DisplayHeading>
-                  Your tags:
-                </DisplayHeading>
-                <TagContainer>
-                  <Tag>blockchain</Tag>
-                  <AddButton>+</AddButton>
-                </TagContainer>
-              </DisplayContainer> */}
-                  <DisplayContainer halfsize>
-                    <DisplayHeading>
-                      What will you offer?
-                </DisplayHeading>
-                    <br />
-                    <div style={{ display: 'flex', width: '100%' }}>
-                      {
-                        this.state.serviceEdit ?
-                          <ServiceBox>
-                            <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate} placeholder="title" defaultValue={services[0].title} />
-                            <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate} placeholder="description" defaultValue={services[0].description} />
-                            <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate} placeholder="price" defaultValue={services[0].price} />
-                          </ServiceBox>
-                          : ''
-                      }
-                      <AddServiceButton onClick={() => this.setState({ serviceEdit: true })}>
-                        +
-                  </AddServiceButton>
-                    </div>
-                  </DisplayContainer>
-                </div>
-                <div style={{ height: '10%', width: '100%' }}>
-                  <CommitButton onClick={this.commit}>
-                    COMMIT
-                </CommitButton>
-                </div>
-                {
-                  this.state.uploading ?
-                    'Uploading!' : ''
-                }
-              </>
-              ||
-              active == 1 &&
-              <>
-                {/* <h1>Inbox</h1> */}
-                <div style={{ height: '100%', width: '100%' }}>
-                  {
-                    this.state.messages.length < 1 ?
-                      <div style={{ height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <RingLoader />
-                      </div>
-                      :
-                      vari.reverse()
-                  }
-                </div>
-              </>
-            }
-          </MainDashboardCard>
+          {
+            active === 0 &&
+              <Profile address={account}/>
+            ||
+            active == 1 &&
+              <Inbox address={account}/>
+            ||
+            active == 2 &&
+              <Wallet address={account}/>
+          }
         </DashboardMiddle>
         <DashboardRight>
           <DashboardRightBox>
@@ -638,21 +620,20 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
 }));
 
 const DashboardPage = withRouter(observer(
-  class DashboardPage extends React.Component<any, any>{
+  class DashboardPage extends React.Component<any,any>{
 
-    render() {
-      const { web3Store } = this.props;
+  render() {
+    const { web3Store } = this.props;
 
-      const items = Array.from(web3Store.accountsCache).map((address: any) => {
-        const blockie = makeBlockie(address);
-        return <AccountLink to={`/dashboard/${address}`} key={Math.random()}>
-          <img src={blockie} style={{ width: '50px', height: '50px', borderRadius: '25px' }} alt={address} />
-          <AccountDetails>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>Token Name</div>
-            {address}
-          </AccountDetails>
-        </AccountLink>;
-      });
+    const items = Array.from(web3Store.accountsCache).map((address: any) => {
+      const blockie = makeBlockie(address);
+       return (
+        <AccountLink to={`/dashboard/${address}`} key={Math.random()}>
+          <img src={blockie} style={{ width: '50px', height: '50px', borderRadius: '25px' }} alt={address}/>
+          {address}
+        </AccountLink>
+       );
+    });
 
       return (
         <DashboardContainer>
