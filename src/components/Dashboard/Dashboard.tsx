@@ -10,6 +10,7 @@ import Subject from '../Dropzone.jsx';
 import Wallet from './Wallet/Wallet';
 
 import { colors } from '../../common';
+import { RingLoader } from 'react-spinners';
 
 const DashboardContainer = styled.div`
   width: 100%;
@@ -245,34 +246,28 @@ const WidthdrawButton = styled.button`
   }
 `;
 
-const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class InteriorDashboard extends React.Component<any,any> {
+const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends React.Component<any,any> {
   state = {
-    active: 0,
+    downloading: true,
     bio: '',
-    file: '',
     location: '',
-    preview: '',
-    serviceEdit: false,
-    uploading: false,
-    // TODO: something better
     serviceTitle1: '',
     serviceDescription1: '',
     servicePrice1: '',
-    downloading: false,
+    preview: null,
+    uploading: false,
+    file: '',
+    serviceEdit: false,
   }
 
   componentDidMount = async () => {
-    const { web3Store, match: { params: { account } } } = this.props;
-
-    web3Store.getAccountDataAndCache(account)
-    // await web3Store.ipfsGetDataAndCache(web3Store.betaCache.get(account).metadata);
-    this.getData()
+    this.getData();
   }
 
   getData = async () => {
-    const { web3Store, match: { params: { account } } } = this.props;
+    const { web3Store, address } = this.props;
 
-    if (!web3Store.betaCache.has(account)) {
+    if (!web3Store.betaCache.has(address)) {
       setTimeout(() => this.getData(), 4000);
       return;
     }
@@ -280,13 +275,13 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     this.setState({ downloading: true, });
     await this.props.web3Store.ipfsGetDataAndCache(
       this.props.web3Store.betaCache.get(
-        this.props.match.params.account,
+        address,
       ).metadata,
     );
 
     let bio,location,pic,services;
-    if (web3Store.betaCache.has(account) && web3Store.ipfsCache.has(web3Store.betaCache.get(account).metadata)) {
-      const data = web3Store.ipfsCache.get(web3Store.betaCache.get(account).metadata);
+    if (web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata)) {
+      const data = web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata);
       console.log(data.bio)
       bio = data.bio || '';
       location = data.location || '';
@@ -312,22 +307,22 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
   }
 
   commit = async () => {
-    const { ipfsStore, web3Store } = this.props;
+    const { address, ipfsStore, web3Store } = this.props;
 
     if (!web3Store.account) {
       alert('Log in first! lol');
       // Reroute somewhere else
-      return
+      return;
     }
 
     let imgBuf;
-    try {
-      imgBuf = dataUriToBuffer(this.state.file)
-      // console.log('imgBuf', imgBuf);
-    } catch (e) { console.error(e); }
+    if (this.state.file) {
+      try {
+        imgBuf = dataUriToBuffer(this.state.file)
+      } catch (e) { console.error(e); }
+    } 
 
     this.setState({ uploading: true });
-    // console.log(imgBuf)
 
     const data = {
       bio: this.state.bio,
@@ -350,22 +345,15 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
 
     // TODO Cache it
     const b32 = ipfsStore.getBytes32(hash[0].path);
-    await web3Store.updateMetadata(this.props.match.params.account, b32);
-    await web3Store.addService(this.props.match.params.account, data.services[0].price)
-    
+    await web3Store.updateMetadata(address, b32);
+    await web3Store.addService(address, data.services[0].price)
+   
   }
 
   inputUpdate = (evt: any) => {
     const { name, value } = evt.target;
     this.setState({
       [name]: value,
-    });
-  }
-
-  setActive = (evt: any) => {
-    const { id } = evt.target;
-    this.setState({
-      active: parseInt(id),
     });
   }
 
@@ -384,6 +372,98 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     })
   }
 
+  render() {
+    const { bio, downloading, location, serviceTitle1, serviceDescription1, servicePrice1 } = this.state;
+
+    return (
+      <>
+        {
+          downloading
+            ? <RingLoader/>
+            :
+            <>
+            <DisplayContainer>
+              <Subject upload={this.upload} preview={this.state.preview}/>
+              <InputDisplay>
+                <h4>Your Bio:</h4>
+                <BioInput
+                  name="bio"
+                  onChange={this.inputUpdate}
+                  rows={7}
+                  defaultValue={bio}
+                />
+                <h4>Location:</h4>
+                <LocationInput
+                  name="location"
+                  onChange={this.inputUpdate}
+                  defaultValue={location}
+                />
+              </InputDisplay>
+            </DisplayContainer>
+            {/* <DisplayContainer halfsize>
+              <DisplayHeading>
+                Your tags:
+              </DisplayHeading>
+              <TagContainer>
+                <Tag>blockchain</Tag>
+                <AddButton>+</AddButton>
+              </TagContainer>
+            </DisplayContainer> */}
+            <DisplayContainer halfsize>
+              <DisplayHeading>
+                What will you offer?
+              </DisplayHeading>
+              <br/>
+              <div style={{ display: 'flex', width: '100%'}}>
+                {
+                  this.state.serviceEdit ?
+                    <ServiceBox>
+                      <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate} placeholder="title" defaultValue={serviceTitle1}/>
+                      <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate} placeholder="description" defaultValue={serviceDescription1}/>
+                      <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate} placeholder="price" defaultValue={servicePrice1}/>  
+                    </ServiceBox>
+                    : ''
+                }
+                <AddServiceButton onClick={() => this.setState({ serviceEdit: true })}>
+                  +
+                </AddServiceButton>
+              </div>
+            </DisplayContainer>
+            <CommitButton onClick={this.commit}>
+              Commit to Ethereum
+            </CommitButton>
+            {
+              this.state.uploading ?
+              'Uploading!' : ''
+            }
+            </>
+        }
+      </>
+    )
+  }
+}));
+
+const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class InteriorDashboard extends React.Component<any,any> {
+  state = {
+    active: 0,
+  }
+
+  componentDidMount = async () => {
+    const { web3Store, match: { params: { account } } } = this.props;
+
+    web3Store.getAccountDataAndCache(account)
+    if (web3Store.betaCache.has(account)) {
+      web3Store.ipfsGetDataAndCache(web3Store.betaCache.get(account).metadata);
+    }
+  }
+
+  setActive = (evt: any) => {
+    const { id } = evt.target;
+    this.setState({
+      active: parseInt(id),
+    });
+  }
+
   // TODO check implementation of this account on log in and post a comment if an upgrade is needed
   upgrade = () => {
     this.props.web3Store.upgrade(this.props.match.params.account)
@@ -400,7 +480,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
 
   render() {
     const { web3Store, match: { params: { account } } } = this.props;
-    const { active, bio, location, serviceTitle1, serviceDescription1, servicePrice1 } = this.state;
+    const { active } = this.state;
 
     const contributionsWaiting = web3Store.betaCache.has(account) ? web3Store.web3.utils.fromWei(web3Store.betaCache.get(account).contributions).slice(0,6) : '?';
 
@@ -420,63 +500,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
         <DashboardMiddle>
           {
             active === 0 &&
-              <>
-              {this.state.downloading && <div>DOWNLOADING</div>}
-              <DisplayContainer>
-                <Subject upload={this.upload} preview={this.state.preview}/>
-                <InputDisplay>
-                  <h4>Your Bio:</h4>
-                  <BioInput
-                    name="bio"
-                    onChange={this.inputUpdate}
-                    rows={7}
-                    defaultValue={bio}
-                  />
-                  <h4>Location:</h4>
-                  <LocationInput
-                    name="location"
-                    onChange={this.inputUpdate}
-                    defaultValue={location}
-                  />
-                </InputDisplay>
-              </DisplayContainer>
-              {/* <DisplayContainer halfsize>
-                <DisplayHeading>
-                  Your tags:
-                </DisplayHeading>
-                <TagContainer>
-                  <Tag>blockchain</Tag>
-                  <AddButton>+</AddButton>
-                </TagContainer>
-              </DisplayContainer> */}
-              <DisplayContainer halfsize>
-                <DisplayHeading>
-                  What will you offer?
-                </DisplayHeading>
-                <br/>
-                <div style={{ display: 'flex', width: '100%'}}>
-                  {
-                    this.state.serviceEdit ?
-                      <ServiceBox>
-                        <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate} placeholder="title" defaultValue={serviceTitle1}/>
-                        <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate} placeholder="description" defaultValue={serviceDescription1}/>
-                        <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate} placeholder="price" defaultValue={servicePrice1}/>  
-                      </ServiceBox>
-                      : ''
-                  }
-                  <AddServiceButton onClick={() => this.setState({ serviceEdit: true })}>
-                    +
-                  </AddServiceButton>
-                </div>
-              </DisplayContainer>
-              <CommitButton onClick={this.commit}>
-                Commit to Ethereum
-              </CommitButton>
-              {
-                this.state.uploading ?
-                'Uploading!' : ''
-              }
-              </>
+              <Profile address={account}/>
             ||
             active == 1 &&
               <Inbox address={account}/>

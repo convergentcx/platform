@@ -36,6 +36,8 @@ const ListItem = styled(Link)<any>`
   align-items: center;
   background: #FFF;
   transition: 0.4s;
+  text-decoration: none;
+  color: #000;
   :hover {
     background: rgba(00,44,255, 0.3);
   }
@@ -76,12 +78,16 @@ const Blockie = styled.img`
 
 const List = inject('web3Store')(observer(class List extends React.Component<any,any> {
   state = {
+    byName: null,
+    byMC: null,
     byPrice: null,
     chrono: false,
   }
 
   reverseChronologic = () => {
     this.setState({
+      byName: null,
+      byMC: null,
       byPrice: null,
       chrono: !this.state.chrono,
     })
@@ -106,7 +112,7 @@ const List = inject('web3Store')(observer(class List extends React.Component<any
         }
 
         items.push(
-          <ListItem to={`/profile/${account}`} key={Math.random()} curprice={curPrice}>
+          <ListItem to={`/profile/${account}`} key={Math.random()} curprice={curPrice} mc={MC} name={name}>
             <BContainer>
               <Blockie src={block} alt="blockie"/>
             </BContainer>
@@ -126,20 +132,75 @@ const List = inject('web3Store')(observer(class List extends React.Component<any
     if (this.state.byPrice) {
       items = items.sort((a: any, b: any) => {
         const { toWei, toBN } = this.props.web3Store.web3.utils;
-        console.log(a)
+        if (a.props.curprice == '???' || b.props.curprice == '???') {
+          return -1;
+        }
         a = toBN(toWei(a.props.curprice));
         b = toBN(toWei(b.props.curprice));
         if (a.gt(b)) return -1;
         else return 1;
       })
     } 
+    
     if (this.state.byPrice === false) {
       items = items.sort((a: any, b: any) => {
         const { toWei, toBN } = this.props.web3Store.web3.utils;
-        console.log(a)
+        if (a.props.curprice == '???' || b.props.curprice == '???') {
+          return -1;
+        }
         a = toBN(toWei(a.props.curprice));
         b = toBN(toWei(b.props.curprice));
         if (a.gt(b)) return 1;
+        else return -1;
+      })
+    } 
+
+    if (this.state.byMC) {
+      items = items.sort((a: any, b: any) => {
+        const { toWei, toBN } = this.props.web3Store.web3.utils;
+        if (a.props.mc == '???' || b.props.mc == '???') {
+          return -1;
+        }
+        a = toBN(toWei(a.props.mc));
+        b = toBN(toWei(b.props.mc));
+        if (a.gt(b)) return -1;
+        else return 1;
+      })
+    } 
+
+    if (this.state.byMC === false) {
+      items = items.sort((a: any, b: any) => {
+        const { toWei, toBN } = this.props.web3Store.web3.utils;
+        if (a.props.mc == '???' || b.props.mc == '???') {
+          return -1;
+        }
+        a = toBN(toWei(a.props.mc));
+        b = toBN(toWei(b.props.mc));
+        if (a.gt(b)) return 1;
+        else return -1;
+      })
+    } 
+
+    if (this.state.byName) {
+      items = items.sort((a: any, b: any) => {
+        if (a.props.name == '???' || b.props.name == '???') {
+          return -1;
+        }
+        a = a.props.name;
+        b = b.props.name;
+        if (a > b) return -1;
+        else return 1;
+      })
+    } 
+
+    if (this.state.byName === false) {
+      items = items.sort((a: any, b: any) => {
+        if (a.props.name == '???' || b.props.name == '???') {
+          return -1;
+        }
+        a = a.props.name;
+        b = b.props.name;
+        if (a > b) return 1;
         else return -1;
       })
     } 
@@ -148,9 +209,9 @@ const List = inject('web3Store')(observer(class List extends React.Component<any
       <ListContainer>
         <ListHeader>
           <HeaderItem/>
-          <HeaderItem>NAME</HeaderItem>
-          <HeaderItemClick onClick={() => this.setState({ byPrice: !this.state.byPrice })}>PRICE</HeaderItemClick>
-          <HeaderItem>MARKET CAP</HeaderItem>
+          <HeaderItemClick onClick={() => this.setState({ byPrice: null, byMC: null, byName: !this.state.byName })}>NAME</HeaderItemClick>
+          <HeaderItemClick onClick={() => this.setState({ byPrice: !this.state.byPrice, byMc: null, byName: null, })}>PRICE</HeaderItemClick>
+          <HeaderItemClick onClick={() => this.setState({ byMC: !this.state.byMC, byPrice: null, byName: null,})}>MARKET CAP</HeaderItemClick>
           <HeaderItemClick onClick={this.reverseChronologic}>CREATION</HeaderItemClick>
         </ListHeader>
         {
