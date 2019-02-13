@@ -94,7 +94,7 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
       alert('Log in first!');
     }
     const randBytes32 = web3Store.web3.utils.randomHex(32);
-    const tx = await web3Store.convergentBeta.methods.newAccount(
+    const tx = await web3Store.convergentBeta.methods.createAccount(
       "0x0000000000000000000000000000000000000000", // reserve asset
       "1", // slopeN
       "1000", // slopeD
@@ -108,6 +108,7 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
     ).send({ from: this.props.web3Store.account });
     // console.log(tx);
     if (tx.status === true) {
+      web3Store.toaster.add('Success!', { appearance: 'success', autoDismiss: true });
       console.log('success');
       console.log('tx hash: ', tx.transactionHash);
       console.log('account: ', tx.events.NewAccount.returnValues.account);

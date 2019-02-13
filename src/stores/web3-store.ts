@@ -7,7 +7,7 @@ import Account2 from '../assets/artifacts2/Account.json';
 
 import { b32IntoMhash } from '../lib/ipfs-util';
 
-const CB2_PROXY_ADDR = "0x130ce5d82ae4174a0284027f9ec1d0dcaa748ced";
+const CB_PROXY_ADDR_MAINNET = "0x9ce894a11ada19881ab560a5091a4cc3ff8f2d84";
 
 type CbAccount = {
   creator: string,
@@ -85,7 +85,7 @@ export default class Web3Store {
   // Infure node.
   @action
   initReadonly = async () => {
-    const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws/v3/7121204aac9a45dcb9c2cc825fb85159'));
+    const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://neatly-tolerant-coral.quiknode.io/73b04107-89ee-4261-9a8f-3c1e946c17b2/CyYMMeeGTb-EeIBHGwORaw==/'));
     this.readonly = true;
     this.web3 = web3;
     this.toaster.add(`App started in READONLY mode using Infura node. You will not be able to interact with Ethereum until you log in.`, { appearance: 'warning', autoDismiss: true })
@@ -109,8 +109,8 @@ export default class Web3Store {
       return 
     }
     const netId = await _window.web3.eth.net.getId();
-    if (netId !== 4) {
-      _window.alert('Please tune in on the Rinkeby test network!');
+    if (netId !== 1) {
+      _window.alert('DApp is running on the Ethereum mainnet. Please switch your provider to mainnet.');
       return;
     }
     this.updateWeb3(_window.web3);
@@ -130,7 +130,7 @@ export default class Web3Store {
     const { abi: abi2 } = ConvergentBeta2;
     const convergentBeta2 = new this.web3.eth.Contract(
       abi2,
-      CB2_PROXY_ADDR,
+      CB_PROXY_ADDR_MAINNET,
     );
     this.convergentBeta = convergentBeta2;
     this.cacheAccounts();

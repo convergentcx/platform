@@ -18,7 +18,7 @@ const Inbox = inject('web3Store')(observer(class Inbox extends React.Component<a
     } else {
       setTimeout(() => web3Store.syncMessages(address).then((res: any) => this.setState({ messages: res })));
     }
-    intercept(this, () => null);
+    // intercept(this.props, () => null);
   }
 
   render() {
