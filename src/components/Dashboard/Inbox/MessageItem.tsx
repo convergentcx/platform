@@ -6,11 +6,11 @@ import { inject } from 'mobx-react';
 
 import makeBlockie from 'ethereum-blockies-base64';
 
-import { MessageType } from '../../lib/messageUtil';
+import { MessageType } from '../../../lib/messageUtil';
 
 import Web3 from 'web3';
-import { colors } from '../../common';
-import { b32IntoMhash } from '../../lib/ipfs-util';
+import { colors } from '../../../common';
+import { b32IntoMhash } from '../../../lib/ipfs-util';
 
 const { utils } = require('web3');
 
@@ -20,7 +20,7 @@ const MessageRow = styled.div`
   flex-flow: row wrap;
   width: 100%;
   height: 40px;
-  background: #CCC;
+  background: #EEE;
   align-items: center;
   border: none;
   cursor: pointer;
@@ -69,11 +69,11 @@ const MessageButtonContainer = styled.div`
 const MessageExpand = styled.div<any>`
   display: ${props => props.show ? 'flex' : 'none'};
   width: 100%;
-  height: ${props => props.show ? '60px' : '0px'};
+  height: ${props => props.show ? '100px' : '0px'};
   justify-content: center;
   align-items: center;
   font-size: 11px;
-  background: grey;
+  background: #666;
 `;
 
 const MessageShowMore = styled.div`
@@ -90,6 +90,26 @@ const ClickableSpan = styled.span`
     color: ${colors.SoftBlue};
   } 
 `;
+
+const MessageInsideContainer = styled.div`
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+`;
+
+const MessageInsideAvatar = styled.img`
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+  margin-left: 20px;
+`;
+  // cursor: pointer;
+  // transition: 0.3s;
+  // :hover {
+  //   opacity: 0.5;
+  // }
+
 
 type MessageItemProps = {
   title: string,
@@ -108,57 +128,57 @@ const sort = (type: string, content: any) => {
     const { requestor, serviceIndex, message } = content;
     const blockie = makeBlockie(requestor);
     return (
-      <div style={{ display: 'flex', width: '100%', height: '100%'}}>
-        <img style={{ width: '60px', height: '60px'}} src={blockie} alt={requestor}/>
+      <MessageInsideContainer>
+        <MessageInsideAvatar src={blockie} alt={requestor}/>
         <div style={{ width: '30%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           {serviceIndex}
         </div>
         <div style={{ width: '100%', padding: '16px', fontSize: '12px'}}>
           {message}
         </div>
-      </div>
+      </MessageInsideContainer>
     )
   }
   if (type === MessageType.Sold) {
     const { seller, amount, reserveReturned } = content;
     const blockie = makeBlockie(seller);
     return (
-      <div style={{ display: 'flex', width: '100%', height: '100%'}}>
-      <img style={{ width: '60px', height: '60px'}} src={blockie} alt={seller}/>
-      <div style={{ width: '30%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        SOLD {utils.fromWei(amount)} cvg
-      </div>
-      <div style={{ width: '30%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-        RETURNED {utils.fromWei(reserveReturned)} eth
-      </div>
-    </div>
+      <MessageInsideContainer>
+        <MessageInsideAvatar src={blockie} alt={seller}/>
+        <div style={{ width: '30%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          SOLD {utils.fromWei(amount)} cvg
+        </div>
+        <div style={{ width: '30%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+          RETURNED {utils.fromWei(reserveReturned)} eth
+        </div>
+      </MessageInsideContainer>
     )
   }
   if (type === MessageType.Bought) {
     const { buyer, amount, paid } = content;
     const blockie = makeBlockie(buyer);
     return (
-      <div style={{ display: 'flex', width: '100%', height: '100%'}}>
-      <img style={{ width: '60px', height: '60px'}} src={blockie} alt={buyer}/>
+      <MessageInsideContainer>
+      <MessageInsideAvatar src={blockie} alt={buyer}/>
       <div style={{ width: '30%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         BOUGHT {utils.fromWei(amount)} cvg
       </div>
       <div style={{ width: '30%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
         PAID {utils.fromWei(paid)} eth
       </div>
-    </div>
+    </MessageInsideContainer>
     )
   }
   if (type === MessageType.Contributed) {
     const { buyer, contribution } = content;
     const blockie = makeBlockie(buyer);
     return (
-      <div style={{ display: 'flex', width: '100%', height: '100%'}}>
-      <img style={{ width: '60px', height: '60px'}} src={blockie} alt={buyer}/>
+      <MessageInsideContainer>
+      <MessageInsideAvatar src={blockie} alt={buyer}/>
       <div style={{ width: '30%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         CONTRIBUTED {utils.fromWei(contribution)} eth
       </div>
-    </div>
+    </MessageInsideContainer>
     )
   }
   if (type === MessageType.MetadataUpdated) {
@@ -170,11 +190,11 @@ const sort = (type: string, content: any) => {
     });
     const url = 'https://gateway.ipfs.io/ipfs/' + contentAddr;
     return (
-      <div style={{ display: 'flex', width: '100%', height: '100%'}}>
+      <MessageInsideContainer>
       <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         YOU UPDATED YOUR DATA: &nbsp;<ClickableSpan onClick={() => window.open(url)}>{newMetadata.slice(0,6) + '...' + newMetadata.slice(-4)}</ClickableSpan>
       </div>
-    </div>
+    </MessageInsideContainer>
     )
   }
   return JSON.stringify(content);
@@ -190,7 +210,7 @@ const MessageItem = inject('web3Store')(class MessageItem extends React.Componen
   }
 
   render() {
-    const { web3Store } = this.props;
+    // const { web3Store } = this.props;
     // const { services } = web3Store.web3Store.betaCache.get(this.props.address).metadata
     return (
       <>

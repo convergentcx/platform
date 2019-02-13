@@ -7,16 +7,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   faCoins,
-  faUserFriends,
-  faDollarSign,
-  faMoneyBill,
+  // faUserFriends,
+  // faDollarSign,
+  // faMoneyBill,
   faChartLine,
   faSyncAlt
 } from '@fortawesome/free-solid-svg-icons';
 
 import MyChart from '../Chart';
 import { colors, shadowMixin } from '../../../common';
-import Web3Store from '../../../stores/web3-store';
 
 const InvestBox = styled.div`
   background: #FFF;
@@ -35,7 +34,7 @@ const TradeScreenTab = styled.button<any>`
   border: none;
   cursor: pointer;
   width: 20%;
-  background: #FFF;
+  background: transparent;
   border-radius: 60px 0 0 0;
   color: ${(props: any) => props.active ? colors.SoftBlue : '#000'};
   transition: 0.3s;
@@ -51,6 +50,7 @@ const TradeScreenContent = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  border-radius: 60px 60px 0 0;
 `;
 
 type ButtonProps = { exiting: boolean, investing: boolean };
@@ -134,6 +134,11 @@ const InvestSlashExitContainer = styled.div`
   text-align: center;
 `;
 
+const TradeScreenContainer = styled.div`
+  height: 90%;
+  border-radius: 60px 60px 0 0;
+`;
+
 const QuitButtonContainer = styled.div`
   width: 100%;
   height: 16%;
@@ -193,6 +198,7 @@ const StatsContainer = styled.div`
   justify-content: center;
   padding: 0;
   padding-top: 50px;
+  margin: 0;
   height: auto;
   width: 100%;
   align-self: flex-start;
@@ -293,7 +299,7 @@ const StatsDisplay = inject('web3Store')(observer((props: any) => (
         Contributors
       </StatsBoxHeader>
       <StatsBoxContent>
-        {props.web3Store.betaCache.get(props.address).contributorCount}
+        {props.web3Store.betaCache.get(props.address).contributorCount || 0}
       </StatsBoxContent>
     </StatsBox>
 
@@ -374,8 +380,8 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
     }
 
     return (
-      <div style={{ height: '90%', padding: '5px' }}>
-        <div style={{ width: '100%', height: '8%', display: 'flex', flexDirection: 'row', paddingLeft: '10px' }}>
+      <TradeScreenContainer>
+        <div style={{ width: '100%', height: '8%', display: 'flex', flexDirection: 'row', paddingLeft: '10px', background: 'transparent' }}>
           <TradeScreenTab
             active={this.state.active === 0}
             id={0}
@@ -487,7 +493,7 @@ const TradeScreen = observer(class TradeScreen extends React.Component<TradeScre
             )
           }
         </TradeScreenContent>
-      </div>
+      </TradeScreenContainer>
     );
   }
 });
