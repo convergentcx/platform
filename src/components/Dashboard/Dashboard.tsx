@@ -9,40 +9,68 @@ import Inbox from './Inbox/Inbox';
 import Subject from '../Dropzone.jsx';
 import Wallet from './Wallet/Wallet';
 
-import { colors } from '../../common';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import {
+  faEnvelope,
+  faUserAstronaut
+} from '@fortawesome/free-solid-svg-icons';
+
+import { colors, shadowMixin } from '../../common';
 import { RingLoader } from 'react-spinners';
 
 const DashboardContainer = styled.div`
   width: 100%;
   min-height: 100vh;
-  background: ${colors.CvgTeal};
+  background: ${colors.BgGrey};
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  /* align-items: center; */
+  @media (max-width: 450px) {
+    width: 94vw;
+    margin-bottom: 8%;
+  }
 `;
+
 
 const YourAccounts = observer(styled.div`
   max-width: 80%;
   display: flex;
   flex-direction: column;
+  overflow-y: scroll;
 `);
 
 const AccountLink = styled(Link)`
   display: flex;
   width: 100%;
+  /* padding-left: 20px; */
   text-decoration: none;
   align-items: center;
-  margin-bottom: 8px;
   transition: 0.2s;
+  color: white;
+  font-size: 12px;
+  padding: 8px 0 8px 0;
   :hover {
-    color: #A3A3A3;
+    color: ${colors.OrangeDark};
+    background: ${colors.BgGrey};
   }
+`;
+
+const AccountDetails = styled.div`
+  padding-left: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const DashboardLeft = styled.div`
   width: 20%;
   height: 100vh;
-  background: ;
+  background: ${colors.CvgTealLight};
+  max-width: 80%;
+  display: flex;
+  flex-direction: column;
+  padding-top: 5vh;
 `;
 
 const DashboardLink = styled.div<any>`
@@ -63,14 +91,38 @@ const DashboardLink = styled.div<any>`
 `;
 
 const DashboardMiddle = styled.div`
-  width: 60%;
-  height: 100vh;
-  background: ;
+  width: 58%;
+  padding-top: 5vh;
+  display: flex;
+  justify-content: center;
+`;
+
+const MainDashboardCard = styled.div`
+  width: 85%;
+  background: #FFF;
   align-items: center;
   display: flex;
   flex-direction: column;
-  overflow-y: scroll;
+  // overflow-y: scroll;
   justify-content: center;
+  border-radius: 60px;
+  border-width: 10px;
+  height: 90vh;
+  ${shadowMixin};
+`;
+
+
+const TradeScreenTab = styled.button<any>`
+  border: none;
+  cursor: pointer;
+  width: 20%;
+  background: #FFF;
+  border-radius: 60px 0 0 0;
+  color: ${(props: any) => props.active ? colors.SoftBlue : '#000'};
+  transition: 0.3s;
+  :hover {
+    color: ${colors.SoftBlue}
+  }
 `;
 
 const DisplayContainer = styled.div<any>`
@@ -128,19 +180,21 @@ const ServiceInputPrice = styled.input`
 `;
 
 const CommitButton = styled.button`
-  display: flex;
   cursor: pointer;
-  width: 90%;
-  border: solid;
-  justify-content: center;
-  align-items: center;
-  height: 32px;
-  font-size: 16px;
-  transition: 0.3s;
-  border-radius: 32px;
-  border-color: #202020;
-  margin-top: 16px;
-  font-weight: 900;
+  width: 100%;
+  height: 100%;
+  border-radius: 0 0 60px 60px;
+  background: ${colors.SoftBlue};
+  color: #FFF;
+  font-weight: 600;
+  font-style: italic;
+  border: none;
+  background: ${colors.OrangeDark};
+  transition: 0.2s;
+  :hover {
+    background: ${colors.Orange};
+    border-color: ${colors.Orange};
+  }
 `;
 
 const DisplayHeading = styled.h4`
@@ -203,22 +257,29 @@ const AddServiceButton = styled.button`
 
 const DashboardRight = styled.div`
   width: 20%;
-  height: 100vh;
+  height: 90vh;
   background: ;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-between;
   align-items: flex-start;
-  flex-flow: row wrap;
+  /* flex-flow: row wrap;  */
+  padding-top: 5vh;
+  padding-bottom: 5vh;
 `;
 
 const DashboardRightBox = styled.div`
-  width: 100%;
-  height: 160px;
+  width: 80%;
+  height: 150px;
   display: flex;
-  flex-flow: row wrap;
-  padding: 16px;
-  background: #CCC;
-  margin: 8px;
+  flex-direction: column;
+  padding: 30px;
+  background: #FFF;
+  border-radius: 60px;
+  border-width: 10px;
+  ${shadowMixin};
+  position: relative;
+  font-size: 18px;
 `;
 
 // const UpgradeButton = styled.button`
@@ -236,13 +297,21 @@ const DashboardRightBox = styled.div`
 // `;
 
 const WidthdrawButton = styled.button`
-  background: #232323;
+  background: #ffff4c;
   border: none;
   cursor: pointer;
   transition: 0.3s;
   width: 100%;
+  height: 20%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  border-radius: 0 0 60px 60px;
+  color: #232323;
+  font-weight: bold;
+  font-style: italic;
   :hover {
-    background: #696969
+    background: #ffff7f;
   }
 `;
 
@@ -282,7 +351,6 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
     let bio,location,pic,services;
     if (web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata)) {
       const data = web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata);
-      console.log(data.bio)
       bio = data.bio || '';
       location = data.location || '';
       pic = data.pic || '';
@@ -347,7 +415,6 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
     const b32 = ipfsStore.getBytes32(hash[0].path);
     await web3Store.updateMetadata(address, b32);
     await web3Store.addService(address, data.services[0].price)
-   
   }
 
   inputUpdate = (evt: any) => {
@@ -366,7 +433,7 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
     };
 
     reader.readAsDataURL(files[0]);
-    
+
     this.setState({
       preview: URL.createObjectURL(files[0]),
     })
@@ -482,7 +549,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     const { web3Store, match: { params: { account } } } = this.props;
     const { active } = this.state;
 
-    const contributionsWaiting = web3Store.betaCache.has(account) ? web3Store.web3.utils.fromWei(web3Store.betaCache.get(account).contributions).slice(0,6) : '?';
+    const contributionsWaiting = web3Store.betaCache.has(account) ? web3Store.web3.utils.fromWei(web3Store.betaCache.get(account).contributions).slice(0, 6) : '?';
 
     return (
       <>
@@ -498,6 +565,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
           </DashboardLink> */}
         </DashboardLeft>
         <DashboardMiddle>
+          <MainDashboardCard>                              
           {
             active === 0 &&
               <Profile address={account}/>
@@ -508,25 +576,43 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
             active == 2 &&
               <Wallet address={account}/>
           }
+          </MainDashboardCard>
         </DashboardMiddle>
         <DashboardRight>
           <DashboardRightBox>
-            <div style={{ width: '100%' }}>
-              You have {contributionsWaiting} eth in contributions to withdraw.
-            </div>
+              <div style={{margin: '0'}}>
+                Contributions to withdraw
+              </div>
+              <div style={{ fontSize: '35px', marginTop: '20px' }}>
+                {contributionsWaiting} eth
+              </div>
             <WidthdrawButton onClick={this.sendContributions}>
-              Withdraw
+              WITHDRAW
             </WidthdrawButton>
           </DashboardRightBox>
           <DashboardRightBox>
-            <div style={{ width: '100%' }}>
-              You are on the current release.
-            </div>
-            <WidthdrawButton onClick={this.upgrade}>
-              Upgrade
+              <div style={{margin: '0'}}>
+                You own
+              </div>
+              <div style={{ fontSize: '35px', marginTop: '20px' }}>
+                123 TKN
+              </div>
+            <WidthdrawButton>
+              SELL
             </WidthdrawButton>
           </DashboardRightBox>
-          
+          <DashboardRightBox>
+              <div style={{margin: '0'}}>
+                You are on the current release
+              </div>
+              <div style={{ fontSize: '35px', marginTop: '20px' }}>
+                V0.1
+              </div>              
+            <WidthdrawButton onClick={this.upgrade}>
+              UPGRADE
+            </WidthdrawButton>
+          </DashboardRightBox>
+
         </DashboardRight>
       </>
     )
@@ -534,36 +620,37 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
 }));
 
 const DashboardPage = withRouter(observer(
-  class DashboardPage extends React.Component<any,any>{
+  class DashboardPage extends React.Component<any, any>{
 
-  render() {
-    const { web3Store } = this.props;
+    render() {
+      const { web3Store } = this.props;
 
-    const items = Array.from(web3Store.accountsCache).map((address: any) => {
-      const blockie = makeBlockie(address);
-       return (
-        <AccountLink to={`/dashboard/${address}`} key={Math.random()}>
-          <img src={blockie} style={{ width: '50px', height: '50px', borderRadius: '25px' }} alt={address}/>
-          {address}
-        </AccountLink>
-       );
-    });
+      const items = Array.from(web3Store.accountsCache).map((address: any) => {
+        const blockie = makeBlockie(address);
+        return <AccountLink to={`/dashboard/${address}`} key={Math.random()}>
+          <img src={blockie} style={{ width: '50px', height: '50px', borderRadius: '25px' }} alt={address} />
+          <AccountDetails>
+            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>Token Name</div>
+            {address}
+          </AccountDetails>
+        </AccountLink>;
+      });
 
-    return (
-      <DashboardContainer>
-        <Route path='/dashboard' exact render={() => (
-          web3Store.account
-            ?
-              <YourAccounts>
+      return (
+        <DashboardContainer>
+          <Route path='/dashboard' render={() => (
+            web3Store.account
+              ?
+              <DashboardLeft>
                 {items}
-              </YourAccounts>
-            :
-              <h1>Please log in</h1>
-        )}/>
-        <Route path='/dashboard/:account' render={(props: any) => <InteriorDashboard {...props} web3Store={web3Store}/>}/>
-      </DashboardContainer>
-    )
-  }
-}));
+              </DashboardLeft>
+              :
+              <h4 style={{ position: 'fixed', bottom: '80px', right: '0' }}>Please log in</h4>
+          )} />
+          <Route path='/dashboard/:account' render={(props: any) => <InteriorDashboard {...props} web3Store={web3Store} />} />
+        </DashboardContainer>
+      )
+    }
+  }));
 
 export default DashboardPage;
