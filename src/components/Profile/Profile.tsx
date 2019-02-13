@@ -100,33 +100,21 @@ const Middle = styled.div`
   }
 `;
 
+
 const ProfilePage = withRouter(observer(class ProfilePage extends React.Component<any,any> {
-  state = {
-    interval: 0,
-  }
-
-  componentDidMount = () => {
-    this.fillDataAndStartPolling();
-  }
-
-  componentWillUnmount = () => {
-    clearInterval(this.state.interval);
-  }
-
-  // We poll data for the account that we are viewing more often than other accounts.
-  fillDataAndStartPolling = () => {
+  componentDidMount = async () => {
     const { web3Store, match: { params: { address } } } = this.props;
-    // async function
-    web3Store.getAccountDataAndCache(address);
-    // Set the interval so we can clear it when this component dismounts.
-    const interval = setInterval(() => web3Store.getAccountDataAndCache(address), 8000);
-    this.setState({
-      interval,
-    });
+    
+    // Fills data for this profile
+    await web3Store.getAccountDataAndCache(address);
   }
   
   render() {
     const { web3Store, match: { params: { address } } } = this.props;
+    // if (web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata)) {
+      // console.log(Buffer.from(web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata).pic.data).toString('base64'));
+    // }
+
     const blockie = makeBlockie(address);
 
     return (
@@ -134,7 +122,7 @@ const ProfilePage = withRouter(observer(class ProfilePage extends React.Componen
         <Left>
           <NavBox>
             {
-              web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata) && web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata).pic
+              web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata)
               ?
                 <img
                   src={

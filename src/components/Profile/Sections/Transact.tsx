@@ -4,8 +4,6 @@ import styled from 'styled-components';
 
 import { colors, shadowMixin } from '../../../common';
 
-import { RingLoader } from 'react-spinners';
-
 const TransactContainer = styled.div`
   background: #FFF;
   border-radius: 60px;
@@ -106,29 +104,27 @@ const TransactSection = observer(class TransactPage extends React.Component<any,
   render() {
     const { address, web3Store } = this.props;
     const { betaCache, ipfsCache } = web3Store;
-    let title, description, price, symbol, curPrice;
+    let title, description, price;
     if (betaCache.has(address) && ipfsCache.has(betaCache.get(address).metadata)) {
-      const { metadata, symbol: s, curPrice: cp } = betaCache.get(address);
+      const { metadata } = betaCache.get(address);
       const { services } = ipfsCache.get(metadata);
       title = services[0].title;
       description = services[0].description;
       price = services[0].price;
-      symbol = s;
-      curPrice = this.props.web3Store.web3.utils.fromWei(cp);
     }
 
     return (
       <TransactContainer>
         <div style={{ height: '90%' }}>
           <TransactInner>
-            {title || 'No title'}
+            Here goes the title of the service
             <StatsContainer>
               <StatsBox>
                 <StatsBoxHeader>
                   Price in Token
                   </StatsBoxHeader>
                   <StatsBoxContent>
-                    {price || '?'} {symbol}
+                    1 CVG
                   </StatsBoxContent>
                 </StatsBox>
                 <StatsBox>
@@ -136,14 +132,15 @@ const TransactSection = observer(class TransactPage extends React.Component<any,
                     Current price in ETH
                   </StatsBoxHeader>
                   <StatsBoxContent>
-                    {curPrice || '?'} eth
+                    4 eth
                   </StatsBoxContent>
                 </StatsBox>
             </StatsContainer>
             <ServiceDescription>
-              {description || 'No description'}
+              Here goes the long description that people will hopefully add and be able to add some day and that users might actually find valuable under certain conditions.
+              Here goes the long description that people will hopefully add and be able to add some day and that users might actually find valuable under certain conditions.
             </ServiceDescription>
-            {/* <div style={{ display: 'flex', width: '100%' }}>
+            <div style={{ display: 'flex', width: '100%' }}>
               <div style={{ fontSize: '64px', width: '60%', textAlign: 'left' }}>
                 {title}
               </div>
@@ -153,7 +150,7 @@ const TransactSection = observer(class TransactPage extends React.Component<any,
             </div>
             <div style={{ fontSize: '16px', textAlign: 'left' }}>
               {description}
-            </div> */}
+            </div>
             <RequestTextArea 
               name="msg" 
               placeholder="Enter a message with details about your request ..." 

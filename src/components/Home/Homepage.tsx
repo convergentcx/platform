@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { colors, shadowMixin } from '../../common/index';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLock, faRocket } from '@fortawesome/free-solid-svg-icons';
+import { faLock } from '@fortawesome/free-solid-svg-icons';
 
 const HomeContainer = styled.div`
   width: 100%;
@@ -34,35 +34,11 @@ const LaunchButton = styled.button`
     background: ${colors.OrangeDark};
     box-shadow: 0 15px 35px rgba(50,50,93,.9), 0 5px 15px rgba(0,0,0,.87);
   }
-  @media (max-width: 1000px) {
-    font-size: 32px;
-  }
-  @media (max-width: 480px) {
-    font-size: 24px;
-  }
-`;
-
-const UserInput = styled.input`
-  margin-bottom: 8px;
-  background: #EEE;
-  color: black;
 `;
 
 const DeployButton = styled.button`
   cursor: pointer;
   margin-top: 16px;
-  height: 32px;
-  background: ${colors.SoftBlue};
-  color: #FFF;
-  cursor: pointer;
-  font-style: italic;
-  font-weight: 600;
-  transition: 0.2s;
-  border: none;
-  :hover {
-    color: #FFF;
-    background: ${colors.CvgPurp};
-  }
 `;
 
 type HomePageState = {
@@ -81,7 +57,6 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
     launching: false,
     text: 'CONVERGENT',
     mobile: false,
-    premint: "0",
   }
 
   componentDidMount = () => {
@@ -101,7 +76,7 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
       "1",  //exponent
       "60", // spreadN
       "100",  // spreadD
-      this.state.premint.toString(),  // premint
+      "0",  // premint
       randBytes32,  //metadata
       this.state.accountName, //_name
       this.state.accountTicker, // _symbol
@@ -154,24 +129,24 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
           ?
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               Your name:
-              <UserInput
+              <input
                 name="accountName"
                 onChange={this.inputUpdate}
+                style={{
+                  marginBottom: '8px',
+                }}
               />
               Your ticker symbol:
-              <UserInput
+              <input
                 name="accountTicker"
                 onChange={this.inputUpdate}
               />
-              {/* Pre-mint:
-              <UserInput
-                name="premint"
-                onChange={this.inputUpdate}
-              /> */}
+
               What do you want to tokenize:
-              <UserInput
+              <input
                 name="service"
                 onChange={this.inputUpdate}
+                style={{height: '30px'}}
               />
               <DeployButton
                 onClick={this.deploy}
@@ -188,7 +163,7 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
               {
                 this.state.mobile
                 ?
-                  <FontAwesomeIcon icon={faRocket} style={{ color: 'white', fontSize: '40px'}}/> 
+                  <FontAwesomeIcon icon={faLock} style={{ color: 'white', fontSize: '40px'}}/> 
                 :
                   this.state.text
               }
