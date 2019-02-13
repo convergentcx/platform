@@ -93,6 +93,12 @@ class FAQPage extends React.Component {
           </p>
         </FAQItem>
         <FAQItem>
+          <h1>What's up with the loading times?</h1>
+          <p>
+            Convergent is a completely decentralized application, which means that the infrastructure runs on the Ethereum blockchain and the InterPlanetary FileSystem (IPFS). IPFS, a peer-to-peer storage solution is used to keep all the application data. This means that there is no central server which holds all the data, but the tradeoff is that it takes a bit longer to retrieve the data the first time you visit the page. After the data loads once it will be cached in your browser so that it doesn't take so long next time.
+          </p>
+        </FAQItem>
+        <FAQItem>
           <h1>How can I find out more about how this work behind the scenes?</h1>
           <p>
             This project is entirely open source so you can see all the <a href="https://github.com/convergentcx" target="_blank">code</a> that is under the hood. We also engage with each of your individual questions on our <a href="https://discordapp.com/invite/JUPx5Xg" target="_blank">discord chat</a>. And you can find more detailed technical as well as abstract write-ups on our <a href="https://medium.com/convergentcx" target="_blank">Medium</a> blog. Also feel free to follow our updates on the social media channels listed on the main website. We are two very approachable dudes that are enthusiastic about decentralized technology and how it can improve life for creators and entrepreneurs. We are always extremely happy to connect and get feedback, also in the real world if you are ever near Berlin!
