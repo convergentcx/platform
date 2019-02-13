@@ -21,10 +21,10 @@ import { colors, shadowMixin } from '../../common';
 const DashboardContainer = styled.div`
   width: 100%;
   min-height: 100vh;
-  ${colors.BgGrey};
+  background: ${colors.BgGrey};
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-start;
+  /* align-items: center; */
   @media (max-width: 450px) {
     width: 94vw;
     margin-bottom: 8%;
@@ -42,23 +42,34 @@ const YourAccounts = observer(styled.div`
 const AccountLink = styled(Link)`
   display: flex;
   width: 100%;
+  /* padding-left: 20px; */
   text-decoration: none;
   align-items: center;
-  margin-bottom: 8px;
   transition: 0.2s;
+  color: white;
+  font-size: 12px;
+  padding: 8px 0 8px 0;
   :hover {
-    color: #A3A3A3;
+    color: ${colors.OrangeDark};
+    background: ${colors.BgGrey};
   }
 `;
 
+const AccountDetails = styled.div`
+  padding-left: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
 const DashboardLeft = styled.div`
-  width: 15%;
+  width: 20%;
   height: 100vh;
-  background: ;
+  background: ${colors.CvgTealLight};
   max-width: 80%;
   display: flex;
   flex-direction: column;
-  overflow-y: scroll;
+  padding-top: 5vh;
 `;
 
 const DashboardLink = styled.div<any>`
@@ -79,21 +90,26 @@ const DashboardLink = styled.div<any>`
 `;
 
 const DashboardMiddle = styled.div`
-  // width: 60%;
-  // height: 100vh;
+  width: 58%;
+  padding-top: 5vh;
+  display: flex;
+  justify-content: center;
+`;
+
+const MainDashboardCard = styled.div`
+  width: 85%;
   background: #FFF;
   align-items: center;
   display: flex;
   flex-direction: column;
-  overflow-y: scroll;
+  // overflow-y: scroll;
   justify-content: center;
   border-radius: 60px;
   border-width: 10px;
-  width: 50vw;
   height: 90vh;
-  margin-top: 5vh;
   ${shadowMixin};
 `;
+
 
 const TradeScreenTab = styled.button<any>`
   border: none;
@@ -163,19 +179,21 @@ const ServiceInputPrice = styled.input`
 `;
 
 const CommitButton = styled.button`
-  display: flex;
   cursor: pointer;
-  width: 90%;
-  border: solid;
-  justify-content: center;
-  align-items: center;
-  height: 32px;
-  font-size: 16px;
-  transition: 0.3s;
-  border-radius: 32px;
-  border-color: #202020;
-  margin-top: 16px;
-  font-weight: 900;
+  width: 100%;
+  height: 100%;
+  border-radius: 0 0 60px 60px;
+  background: ${colors.SoftBlue};
+  color: #FFF;
+  font-weight: 600;
+  font-style: italic;
+  border: none;
+  background: ${colors.OrangeDark};
+  transition: 0.2s;
+  :hover {
+    background: ${colors.Orange};
+    border-color: ${colors.Orange};
+  }
 `;
 
 const DisplayHeading = styled.h4`
@@ -238,22 +256,29 @@ const AddServiceButton = styled.button`
 
 const DashboardRight = styled.div`
   width: 20%;
-  height: 100vh;
+  height: 90vh;
   background: ;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-between;
   align-items: flex-start;
-  flex-flow: row wrap;
+  /* flex-flow: row wrap;  */
+  padding-top: 5vh;
+  padding-bottom: 5vh;
 `;
 
 const DashboardRightBox = styled.div`
-  width: 100%;
-  height: 160px;
+  width: 80%;
+  height: 150px;
   display: flex;
-  flex-flow: row wrap;
-  padding: 16px;
-  background: #CCC;
-  margin: 8px;
+  flex-direction: column;
+  padding: 30px;
+  background: #FFF;
+  border-radius: 60px;
+  border-width: 10px;
+  ${shadowMixin};
+  position: relative;
+  font-size: 18px;
 `;
 
 // const UpgradeButton = styled.button`
@@ -271,13 +296,21 @@ const DashboardRightBox = styled.div`
 // `;
 
 const WidthdrawButton = styled.button`
-  background: #232323;
+  background: #ffff4c;
   border: none;
   cursor: pointer;
   transition: 0.3s;
   width: 100%;
+  height: 20%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  border-radius: 0 0 60px 60px;
+  color: #232323;
+  font-weight: bold;
+  font-style: italic;
   :hover {
-    background: #696969
+    background: #ffff7f;
   }
 `;
 
@@ -473,6 +506,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     return (
       <>
         <DashboardMiddle>
+          <MainDashboardCard>
 
             <div style={{ width: '100%', height: '8%', paddingLeft: '10px' }}>
               <TradeScreenTab active={active === 0} id={0} onClick={this.setActive}>
@@ -485,25 +519,26 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
             {
               active === 0 &&
               <>
-                <DisplayContainer>
-                  <Subject upload={this.upload} preview={this.state.preview} />
-                  <InputDisplay>
-                    <h4>Your Bio:</h4>
-                    <BioInput
-                      name="bio"
-                      onChange={this.inputUpdate}
-                      rows={7}
-                      defaultValue={bio}
-                    />
-                    <h4>Location:</h4>
-                    <LocationInput
-                      name="location"
-                      onChange={this.inputUpdate}
-                      defaultValue={location}
-                    />
-                  </InputDisplay>
-                </DisplayContainer>
-                {/* <DisplayContainer halfsize>
+                <div style={{ height: '90%' }}>
+                  <DisplayContainer>
+                    <Subject upload={this.upload} preview={this.state.preview} />
+                    <InputDisplay>
+                      <h4>Your Bio:</h4>
+                      <BioInput
+                        name="bio"
+                        onChange={this.inputUpdate}
+                        rows={7}
+                        defaultValue={bio}
+                      />
+                      <h4>Location:</h4>
+                      <LocationInput
+                        name="location"
+                        onChange={this.inputUpdate}
+                        defaultValue={location}
+                      />
+                    </InputDisplay>
+                  </DisplayContainer>
+                  {/* <DisplayContainer halfsize>
                 <DisplayHeading>
                   Your tags:
                 </DisplayHeading>
@@ -512,29 +547,32 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
                   <AddButton>+</AddButton>
                 </TagContainer>
               </DisplayContainer> */}
-                <DisplayContainer halfsize>
-                  <DisplayHeading>
-                    What will you offer?
+                  <DisplayContainer halfsize>
+                    <DisplayHeading>
+                      What will you offer?
                 </DisplayHeading>
-                  <br />
-                  <div style={{ display: 'flex', width: '100%' }}>
-                    {
-                      this.state.serviceEdit ?
-                        <ServiceBox>
-                          <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate} placeholder="title" defaultValue={services[0].title} />
-                          <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate} placeholder="description" defaultValue={services[0].description} />
-                          <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate} placeholder="price" defaultValue={services[0].price} />
-                        </ServiceBox>
-                        : ''
-                    }
-                    <AddServiceButton onClick={() => this.setState({ serviceEdit: true })}>
-                      +
+                    <br />
+                    <div style={{ display: 'flex', width: '100%' }}>
+                      {
+                        this.state.serviceEdit ?
+                          <ServiceBox>
+                            <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate} placeholder="title" defaultValue={services[0].title} />
+                            <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate} placeholder="description" defaultValue={services[0].description} />
+                            <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate} placeholder="price" defaultValue={services[0].price} />
+                          </ServiceBox>
+                          : ''
+                      }
+                      <AddServiceButton onClick={() => this.setState({ serviceEdit: true })}>
+                        +
                   </AddServiceButton>
-                  </div>
-                </DisplayContainer>
-                <CommitButton onClick={this.commit}>
-                  Commit to Ethereum
-              </CommitButton>
+                    </div>
+                  </DisplayContainer>
+                </div>
+                <div style={{ height: '10%', width: '100%' }}>
+                  <CommitButton onClick={this.commit}>
+                    COMMIT
+                </CommitButton>
+                </div>
                 {
                   this.state.uploading ?
                     'Uploading!' : ''
@@ -556,30 +594,40 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
                 </div>
               </>
             }
+          </MainDashboardCard>
         </DashboardMiddle>
         <DashboardRight>
           <DashboardRightBox>
-            <div style={{ width: '100%' }}>
-              You have {contributionsWaiting} eth in contributions to withdraw.
-            </div>
+              <div style={{margin: '0'}}>
+                Contributions to withdraw
+              </div>
+              <div style={{ fontSize: '35px', marginTop: '20px' }}>
+                {contributionsWaiting} eth
+              </div>
             <WidthdrawButton onClick={this.sendContributions}>
-              Withdraw
+              WITHDRAW
             </WidthdrawButton>
           </DashboardRightBox>
           <DashboardRightBox>
-            <div style={{ width: '100%' }}>
-              You have XXX of your own token.
-            </div>
+              <div style={{margin: '0'}}>
+                You own
+              </div>
+              <div style={{ fontSize: '35px', marginTop: '20px' }}>
+                123 TKN
+              </div>
             <WidthdrawButton>
-              Sell
+              SELL
             </WidthdrawButton>
           </DashboardRightBox>
           <DashboardRightBox>
-            <div style={{ width: '100%' }}>
-              You are on the current release.
-            </div>
+              <div style={{margin: '0'}}>
+                You are on the current release
+              </div>
+              <div style={{ fontSize: '35px', marginTop: '20px' }}>
+                V0.1
+              </div>              
             <WidthdrawButton onClick={this.upgrade}>
-              Upgrade
+              UPGRADE
             </WidthdrawButton>
           </DashboardRightBox>
 
@@ -599,9 +647,11 @@ const DashboardPage = withRouter(observer(
         const blockie = makeBlockie(address);
         return <AccountLink to={`/dashboard/${address}`} key={Math.random()}>
           <img src={blockie} style={{ width: '50px', height: '50px', borderRadius: '25px' }} alt={address} />
-          {/* {address} */}
-          Token Name
-       </AccountLink>;
+          <AccountDetails>
+            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>Token Name</div>
+            {address}
+          </AccountDetails>
+        </AccountLink>;
       });
 
       return (
@@ -613,7 +663,7 @@ const DashboardPage = withRouter(observer(
                 {items}
               </DashboardLeft>
               :
-              <h1>Please log in</h1>
+              <h4 style={{ position: 'fixed', bottom: '80px', right: '0' }}>Please log in</h4>
           )} />
           <Route path='/dashboard/:account' render={(props: any) => <InteriorDashboard {...props} web3Store={web3Store} />} />
         </DashboardContainer>
