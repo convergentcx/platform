@@ -400,21 +400,24 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
       preview = `data:image/jpeg;base64,${Buffer.from(pic.data).toString('base64')}`;
     }
 
+    const { curServiceIndex } = web3Store.betaCache.get(address);
+
     this.setState({
       downloading: false,
       bio,
       location,
       services,
-      serviceTitle0: services[0].title || '',
-      serviceDescription0: services[0].description || '',
-      servicePrice0: services[0].price || '',
-      serviceTitle1: services[1].title || '',
-      serviceDescription1: services[1].description || '',
-      servicePrice1: services[1].price || '',
-      serviceTitle2: services[2].title || '',
-      serviceDescription2: services[2].description || '',
-      servicePrice2: services[2].price || '',
+      serviceTitle0: services[0] && services[0].title || '',
+      serviceDescription0: services[0] && services[0].description || '',
+      servicePrice0: services[0] && services[0].price || '',
+      serviceTitle1: services[1] && services[1].title || '',
+      serviceDescription1: services[1] && services[1].description || '',
+      servicePrice1: services[1] && services[1].price || '',
+      serviceTitle2: services[2] && services[2].title || '',
+      serviceDescription2: services[2] && services[2].description || '',
+      servicePrice2: services[2] && services[2].price || '',
       preview,
+      serviceNum: curServiceIndex < 3 ? parseInt(curServiceIndex)+1 : 3,
       pic,
     });
   }
@@ -467,8 +470,10 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
     await web3Store.updateMetadata(address, b32);
 
     const { curServiceIndex } = web3Store.betaCache.get(address);
-    if (curServiceIndex < data.services.length) {
-      for (let j = curServiceIndex; j < data.services.length; j++) {
+    console.log(curServiceIndex)
+    console.log(data.services.length)
+    if (parseInt(curServiceIndex) < data.services.length) {
+      for (let j = parseInt(curServiceIndex); j < data.services.length; j++) {
         await web3Store.addService(address, data.services[j].price);
       }
     }
@@ -507,8 +512,9 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
   }
 
   render() {
-    const { bio, downloading, location, serviceTitle1, serviceDescription1, servicePrice1, serviceNum } = this.state;
+    const { bio, downloading, location, serviceNum } = this.state;
 
+    console.log(serviceNum)
     return (
       <ProfileContainer>
         {
