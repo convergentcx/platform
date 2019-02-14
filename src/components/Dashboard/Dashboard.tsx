@@ -4,7 +4,7 @@ import { observer, inject } from 'mobx-react';
 import React from 'react';
 import { Link, Route, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-
+import { RingLoader } from 'react-spinners';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEnvelope,
@@ -16,6 +16,7 @@ import Subject from '../Dropzone.jsx';
 import Wallet from './Wallet/Wallet';
 
 import { colors, shadowMixin } from '../../common';
+import { any } from 'prop-types';
 
 const DashboardContainer = styled.div`
   width: 100%;
@@ -193,16 +194,22 @@ const ServiceBox = styled.div`
 const ServiceInputTitle = styled.input`
   display: flex;
   width: 30%;
+  background: #E9EDF2;
+  color: #000;
 `;
 
 const ServiceInputDescription = styled.input`
   display: flex;
   width: 55%;
+  background: #E9EDF2;
+  color: #000;
 `;
 
 const ServiceInputPrice = styled.input`
   display: flex;
   width: 5%;
+  background: #E9EDF2;
+  color: #000;
 `;
 
 const CommitButton = styled.button`
@@ -244,6 +251,7 @@ const AddServiceButton = styled.button`
   justify-content: center;
   align-items: center;
   font-weight: 900;
+  cursor: pointer;
 `;
 
 // const TagContainer = styled.div`
@@ -329,11 +337,12 @@ const WidthdrawButton = styled.button`
   }
 `;
 
-const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends React.Component<any,any> {
+const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends React.Component<any, any> {
   state = {
     downloading: true,
     bio: '',
     location: '',
+    services: [],
     serviceTitle1: '',
     serviceDescription1: '',
     servicePrice1: '',
@@ -342,6 +351,8 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
     file: '',
     serviceEdit: false,
     serviceNum: 0,
+    [name]: any,
+    pic: null,
   }
 
   componentDidMount = async () => {
@@ -356,14 +367,25 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
       return;
     }
 
-    this.setState({ downloading: true, });
+    const { metadata } = web3Store.betaCache.get(address);
+
+    if (!this.props.web3Store.ipfsCache.has(metadata)) {
+      this.setState({
+        downloading: false,
+        bio: '',
+        location: '',
+        services: [],
+      });
+      return;
+    }
+
     await this.props.web3Store.ipfsGetDataAndCache(
       this.props.web3Store.betaCache.get(
         address,
       ).metadata,
     );
 
-    let bio,location,pic,services;
+    let bio, location, pic, services;
     if (web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata)) {
       const data = web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata);
       // console.log(data.bio)
@@ -378,15 +400,22 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
       preview = `data:image/jpeg;base64,${Buffer.from(pic.data).toString('base64')}`;
     }
 
-    this.setState({ 
-      downloading: false, 
-      file: pic.data,
+    this.setState({
+      downloading: false,
       bio,
       location,
-      serviceTitle1: services[0].title,
-      serviceDescription1: services[0].description,
-      servicePrice1: services[0].price,
+      services,
+      serviceTitle0: services[0].title || '',
+      serviceDescription0: services[0].description || '',
+      servicePrice0: services[0].price || '',
+      serviceTitle1: services[1].title || '',
+      serviceDescription1: services[1].description || '',
+      servicePrice1: services[1].price || '',
+      serviceTitle2: services[2].title || '',
+      serviceDescription2: services[2].description || '',
+      servicePrice2: services[2].price || '',
       preview,
+      pic,
     });
   }
 
@@ -404,21 +433,27 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
       try {
         imgBuf = dataUriToBuffer(this.state.file)
       } catch (e) { console.error(e); }
-    } 
+    } else if (this.state.pic) {
+      imgBuf = this.state.pic;
+    }
 
     this.setState({ uploading: true });
+
+    let services = [];
+    for (let i = 0; i < this.state.serviceNum; i++) {
+      const x = i.toString();
+      services.push({
+        title: this.state[(`serviceTitle${x}` as any)],
+        description: this.state[(`serviceDescription${x}` as any)],
+        price: this.state[(`servicePrice${x}` as any)],
+      });
+    }
 
     const data = {
       bio: this.state.bio,
       location: this.state.location,
       pic: imgBuf,
-      services: [
-        {
-          title: this.state.serviceTitle1,
-          description: this.state.serviceDescription1,
-          price: this.state.servicePrice1,
-        },
-      ],
+      services,
     };
 
     const hash = await web3Store.ipfsAdd(
@@ -430,8 +465,13 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
     // TODO Cache it
     const b32 = ipfsStore.getBytes32(hash[0].path);
     await web3Store.updateMetadata(address, b32);
-    await web3Store.addService(address, data.services[0].price)
-   
+
+    const { curServiceIndex } = web3Store.betaCache.get(address);
+    if (curServiceIndex < data.services.length) {
+      for (let j = curServiceIndex; j < data.services.length; j++) {
+        await web3Store.addService(address, data.services[j].price);
+      }
+    }
   }
 
   inputUpdate = (evt: any) => {
@@ -439,6 +479,7 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
     this.setState({
       [name]: value,
     });
+    // evt.target.autofocus();
   }
 
   upload = (files: any) => {
@@ -450,7 +491,7 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
     };
 
     reader.readAsDataURL(files[0]);
-    
+
     this.setState({
       preview: URL.createObjectURL(files[0]),
     })
@@ -461,52 +502,41 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
       return;
     }
     this.setState({
-      serviceNum: this.state.serviceNum+1,
+      serviceNum: this.state.serviceNum + 1,
     });
   }
 
   render() {
     const { bio, downloading, location, serviceTitle1, serviceDescription1, servicePrice1, serviceNum } = this.state;
 
-    let serviceInputs = [];
-    for (let i = 0; i < serviceNum; i++) {
-      serviceInputs.push(
-        <ServiceBox key={Math.random()}>
-          <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate} placeholder="title" defaultValue={serviceTitle1}/>
-          <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate} placeholder="description" defaultValue={serviceDescription1}/>
-          <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate} placeholder="price" defaultValue={servicePrice1}/>  
-        </ServiceBox>
-      )
-    }
-
     return (
       <ProfileContainer>
         {
-          // downloading
-          //   ? <RingLoader/>
-          //   :
+          downloading
+            ? <RingLoader />
+            :
             <>
-            <DisplayContainer>
-              <div style={{ width: '40%' }}>
-                <Subject upload={this.upload} preview={this.state.preview}/>
-              </div>
-              <InputDisplay>
-                <InputHeading>Your Bio:</InputHeading>
-                <BioInput
-                  name="bio"
-                  onChange={this.inputUpdate}
-                  rows={7}
-                  defaultValue={bio}
-                />
-                <InputHeading>Location:</InputHeading>
-                <LocationInput
-                  name="location"
-                  onChange={this.inputUpdate}
-                  defaultValue={location}
-                />
-              </InputDisplay>
-            </DisplayContainer>
-            {/* <DisplayContainer halfsize>
+              <DisplayContainer>
+                <div style={{ width: '40%' }}>
+                  <Subject upload={this.upload} preview={this.state.preview} />
+                </div>
+                <InputDisplay>
+                  <InputHeading>Your Bio:</InputHeading>
+                  <BioInput
+                    name="bio"
+                    onChange={this.inputUpdate}
+                    rows={7}
+                    defaultValue={bio}
+                  />
+                  <InputHeading>Location:</InputHeading>
+                  <LocationInput
+                    name="location"
+                    onChange={this.inputUpdate}
+                    defaultValue={location}
+                  />
+                </InputDisplay>
+              </DisplayContainer>
+              {/* <DisplayContainer halfsize>
               <DisplayHeading>
                 Your tags:
               </DisplayHeading>
@@ -515,26 +545,38 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
                 <AddButton>+</AddButton>
               </TagContainer>
             </DisplayContainer> */}
-            <DisplayContainer halfsize>
-              <InputHeading>
-                What will you offer?
+              <DisplayContainer halfsize>
+                <InputHeading>
+                  What will you offer?
               </InputHeading>
-              <div style={{ display: 'flex', width: '100%', marginTop: '8px', flexDirection: 'column', alignItems: 'center' }}>
-                {
-                  serviceInputs
-                }
-                <AddServiceButton onClick={this.serviceButtonClicked}>
-                  +
-                </AddServiceButton>
-              </div>
-            </DisplayContainer>
-            <CommitButton onClick={this.commit}>
-              Commit to Ethereum
+                <div style={{ display: 'flex', width: '100%', marginTop: '8px', flexDirection: 'column', alignItems: 'center' }}>
+                  {
+                    [...Array(serviceNum).keys()].map((i: number) => {
+                      return (
+                        <ServiceBox key={i + 30 * (i + 1)}>
+                          <ServiceInputTitle key={i + 31 * (i + 1)} name={`serviceTitle${i}`} type="text" onChange={this.inputUpdate} placeholder="title" value={(this.state[(`serviceTitle${i}` as any)] as any)} />
+                          <ServiceInputDescription key={i + 32 * (i + 1)} name={`serviceDescription${i}`} type="text" onChange={this.inputUpdate} placeholder="description" value={(this.state[(`serviceDescription${i}` as any)] as any)} />
+                          <ServiceInputPrice key={i + 34 * (i + 1)} name={`servicePrice${i}`} type="number" onChange={this.inputUpdate} placeholder="price" value={(this.state[(`servicePrice${i}` as any)] as any)} />
+                        </ServiceBox>
+                      )
+                    })
+                  }
+                  {
+                    serviceNum < 3
+                    &&
+                    <AddServiceButton onClick={this.serviceButtonClicked}>
+                      +
+                  </AddServiceButton>
+                  }
+                </div>
+              </DisplayContainer>
+              <CommitButton onClick={this.commit}>
+                Commit to Ethereum
             </CommitButton>
-            {
-              this.state.uploading ?
-              'Uploading!' : ''
-            }
+              {
+                this.state.uploading ?
+                  'Uploading!' : ''
+              }
             </>
         }
       </ProfileContainer>
@@ -542,7 +584,7 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
   }
 }));
 
-const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class InteriorDashboard extends React.Component<any,any> {
+const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class InteriorDashboard extends React.Component<any, any> {
   state = {
     active: 0,
     balance: '',
@@ -587,7 +629,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     const { web3Store, match: { params: { account } } } = this.props;
     const { active, balance } = this.state;
 
-    const contributionsWaiting = web3Store.betaCache.has(account) ? web3Store.web3.utils.fromWei(web3Store.betaCache.get(account).contributions).slice(0,6) : '?';
+    const contributionsWaiting = web3Store.betaCache.has(account) ? web3Store.web3.utils.fromWei(web3Store.betaCache.get(account).contributions).slice(0, 6) : '?';
     const symbol = web3Store.betaCache.has(account) ? web3Store.betaCache.get(account).symbol : '';
 
     return (
@@ -596,23 +638,23 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
           <DashboardMidNav>
             <DashboardMidNavItem active={active === 0} onClick={() => this.setState({ active: 0 })}>
               {/* <Circle> */}
-                <FontAwesomeIcon icon={faUserAstronaut}/>
+              <FontAwesomeIcon icon={faUserAstronaut} />
               {/* </Circle> */}
             </DashboardMidNavItem>
             <DashboardMidNavItem active={active === 1} onClick={() => this.setState({ active: 1 })}>
-              <FontAwesomeIcon icon={faEnvelope}/>
+              <FontAwesomeIcon icon={faEnvelope} />
             </DashboardMidNavItem>
           </DashboardMidNav>
           <DashboardMiddleChildren>
             {
               active === 0 &&
-                <Profile address={account}/>
+              <Profile address={account} />
               ||
               active == 1 &&
-                <Inbox address={account}/>
+              <Inbox address={account} />
               ||
               active == 2 &&
-                <Wallet address={account}/>
+              <Wallet address={account} />
             }
           </DashboardMiddleChildren>
         </DashboardMiddle>
@@ -641,7 +683,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
               Upgrade
             </WidthdrawButton>
           </DashboardRightBox>
-          
+
         </DashboardRight>
       </>
     )
@@ -649,53 +691,53 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
 }));
 
 const DashboardPage = withRouter(observer(
-  class DashboardPage extends React.Component<any,any>{
+  class DashboardPage extends React.Component<any, any>{
 
-  render() {
-    const { web3Store } = this.props;
+    render() {
+      const { web3Store } = this.props;
 
-    const items = Array.from(web3Store.accountsCache).map((address: any) => {
-      const blockie = makeBlockie(address);
+      const items = Array.from(web3Store.accountsCache).map((address: any) => {
+        const blockie = makeBlockie(address);
 
-      let tokenName = 'Token Name';
-      if (web3Store.betaCache.has(address)) {
-        tokenName = web3Store.betaCache.get(address).name;
-      }
+        let tokenName = 'Token Name';
+        if (web3Store.betaCache.has(address)) {
+          tokenName = web3Store.betaCache.get(address).name;
+        }
 
-       return (
-        <AccountLink to={`/dashboard/${address}`} key={Math.random()}>
-          <AccountLinkImg src={blockie} alt={address}/>
-          <AccountDetails>
-            <AccountLinkName>
-              {tokenName}
-            </AccountLinkName>
-            {address}
-          </AccountDetails>
-        </AccountLink>
-       );
-    });
+        return (
+          <AccountLink to={`/dashboard/${address}`} key={Math.random()}>
+            <AccountLinkImg src={blockie} alt={address} />
+            <AccountDetails>
+              <AccountLinkName>
+                {tokenName}
+              </AccountLinkName>
+              {address}
+            </AccountDetails>
+          </AccountLink>
+        );
+      });
 
-    return (
-      <DashboardContainer>
-        <Route path='/dashboard' render={() => (
-          web3Store.account
-            ?
+      return (
+        <DashboardContainer>
+          <Route path='/dashboard' render={() => (
+            web3Store.account
+              ?
               <DashboardLeft>
                 {items}
               </DashboardLeft>
-            :
+              :
               <h1 style={{ width: '100%', textAlign: 'center' }}>Please log in</h1>
-        )}/>
-        {
-          web3Store.account
-            ?
-              <Route path='/dashboard/:account' render={(props: any) => <InteriorDashboard {...props} web3Store={web3Store}/>}/>
-            :
+          )} />
+          {
+            web3Store.account
+              ?
+              <Route path='/dashboard/:account' render={(props: any) => <InteriorDashboard {...props} web3Store={web3Store} />} />
+              :
               ''
-        }
-      </DashboardContainer>
-    )
-  }
-}));
+          }
+        </DashboardContainer>
+      )
+    }
+  }));
 
 export default DashboardPage;
