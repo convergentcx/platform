@@ -5,27 +5,32 @@ import React from 'react';
 import { Link, Route, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faEnvelope,
+  faUserAstronaut
+} from '@fortawesome/free-solid-svg-icons';
+
 import Inbox from './Inbox/Inbox';
 import Subject from '../Dropzone.jsx';
 import Wallet from './Wallet/Wallet';
 
 import { colors } from '../../common';
-import { RingLoader } from 'react-spinners';
 
 const DashboardContainer = styled.div`
   width: 100%;
   min-height: 100vh;
-  background: ${colors.CvgTeal};
+  background: ${colors.CvgTealLight};
   display: flex;
-  justify-content: center;
+  justify-content: ;
   align-items: center;
 `;
 
-const YourAccounts = observer(styled.div`
-  max-width: 80%;
-  display: flex;
-  flex-direction: column;
-`);
+// const YourAccounts = observer(styled.div`
+//   max-width: 80%;
+//   display: flex;
+//   flex-direction: column;
+// `);
 
 const AccountLink = styled(Link)`
   display: flex;
@@ -34,15 +39,37 @@ const AccountLink = styled(Link)`
   align-items: center;
   margin-bottom: 8px;
   transition: 0.2s;
+  color: #FFF;
+  padding: 8px 0 8px 0;
   :hover {
-    color: #A3A3A3;
+    color: ${colors.SoftBlue};
+    background: ${colors.BgGrey};
   }
+`;
+
+const AccountLinkImg = styled.img`
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+`;
+
+const AccountLinkName = styled.div`
+  font-size: 20px;
+  fontWeight: bold;
+`;
+
+const AccountDetails = styled.div`
+  padding-left: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const DashboardLeft = styled.div`
   width: 20%;
+  max-width: 20%;
   height: 100vh;
-  background: ;
+  background: ${colors.CvgTealLight};
 `;
 
 const DashboardLink = styled.div<any>`
@@ -65,29 +92,61 @@ const DashboardLink = styled.div<any>`
 const DashboardMiddle = styled.div`
   width: 60%;
   height: 100vh;
-  background: ;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+`;
+
+const DashboardMiddleChildren = styled.div`
+  height: 90%;
+  width: 100%;
+  background: blue;
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
+  align-items: center;
+`;
+
+const InputHeading = styled.div`
+  font-size: 24px;
+  font-weight: bold;
+
+`;
+
+const DashboardMidNav = styled.div`
+  align-self: flex-start;
+  justify-self: flex-start;
+  height: 10%;
+  width: 100%;
+  background: white;
+  display: flex;
+  flex-direction: row;
+`;
+
+const DashboardMidNavItem = styled.div<any>`
+  cursor: pointer;
+  width: 20%;
+  display: flex;
   justify-content: center;
+  align-items: center;
+  color: ${props => props.active ? 'blue' : 'black'};
 `;
 
 const DisplayContainer = styled.div<any>`
   width: 80%;
   min-height: ${(props: any) => props.halfsize ? '15%' : '30%'};
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   flex-flow: row wrap;
 `;
 
 const InputDisplay = styled.div`
-  width: 65%;
+  width: 60%;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
+  align-items: center;
 `;
 
 const BioInput = styled.textarea`
@@ -383,16 +442,18 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
           //   :
             <>
             <DisplayContainer>
-              <Subject upload={this.upload} preview={this.state.preview}/>
+              <div style={{ width: '40%' }}>
+                <Subject upload={this.upload} preview={this.state.preview}/>
+              </div>
               <InputDisplay>
-                <h4>Your Bio:</h4>
+                <InputHeading>Your Bio:</InputHeading>
                 <BioInput
                   name="bio"
                   onChange={this.inputUpdate}
                   rows={7}
                   defaultValue={bio}
                 />
-                <h4>Location:</h4>
+                <InputHeading>Location:</InputHeading>
                 <LocationInput
                   name="location"
                   onChange={this.inputUpdate}
@@ -410,11 +471,10 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
               </TagContainer>
             </DisplayContainer> */}
             <DisplayContainer halfsize>
-              <DisplayHeading>
+              <InputHeading>
                 What will you offer?
-              </DisplayHeading>
-              <br/>
-              <div style={{ display: 'flex', width: '100%'}}>
+              </InputHeading>
+              <div style={{ display: 'flex', width: '100%', marginTop: '8px', flexDirection: 'column', alignItems: 'center' }}>
                 {
                   this.state.serviceEdit ?
                     <ServiceBox>
@@ -486,28 +546,38 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
 
     return (
       <>
-        <DashboardLeft>
+        {/* <DashboardLeft>
           <DashboardLink active={active === 0} id={0} onClick={this.setActive}>
             Profile
           </DashboardLink>
           <DashboardLink active={active === 1} id={1} onClick={this.setActive}>
             Inbox
-          </DashboardLink>
+          </DashboardLink> */}
           {/* <DashboardLink active={active === 2} id={2} onClick={this.setActive}>
             Wallet
           </DashboardLink> */}
-        </DashboardLeft>
+        {/* </DashboardLeft> */}
         <DashboardMiddle>
-          {
-            active === 0 &&
-              <Profile address={account}/>
-            ||
-            active == 1 &&
-              <Inbox address={account}/>
-            ||
-            active == 2 &&
-              <Wallet address={account}/>
-          }
+          <DashboardMidNav>
+            <DashboardMidNavItem active={active === 0} onClick={() => this.setState({ active: 0 })}>
+              <FontAwesomeIcon icon={faUserAstronaut}/>
+            </DashboardMidNavItem>
+            <DashboardMidNavItem active={active === 1} onClick={() => this.setState({ active: 1 })}>
+              <FontAwesomeIcon icon={faEnvelope}/>
+            </DashboardMidNavItem>
+          </DashboardMidNav>
+          <DashboardMiddleChildren>
+            {
+              active === 0 &&
+                <Profile address={account}/>
+              ||
+              active == 1 &&
+                <Inbox address={account}/>
+              ||
+              active == 2 &&
+                <Wallet address={account}/>
+            }
+          </DashboardMiddleChildren>
         </DashboardMiddle>
         <DashboardRight>
           <DashboardRightBox>
@@ -516,6 +586,14 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
             </div>
             <WidthdrawButton onClick={this.sendContributions}>
               Withdraw
+            </WidthdrawButton>
+          </DashboardRightBox>
+          <DashboardRightBox>
+            <div style={{ width: '100%' }}>
+              You hold XXX SYM.
+            </div>
+            <WidthdrawButton>
+              Sell
             </WidthdrawButton>
           </DashboardRightBox>
           <DashboardRightBox>
@@ -541,26 +619,43 @@ const DashboardPage = withRouter(observer(
 
     const items = Array.from(web3Store.accountsCache).map((address: any) => {
       const blockie = makeBlockie(address);
+
+      let tokenName = 'Token Name';
+      if (web3Store.betaCache.has(address)) {
+        tokenName = web3Store.betaCache.get(address).name;
+      }
+
        return (
         <AccountLink to={`/dashboard/${address}`} key={Math.random()}>
-          <img src={blockie} style={{ width: '50px', height: '50px', borderRadius: '25px' }} alt={address}/>
-          {address}
+          <AccountLinkImg src={blockie} alt={address}/>
+          <AccountDetails>
+            <AccountLinkName>
+              {tokenName}
+            </AccountLinkName>
+            {address}
+          </AccountDetails>
         </AccountLink>
        );
     });
 
     return (
       <DashboardContainer>
-        <Route path='/dashboard' exact render={() => (
+        <Route path='/dashboard' render={() => (
           web3Store.account
             ?
-              <YourAccounts>
+              <DashboardLeft>
                 {items}
-              </YourAccounts>
+              </DashboardLeft>
             :
-              <h1>Please log in</h1>
+              <h1 style={{ width: '100%', textAlign: 'center' }}>Please log in</h1>
         )}/>
-        <Route path='/dashboard/:account' render={(props: any) => <InteriorDashboard {...props} web3Store={web3Store}/>}/>
+        {
+          web3Store.account
+            ?
+              <Route path='/dashboard/:account' render={(props: any) => <InteriorDashboard {...props} web3Store={web3Store}/>}/>
+            :
+              ''
+        }
       </DashboardContainer>
     )
   }

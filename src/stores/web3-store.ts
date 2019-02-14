@@ -137,9 +137,9 @@ export default class Web3Store {
       return;
     }
     this.updateWeb3(_window.web3);
+    await this.signWelcome();
     this.readonly = false;
     await this.updateAccount();
-    await this.signWelcome();
     this.toaster.add(`Logged in to ${this.account.slice(0,10) + '...' + this.account.slice(-4)}. You may now interact with Ethereum.`, {appearance: 'success', autoDismiss: true})
     await this.instantiateConvergentBeta();
   }
@@ -425,7 +425,8 @@ export default class Web3Store {
 
   @action
   signWelcome = async () => {
-    await this.web3.eth.personal.sign("Welcome to Convergent Beta DApp. By signing this message you agree to abide by the Terms of Use. Happy investing in your friends!", this.account);
+    const main = (await this.web3.eth.getAccounts())[0];
+    await this.web3.eth.personal.sign("Welcome to Convergent Beta DApp. By signing this message you agree to abide by the Terms of Use. Happy investing in your friends!", main);
   }
 
   // @action
