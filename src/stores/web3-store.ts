@@ -2,12 +2,28 @@ import { observable, action } from 'mobx';
 import ipfsClient from 'ipfs-http-client';
 import Web3 from 'web3';
 
-import ConvergentBeta2 from '../assets/artifacts2/ConvergentBeta.json';
-import Account2 from '../assets/artifacts2/Account.json';
+import ConvergentBeta from '../assets/artifacts2/ConvergentBeta.json';
+import Account from '../assets/artifacts2/Account.json';
 
 import { b32IntoMhash } from '../lib/ipfs-util';
 
 const CB_PROXY_ADDR_MAINNET = "0x9ce894a11ada19881ab560a5091a4cc3ff8f2d84";
+const CB_PROXY_ADDR_RINKEBY = "0x60dacca6a82cbe636032f4a7363bdcb166de88be";
+
+const MainnetWebsocketsProvider = 'wss://neatly-tolerant-coral.quiknode.io/73b04107-89ee-4261-9a8f-3c1e946c17b2/CyYMMeeGTb-EeIBHGwORaw==/';
+
+enum Chain {
+  Mainnet = '1',
+  Rinkeby = '4',
+}
+
+const { NODE_ENV } = process.env;
+let chain: Chain;
+if (NODE_ENV === 'development') {
+  chain = Chain.Rinkeby;
+} else if (NODE_ENV === 'production') {
+  chain = Chain.Mainnet;
+}
 
 type CbAccount = {
   creator: string,
@@ -27,7 +43,7 @@ type IPFSCacheObject = {
   services: ServiceObject[],
 }
 
-type NewBetaCache = {
+type BetaCacheObject = {
   metadata?: string,
   curServiceIndex?: string,
   reserve?: string,
@@ -50,7 +66,7 @@ type NewBetaCache = {
 export default class Web3Store {
   @observable account: string = ''; // Main unlocked account
   @observable accountsCache: Set<string> = new Set();
-  @observable betaCache: Map<string, NewBetaCache> = new Map(); // Will update through polling every 2000 ms
+  @observable betaCache: Map<string, BetaCacheObject> = new Map(); // Will update through polling every 2000 ms
   @observable cbAccounts: Map<string, CbAccount> = new Map(); // Will update any time a new account event comes (contains less data)
   @observable convergentBeta = null; // The contract instance
   @observable ipfs: any = null;   // Global IPFS object
@@ -86,7 +102,12 @@ export default class Web3Store {
   // Infure node.
   @action
   initReadonly = async () => {
-    const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://neatly-tolerant-coral.quiknode.io/73b04107-89ee-4261-9a8f-3c1e946c17b2/CyYMMeeGTb-EeIBHGwORaw==/'));
+    let web3 = null;
+    if (chain === Chain.Mainnet) {
+      web3 = new Web3(new Web3.providers.WebsocketProvider('wss://neatly-tolerant-coral.quiknode.io/73b04107-89ee-4261-9a8f-3c1e946c17b2/CyYMMeeGTb-EeIBHGwORaw==/'));
+    } else if (chain === Chain.Rinkeby) {
+      web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws'));
+    }
     this.readonly = true;
     this.web3 = web3;
     this.web3Ws = web3;
@@ -111,8 +132,8 @@ export default class Web3Store {
       return 
     }
     const netId = await _window.web3.eth.net.getId();
-    if (netId !== 1) {
-      _window.alert('DApp is running on the Ethereum mainnet. Please switch your provider to mainnet.');
+    if (chain !== netId.toString()) {
+      _window.alert('DApp is running on the Ethereum mainnet. Please switch your Web3 provider to Mainnet.');
       return;
     }
     this.updateWeb3(_window.web3);
@@ -124,17 +145,52 @@ export default class Web3Store {
   }
 
   @action
+  createAccount = async (
+    premint: string,
+    metadata: string,
+    name: string,
+    symbol: string,
+  ) => {
+    if (!this.account) { return; }
+
+    const { abi } = ConvergentBeta;
+    const addr = chain === Chain.Rinkeby ? CB_PROXY_ADDR_RINKEBY : CB_PROXY_ADDR_MAINNET;
+
+    const cb = new this.web3.eth.Contract(
+      abi,
+      addr,
+    );
+
+    const tx = await cb.methods.createAccount(
+      "0x0000000000000000000000000000000000000000",   // reserve asset
+      "1",                                            // slopeN
+      "1000",                                         // slopeD
+      "1",                                            // exponent
+      "60",                                           // spreadN
+      "100",                                          // spreadD
+      premint,                                        // premint
+      metadata,                                       //metadata
+      name,                                           //_name
+      symbol,                                         // _symbol
+    ).send({ from: this.account });
+    this.handleTransactionReturn(tx);
+    return tx;
+  }
+
+  @action
   instantiateConvergentBeta = async () => {
     if (!this.web3) {
       console.error('Unable to instantiate Convergent Beta');
     }
 
-    const { abi: abi2 } = ConvergentBeta2;
-    const convergentBeta2 = new this.web3Ws.eth.Contract(
-      abi2,
-      CB_PROXY_ADDR_MAINNET,
+    const { abi } = ConvergentBeta;
+    const addr = chain === Chain.Rinkeby ? CB_PROXY_ADDR_RINKEBY : CB_PROXY_ADDR_MAINNET;
+
+    const convergentBeta = new this.web3Ws.eth.Contract(
+      abi,
+      addr,
     );
-    this.convergentBeta = convergentBeta2;
+    this.convergentBeta = convergentBeta;
     this.cacheAccounts();
     await this.startCachingAccounts();
   }
@@ -235,7 +291,7 @@ export default class Web3Store {
 
   @action
   request = async (address: string, serviceIndex: number, msg: string) => {
-    const { abi } = Account2;
+    const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
     const tx = await (acc as any).methods.requestService(
       serviceIndex.toString(),
@@ -251,7 +307,7 @@ export default class Web3Store {
     if (this.betaCache.has(address) && (this.betaCache.get(address) as any).curServiceIndex > 0) {
       return;
     }
-    const { abi } = Account2;
+    const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
     const tx = await (acc as any).methods.addService(
       price
@@ -273,7 +329,7 @@ export default class Web3Store {
   sendContribution = async (address: string) => {
     if (this.readonly) throw new Error('Cannot perform this action of sending contributions in readonly mode.');
 
-    const { abi } = Account2;
+    const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
     const ret = await acc.methods.withdraw().send({ from: this.account });
     this.handleTransactionReturn(ret);
@@ -290,7 +346,7 @@ export default class Web3Store {
 
   @action
   getSellReturn = async (address: string, howMuch: string) => {
-    const { abi } = Account2;
+    const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
 
     const sellReturn = await acc.methods.returnForSell(howMuch).call();
@@ -299,7 +355,7 @@ export default class Web3Store {
 
   @action
   syncMessages = async (address: string) => {
-    const { abi } = Account2;
+    const { abi } = Account;
     const acc = new this.web3Ws.eth.Contract(abi, address);
 
     const messages = await (acc as any).getPastEvents('allEvents', { fromBlock: 0 });
@@ -312,7 +368,7 @@ export default class Web3Store {
       throw new Error('No account!!!');
     }
 
-    const { abi } = Account2;
+    const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
     const tx = await acc.methods.sell(
       howMuch,
@@ -327,7 +383,7 @@ export default class Web3Store {
 
   @action
   getBuyReturn = async (address: string, value: string) =>{
-    const { abi } = Account2;
+    const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
     const price = await acc.methods.priceToBuy(value).call();
     return price;
@@ -338,7 +394,7 @@ export default class Web3Store {
     if (!this.account) {
       throw new Error('No account!!');
     }
-    const { abi } = Account2;
+    const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
     const ret = await acc.methods.buy(
       howMuch,
@@ -476,7 +532,7 @@ export default class Web3Store {
 
     console.log('one', address)
 
-    const { abi } = Account2;
+    const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
 
     // These will change and should be polled
@@ -597,7 +653,7 @@ export default class Web3Store {
 
   // Updates the values that will change.
   @action updateValues = async (address: string) => {
-    const { abi } = Account2;
+    const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
 
     // These will change and should be polled
@@ -639,7 +695,7 @@ export default class Web3Store {
 
   @action
   getContributorCount = async (address: string) => {
-    const { abi } = Account2;
+    const { abi } = Account;
     const acc = new this.web3Ws.eth.Contract(abi, address);
     const buyEvents = await (acc as any).getPastEvents('Bought', { fromBlock: 0 });
     let buyers = new Set();
@@ -662,7 +718,7 @@ export default class Web3Store {
   getBalance = async (address: string) => {
     if (!this.account) { return; }
     // if (this.balancesCache.has())
-    const { abi } = Account2;
+    const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
     const bal = await acc.methods.balanceOf(this.account).call();
     this.balancesCache.set(address, bal.toString());
@@ -681,7 +737,7 @@ export default class Web3Store {
       throw new Error('Incorrect economy address provided to updateMetadata function');
     }
 
-    const { abi } = Account2;
+    const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, economy);
 
     const tx = await acc.methods.updateMetadata(metadata).send({from: this.account});

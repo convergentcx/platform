@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { colors, shadowMixin } from '../../common/index';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLock, faRocket } from '@fortawesome/free-solid-svg-icons';
+import { faRocket } from '@fortawesome/free-solid-svg-icons';
 
 const HomeContainer = styled.div`
   width: 100%;
@@ -90,28 +90,23 @@ class HomePage extends React.Component<{web3Store: any}, HomePageState> {
 
   deploy = async () => {
     const { web3Store } = this.props; 
-    if (!web3Store) {
+    const { premint, accountName, accountTicker } = this.state;
+
+    if (!web3Store.account) {
       alert('Log in first!');
     }
-    const randBytes32 = web3Store.web3.utils.randomHex(32);
-    const tx = await web3Store.convergentBeta.methods.createAccount(
-      "0x0000000000000000000000000000000000000000", // reserve asset
-      "1", // slopeN
-      "1000", // slopeD
-      "1",  //exponent
-      "60", // spreadN
-      "100",  // spreadD
-      this.state.premint.toString(),  // premint
-      randBytes32,  //metadata
-      this.state.accountName, //_name
-      this.state.accountTicker, // _symbol
-    ).send({ from: this.props.web3Store.account });
-    // console.log(tx);
-    if (tx.status === true) {
-      web3Store.toaster.add('Success!', { appearance: 'success', autoDismiss: true });
-      console.log('success');
-      console.log('tx hash: ', tx.transactionHash);
-      console.log('account: ', tx.events.NewAccount.returnValues.account);
+
+    const emptyData = "0x" + "00".repeat(32);
+    
+    const tx = await web3Store.createAccount(
+      premint.toString(),
+      emptyData,
+      accountName,
+      accountTicker,
+    );
+
+    if (tx.success) {
+      console.log('TODO reroute');
     }
   }
 

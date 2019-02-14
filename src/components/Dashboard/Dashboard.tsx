@@ -282,7 +282,7 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
     let bio,location,pic,services;
     if (web3Store.betaCache.has(address) && web3Store.ipfsCache.has(web3Store.betaCache.get(address).metadata)) {
       const data = web3Store.ipfsCache.get(web3Store.betaCache.get(address).metadata);
-      console.log(data.bio)
+      // console.log(data.bio)
       bio = data.bio || '';
       location = data.location || '';
       pic = data.pic || '';
