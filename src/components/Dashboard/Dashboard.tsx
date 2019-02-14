@@ -15,7 +15,7 @@ import Inbox from './Inbox/Inbox';
 import Subject from '../Dropzone.jsx';
 import Wallet from './Wallet/Wallet';
 
-import { colors } from '../../common';
+import { colors, shadowMixin } from '../../common';
 
 const DashboardContainer = styled.div`
   width: 100%;
@@ -106,6 +106,16 @@ const DashboardMiddleChildren = styled.div`
   align-items: center;
 `;
 
+const ProfileContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
 const InputHeading = styled.div`
   font-size: 24px;
   font-weight: bold;
@@ -129,6 +139,15 @@ const DashboardMidNavItem = styled.div<any>`
   justify-content: center;
   align-items: center;
   color: ${props => props.active ? 'blue' : 'black'};
+`;
+
+const Circle = styled.div`
+  width: 25%;
+  background: black;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const DisplayContainer = styled.div<any>`
@@ -265,19 +284,22 @@ const DashboardRight = styled.div`
   height: 100vh;
   background: ;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  flex-flow: row wrap;
+  justify-content: space-around;
+  align-items: center;
+  flex-flow: column;
 `;
 
 const DashboardRightBox = styled.div`
-  width: 100%;
-  height: 160px;
+  width: 60%;
+  height: 120px;
   display: flex;
-  flex-flow: row wrap;
-  padding: 16px;
-  background: #CCC;
-  margin: 8px;
+  flex-flow: column;
+  padding: 32px 32px 32px 32px;
+  background: #FFF;
+  border-radius: 40px;
+  ${shadowMixin}
+  margin: ;
+  font-size: 16px;
 `;
 
 // const UpgradeButton = styled.button`
@@ -295,13 +317,15 @@ const DashboardRightBox = styled.div`
 // `;
 
 const WidthdrawButton = styled.button`
-  background: #232323;
+  background: #de9360;
   border: none;
   cursor: pointer;
   transition: 0.3s;
   width: 100%;
+  height: 20%;
+  color: #FFF;
   :hover {
-    background: #696969
+    background: #cd595f
   }
 `;
 
@@ -317,6 +341,7 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
     uploading: false,
     file: '',
     serviceEdit: false,
+    serviceNum: 0,
   }
 
   componentDidMount = async () => {
@@ -431,11 +456,31 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
     })
   }
 
+  serviceButtonClicked = () => {
+    if (this.state.serviceNum > 3) {
+      return;
+    }
+    this.setState({
+      serviceNum: this.state.serviceNum+1,
+    });
+  }
+
   render() {
-    const { bio, downloading, location, serviceTitle1, serviceDescription1, servicePrice1 } = this.state;
+    const { bio, downloading, location, serviceTitle1, serviceDescription1, servicePrice1, serviceNum } = this.state;
+
+    let serviceInputs = [];
+    for (let i = 0; i < serviceNum; i++) {
+      serviceInputs.push(
+        <ServiceBox key={Math.random()}>
+          <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate} placeholder="title" defaultValue={serviceTitle1}/>
+          <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate} placeholder="description" defaultValue={serviceDescription1}/>
+          <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate} placeholder="price" defaultValue={servicePrice1}/>  
+        </ServiceBox>
+      )
+    }
 
     return (
-      <>
+      <ProfileContainer>
         {
           // downloading
           //   ? <RingLoader/>
@@ -476,15 +521,9 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
               </InputHeading>
               <div style={{ display: 'flex', width: '100%', marginTop: '8px', flexDirection: 'column', alignItems: 'center' }}>
                 {
-                  this.state.serviceEdit ?
-                    <ServiceBox>
-                      <ServiceInputTitle name="serviceTitle1" onChange={this.inputUpdate} placeholder="title" defaultValue={serviceTitle1}/>
-                      <ServiceInputDescription name="serviceDescription1" onChange={this.inputUpdate} placeholder="description" defaultValue={serviceDescription1}/>
-                      <ServiceInputPrice name="servicePrice1" onChange={this.inputUpdate} placeholder="price" defaultValue={servicePrice1}/>  
-                    </ServiceBox>
-                    : ''
+                  serviceInputs
                 }
-                <AddServiceButton onClick={() => this.setState({ serviceEdit: true })}>
+                <AddServiceButton onClick={this.serviceButtonClicked}>
                   +
                 </AddServiceButton>
               </div>
@@ -498,7 +537,7 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
             }
             </>
         }
-      </>
+      </ProfileContainer>
     )
   }
 }));
@@ -506,6 +545,7 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
 const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class InteriorDashboard extends React.Component<any,any> {
   state = {
     active: 0,
+    balance: '',
   }
 
   componentDidMount = async () => {
@@ -515,6 +555,11 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     if (web3Store.betaCache.has(account)) {
       web3Store.ipfsGetDataAndCache(web3Store.betaCache.get(account).metadata);
     }
+
+    const balance = await web3Store.getBalance(account);
+    this.setState({
+      balance,
+    });
   }
 
   setActive = (evt: any) => {
@@ -540,27 +585,19 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
 
   render() {
     const { web3Store, match: { params: { account } } } = this.props;
-    const { active } = this.state;
+    const { active, balance } = this.state;
 
     const contributionsWaiting = web3Store.betaCache.has(account) ? web3Store.web3.utils.fromWei(web3Store.betaCache.get(account).contributions).slice(0,6) : '?';
+    const symbol = web3Store.betaCache.has(account) ? web3Store.betaCache.get(account).symbol : '';
 
     return (
       <>
-        {/* <DashboardLeft>
-          <DashboardLink active={active === 0} id={0} onClick={this.setActive}>
-            Profile
-          </DashboardLink>
-          <DashboardLink active={active === 1} id={1} onClick={this.setActive}>
-            Inbox
-          </DashboardLink> */}
-          {/* <DashboardLink active={active === 2} id={2} onClick={this.setActive}>
-            Wallet
-          </DashboardLink> */}
-        {/* </DashboardLeft> */}
         <DashboardMiddle>
           <DashboardMidNav>
             <DashboardMidNavItem active={active === 0} onClick={() => this.setState({ active: 0 })}>
-              <FontAwesomeIcon icon={faUserAstronaut}/>
+              {/* <Circle> */}
+                <FontAwesomeIcon icon={faUserAstronaut}/>
+              {/* </Circle> */}
             </DashboardMidNavItem>
             <DashboardMidNavItem active={active === 1} onClick={() => this.setState({ active: 1 })}>
               <FontAwesomeIcon icon={faEnvelope}/>
@@ -581,7 +618,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
         </DashboardMiddle>
         <DashboardRight>
           <DashboardRightBox>
-            <div style={{ width: '100%' }}>
+            <div style={{ width: '100%', height: '80%' }}>
               You have {contributionsWaiting} eth in contributions to withdraw.
             </div>
             <WidthdrawButton onClick={this.sendContributions}>
@@ -589,15 +626,15 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
             </WidthdrawButton>
           </DashboardRightBox>
           <DashboardRightBox>
-            <div style={{ width: '100%' }}>
-              You hold XXX SYM.
+            <div style={{ width: '100%', height: '80%' }}>
+              You hold {(web3Store.web3 && web3Store.web3.utils.fromWei(balance)) || '???'} {symbol}.
             </div>
             <WidthdrawButton>
               Sell
             </WidthdrawButton>
           </DashboardRightBox>
           <DashboardRightBox>
-            <div style={{ width: '100%' }}>
+            <div style={{ width: '100%', height: '80%' }}>
               You are on the current release.
             </div>
             <WidthdrawButton onClick={this.upgrade}>

@@ -717,13 +717,16 @@ export default class Web3Store {
 
   @action
   getBalance = async (address: string) => {
-    if (!this.account) { return; }
-    // if (this.balancesCache.has())
+    if (!this.account) {
+      setTimeout(() => this.getBalance(address), 4000)
+      return;
+    }
+
     const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
     const bal = await acc.methods.balanceOf(this.account).call();
     this.balancesCache.set(address, bal.toString());
-    // console.log(bal.toString());
+    return bal;
   }
 
   // TODO: why is this function here?
