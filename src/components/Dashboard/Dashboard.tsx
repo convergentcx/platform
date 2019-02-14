@@ -337,7 +337,7 @@ const WidthdrawButton = styled.button`
   }
 `;
 
-const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends React.Component<any, any> {
+const Profile = withRouter(inject('ipfsStore', 'web3Store')(observer(class Profile extends React.Component<any, any> {
   state = {
     downloading: true,
     bio: '',
@@ -358,9 +358,13 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
   componentDidMount = async () => {
     this.getData();
   }
+  componentWillReceiveProps = () => {
+    this.forceUpdate();
+  }
 
   getData = async () => {
-    const { web3Store, address } = this.props;
+    const { web3Store } = this.props;
+    const address = this.props.match.params.account;
 
     if (!web3Store.betaCache.has(address)) {
       setTimeout(() => this.getData(), 4000);
@@ -588,7 +592,7 @@ const Profile = inject('ipfsStore', 'web3Store')(observer(class Profile extends 
       </ProfileContainer>
     )
   }
-}));
+})));
 
 const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class InteriorDashboard extends React.Component<any, any> {
   state = {
@@ -652,7 +656,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
             </DashboardMidNavItem>
           </DashboardMidNav>
           <DashboardMiddleChildren>
-            {
+            {//TODO change these to route
               active === 0 &&
               <Profile address={account} />
               ||
@@ -737,7 +741,7 @@ const DashboardPage = withRouter(observer(
           {
             web3Store.account
               ?
-              <Route path='/dashboard/:account' render={(props: any) => <InteriorDashboard {...props} web3Store={web3Store} />} />
+              <Route path='/dashboard/:account' onChange={() => this.forceUpdate()} render={(props: any) => <InteriorDashboard {...props} web3Store={web3Store} />} />
               :
               ''
           }
