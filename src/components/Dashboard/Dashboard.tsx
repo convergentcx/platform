@@ -21,7 +21,7 @@ import { any } from 'prop-types';
 const DashboardContainer = styled.div`
   width: 100%;
   min-height: 100vh;
-  background: ${colors.CvgTealLight};
+  background: #3f47ba;
   display: flex;
   justify-content: ;
   align-items: center;
@@ -70,7 +70,7 @@ const DashboardLeft = styled.div`
   width: 20%;
   max-width: 20%;
   height: 100vh;
-  background: ${colors.CvgTealLight};
+  background: #3f47ba;
 `;
 
 // const DashboardLink = styled.div<any>`
@@ -119,7 +119,8 @@ const ProfileContainer = styled.div`
 const InputHeading = styled.div`
   font-size: 24px;
   font-weight: bold;
-
+  margin-bottom: 8px;
+  text-align: left;
 `;
 
 const DashboardMidNav = styled.div`
@@ -169,7 +170,7 @@ const InputDisplay = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-around;
-  align-items: center;
+  align-items: ;
 `;
 
 const BioInput = styled.textarea`
@@ -179,6 +180,10 @@ const BioInput = styled.textarea`
   color: #000;
   display: flex;
   align-items: flex-start;
+  margin-bottom: 8px;
+  border: black;
+  border-style: solid;
+  border-width: 2px;
 `;
 
 const LocationInput = styled.input`
@@ -187,11 +192,16 @@ const LocationInput = styled.input`
   height: 10%;
   display: flex;
   color: #000;
+  margin-bottom: 8px;
+  border: black;
+  border-style: solid;
+  border-width: 2px;
 `;
 
 const ServiceBox = styled.div`
   display: flex;
-
+  margin-top: 4px;
+  margin-bottom: 4px;
 `;
 
 const ServiceInputTitle = styled.input`
@@ -199,6 +209,10 @@ const ServiceInputTitle = styled.input`
   width: 30%;
   background: #E9EDF2;
   color: #000;
+  border: black;
+  border-style: solid;
+  border-width: 2px;
+  margin-right: 2px;
 `;
 
 const ServiceInputDescription = styled.input`
@@ -206,6 +220,10 @@ const ServiceInputDescription = styled.input`
   width: 55%;
   background: #E9EDF2;
   color: #000;
+  border: black;
+  border-style: solid;
+  border-width: 2px;
+  margin-right: 2px;
 `;
 
 const ServiceInputPrice = styled.input`
@@ -213,6 +231,9 @@ const ServiceInputPrice = styled.input`
   width: 5%;
   background: #E9EDF2;
   color: #000;
+  border: black;
+  border-style: solid;
+  border-width: 2px;
 `;
 
 const CommitButton = styled.button`
@@ -230,6 +251,7 @@ const CommitButton = styled.button`
   margin-top: 16px;
   font-weight: 900;
   background: #111;
+  color: #FFF;
   :hover {
     background: #666;
   }
@@ -260,6 +282,7 @@ const AddServiceButton = styled.button`
   font-weight: 900;
   cursor: pointer;
   background: #111;
+  color: #FFF;
   :hover {
     background: #666;
   }
@@ -336,7 +359,7 @@ const DashboardRightBox = styled.div`
 // `;
 
 const WidthdrawButton = styled.button`
-  background: #de9360;
+  background: #ff8300;
   border: none;
   cursor: pointer;
   transition: 0.3s;
@@ -566,11 +589,11 @@ const Profile = withRouter(inject('ipfsStore', 'web3Store')(observer(class Profi
                 <AddButton>+</AddButton>
               </TagContainer>
             </DisplayContainer> */}
-              <DisplayContainer halfsize style={{ marginTop: '16px' }}>
+              <DisplayContainer halfsize style={{ marginTop: '24px' }}>
                 <InputHeading>
                   What will you offer?
               </InputHeading>
-                <div style={{ display: 'flex', width: '100%', marginTop: '24px', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ display: 'flex', width: '100%', marginTop: '16px', flexDirection: 'column', alignItems: 'center' }}>
                   {
                     [...Array(serviceNum).keys()].map((i: number) => {
                       return (
