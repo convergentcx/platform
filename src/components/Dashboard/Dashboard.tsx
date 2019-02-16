@@ -13,7 +13,7 @@ import {
 
 import Inbox from './Inbox/Inbox';
 import Subject from '../Dropzone.jsx';
-import Wallet from './Wallet/Wallet';
+// import Wallet from './Wallet/Wallet';
 
 import { colors, shadowMixin } from '../../common';
 import { any } from 'prop-types';
@@ -73,22 +73,22 @@ const DashboardLeft = styled.div`
   background: ${colors.CvgTealLight};
 `;
 
-const DashboardLink = styled.div<any>`
-  cursor: pointer;
-  display: flex;
-  width: 100%;
-  text-decoration: none;
-  color: ${(props: any) => props.active ? '#FFF' : '#000'};
-  justify-content: center;
-  align-items: center;
-  height: 20%;
-  transition: 0.2s;
-  background: ${(props: any) => props.active ? '#000' : 'transparent'};
-  :hover {
-    background: ;
-    color: #FFF;
-  }
-`;
+// const DashboardLink = styled.div<any>`
+//   cursor: pointer;
+//   display: flex;
+//   width: 100%;
+//   text-decoration: none;
+//   color: ${(props: any) => props.active ? '#FFF' : '#000'};
+//   justify-content: center;
+//   align-items: center;
+//   height: 20%;
+//   transition: 0.2s;
+//   background: ${(props: any) => props.active ? '#000' : 'transparent'};
+//   :hover {
+//     background: ;
+//     color: #FFF;
+//   }
+// `;
 
 const DashboardMiddle = styled.div`
   width: 60%;
@@ -100,7 +100,6 @@ const DashboardMiddle = styled.div`
 const DashboardMiddleChildren = styled.div`
   height: 90%;
   width: 100%;
-  background: blue;
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
@@ -110,7 +109,7 @@ const DashboardMiddleChildren = styled.div`
 const ProfileContainer = styled.div`
   width: 100%;
   height: 100%;
-  background: white;
+  background: ;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -128,18 +127,22 @@ const DashboardMidNav = styled.div`
   justify-self: flex-start;
   height: 10%;
   width: 100%;
-  background: white;
+  background: ;
   display: flex;
   flex-direction: row;
 `;
 
-const DashboardMidNavItem = styled.div<any>`
+const DashboardMidNavItem = styled(Link)<any>`
   cursor: pointer;
   width: 20%;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: ${props => props.active ? 'blue' : 'black'};
+  color: ${props => props.active ? '#de9360' : 'black'};
+  transition: 0.3s;
+  :hover {
+    color: ${props => props.active ? '' : 'rgba(0,0,0,0.5)'};
+  }
 `;
 
 const Circle = styled.div`
@@ -226,6 +229,10 @@ const CommitButton = styled.button`
   border-color: #202020;
   margin-top: 16px;
   font-weight: 900;
+  background: #111;
+  :hover {
+    background: #666;
+  }
 `;
 
 const DisplayHeading = styled.h4`
@@ -252,6 +259,10 @@ const AddServiceButton = styled.button`
   align-items: center;
   font-weight: 900;
   cursor: pointer;
+  background: #111;
+  :hover {
+    background: #666;
+  }
 `;
 
 // const TagContainer = styled.div`
@@ -333,7 +344,7 @@ const WidthdrawButton = styled.button`
   height: 20%;
   color: #FFF;
   :hover {
-    background: #cd595f
+    background: ${colors.OrangeDark};
   }
 `;
 
@@ -555,11 +566,11 @@ const Profile = withRouter(inject('ipfsStore', 'web3Store')(observer(class Profi
                 <AddButton>+</AddButton>
               </TagContainer>
             </DisplayContainer> */}
-              <DisplayContainer halfsize>
+              <DisplayContainer halfsize style={{ marginTop: '16px' }}>
                 <InputHeading>
                   What will you offer?
               </InputHeading>
-                <div style={{ display: 'flex', width: '100%', marginTop: '8px', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ display: 'flex', width: '100%', marginTop: '24px', flexDirection: 'column', alignItems: 'center' }}>
                   {
                     [...Array(serviceNum).keys()].map((i: number) => {
                       return (
@@ -596,8 +607,7 @@ const Profile = withRouter(inject('ipfsStore', 'web3Store')(observer(class Profi
 
 const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class InteriorDashboard extends React.Component<any, any> {
   state = {
-    active: 0,
-    balance: '',
+    active: 1000,
   }
 
   componentDidMount = async () => {
@@ -608,10 +618,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
       web3Store.ipfsGetDataAndCache(web3Store.betaCache.get(account).metadata);
     }
 
-    const balance = await web3Store.getBalance(account);
-    this.setState({
-      balance,
-    });
+    web3Store.getBalance(account);
   }
 
   setActive = (evt: any) => {
@@ -635,37 +642,41 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
     web3Store.sendContribution(account);
   }
 
+  sellTokens = (amt: string) => {
+    const { web3Store, match: { params: { account } } } = this.props;
+    if (!web3Store.account) {
+      alert('You must be logged in to do this action!');
+      return;
+    }
+    web3Store.sell(
+      account,
+      amt,
+    );
+  }
+
   render() {
     const { web3Store, match: { params: { account } } } = this.props;
-    const { active, balance } = this.state;
+    const { active } = this.state;
 
     const contributionsWaiting = web3Store.betaCache.has(account) ? web3Store.web3.utils.fromWei(web3Store.betaCache.get(account).contributions).slice(0, 6) : '?';
     const symbol = web3Store.betaCache.has(account) ? web3Store.betaCache.get(account).symbol : '';
-
+    const balance = web3Store.balancesCache.has(account) ? web3Store.balancesCache.get(account) : '0';
     return (
       <>
         <DashboardMiddle>
           <DashboardMidNav>
-            <DashboardMidNavItem active={active === 0} onClick={() => this.setState({ active: 0 })}>
+            <DashboardMidNavItem active={active === 0} to={`/dashboard/${account}/profile`} onClick={() => this.setState({ active: 0 })}>
               {/* <Circle> */}
               <FontAwesomeIcon icon={faUserAstronaut} />
               {/* </Circle> */}
             </DashboardMidNavItem>
-            <DashboardMidNavItem active={active === 1} onClick={() => this.setState({ active: 1 })}>
+            <DashboardMidNavItem active={active === 1} to={`/dashboard/${account}/inbox`} onClick={() => this.setState({ active: 1 })}>
               <FontAwesomeIcon icon={faEnvelope} />
             </DashboardMidNavItem>
           </DashboardMidNav>
           <DashboardMiddleChildren>
-            {//TODO change these to route
-              active === 0 &&
-              <Profile address={account} />
-              ||
-              active == 1 &&
-              <Inbox address={account} />
-              ||
-              active == 2 &&
-              <Wallet address={account} />
-            }
+            <Route path='/dashboard/:account/profile' onChange={() => this.forceUpdate()} render={(props: any) => <Profile {...props} address={account}/>}/>
+            <Route path='/dashboard/:account/inbox' onChange={() => this.forceUpdate()} render={(props: any) => <Inbox {...props} address={account}/>}/>
           </DashboardMiddleChildren>
         </DashboardMiddle>
         <DashboardRight>
@@ -681,7 +692,7 @@ const InteriorDashboard = inject('ipfsStore', 'web3Store')(observer(class Interi
             <div style={{ width: '100%', height: '80%' }}>
               You hold {(web3Store.web3 && web3Store.web3.utils.fromWei(balance)) || '???'} {symbol}.
             </div>
-            <WidthdrawButton>
+            <WidthdrawButton onClick={() => this.sellTokens(balance)}>
               Sell
             </WidthdrawButton>
           </DashboardRightBox>

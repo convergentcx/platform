@@ -6,6 +6,7 @@ import ConvergentBeta from '../assets/artifacts2/ConvergentBeta.json';
 import Account from '../assets/artifacts2/Account.json';
 
 import { b32IntoMhash } from '../lib/ipfs-util';
+import { ObservableValue } from 'mobx/lib/internal';
 
 const CB_PROXY_ADDR_MAINNET = "0x9ce894a11ada19881ab560a5091a4cc3ff8f2d84";
 const CB_PROXY_ADDR_RINKEBY = "0x60dacca6a82cbe636032f4a7363bdcb166de88be";
@@ -77,6 +78,7 @@ export default class Web3Store {
   @observable web3: any|null = null;  // Global Web3 object
   @observable web3Ws: any = null;
   @observable balancesCache: Map<string, string> = new Map(); // Keeps map of address => account balance
+  @observable messageCache: Map<string, object> = new Map();  // Keeps the messages
 
   // This is the first thing that will trigger when a user is on the DApp.
   @action
@@ -359,6 +361,7 @@ export default class Web3Store {
     const acc = new this.web3Ws.eth.Contract(abi, address);
 
     const messages = await (acc as any).getPastEvents('allEvents', { fromBlock: 0 });
+    this.messageCache.set(address, messages);
     return messages; // TODO if logged in, record messages for your accounts for updates lol
   }
 
@@ -476,7 +479,7 @@ export default class Web3Store {
     const contentAddress = b32IntoMhash(obj);
     const raw = await this.ipfs.get(contentAddress);
     const data: IPFSCacheObject = JSON.parse(raw[0].content.toString());
-
+    // console.log(data.services)
     // TODO: Cannot cache picture because it will slow down the whole DApp.
     this.ipfsCache = this.ipfsCache.set(metadata, data);
   }
@@ -726,6 +729,11 @@ export default class Web3Store {
     const acc = new this.web3.eth.Contract(abi, address);
     const bal = await acc.methods.balanceOf(this.account).call();
     this.balancesCache.set(address, bal.toString());
+
+    setTimeout(() => {
+      this.getBalance(address)
+    }, 4000);
+
     return bal;
   }
 
