@@ -159,7 +159,7 @@ const TransactSection = observer(class TransactPage extends React.Component<any,
                         </StatsBoxHeader>
                         <StatsBoxContent>
                           {
-                            web3Store.web3.utils.fromWei(web3Store.web3.utils.toBN(curPrice).mul(web3Store.web3.utils.toBN(serviceArray[i].price || 0))) || '?'} eth
+                            web3Store.web3.utils.fromWei(web3Store.web3.utils.toBN(curPrice).mul(web3Store.web3.utils.toBN(serviceArray[i].price || 0)) || '0') || '?'} eth
                         </StatsBoxContent>
                       </StatsBox>
                   </StatsContainer>
