@@ -92,6 +92,7 @@ const Middle = styled.div`
   display: flex;
   align-items: flex-start;
   flex-direction: column;
+  height: 100%;
   @media (max-width: 450px) {
     width: 100%;
     margin-left: 0;

@@ -14,6 +14,7 @@ const TransactContainer = styled.div`
   height: 90vh;
   margin-top: 5vh;
   ${shadowMixin}
+  margin-bottom: 5vh;
   @media (max-width: 450px) {
     width: 94vw;
     margin-bottom: 8%;
@@ -41,7 +42,7 @@ const StatsBoxHeader = styled.div`
 `;
 
 const StatsBoxContent = styled.div`
-  font-size: 25px;
+  font-size: 20px;
   display: flex;
   height: 100%;
   justify-content: center;
@@ -55,11 +56,11 @@ const StatsBox = styled.div`
   border-radius: 10px;
   justify-content: flex-start;
   align-items: flex-start;
-  height: 70px;
-  width: 45%;
+  height: 56px;
+  width: 40%;
   background: #EEE;
   @media (max-width: 480px) {
-    margin: 8px;
+    margin: ;
   }
   position: relative;
 `;
@@ -106,69 +107,95 @@ const TransactSection = observer(class TransactPage extends React.Component<any,
   render() {
     const { address, web3Store } = this.props;
     const { betaCache, ipfsCache } = web3Store;
-    let title, description, price, symbol, curPrice;
+    let servicesNumber = 0;
+    let serviceArray: any[] = [];
+    let symbol: any, curPrice: any;
     if (betaCache.has(address) && ipfsCache.has(betaCache.get(address).metadata)) {
-      const { metadata, symbol: s, curPrice: cp } = betaCache.get(address);
+      const { metadata, symbol: s, curPrice: cp, curServiceIndex } = betaCache.get(address);
+      servicesNumber = parseInt(curServiceIndex) + 1;
       const { services } = ipfsCache.get(metadata);
-      title = services[0].title;
-      description = services[0].description;
-      price = services[0].price;
+      if (services.length < servicesNumber) {
+        servicesNumber = services.length;
+      }
+
+      serviceArray = services;
+
+      [0, 1, 2].map((i: number) => {
+        console.log(serviceArray[i]);
+      })
+      // title = services[0].title;
+      // description = services[0].description;
+      // price = services[0].price;
       symbol = s;
-      curPrice = this.props.web3Store.web3.utils.fromWei(cp);
+      curPrice = cp;
+    }
+
+    if (servicesNumber > 3) {
+      servicesNumber = 3;
     }
 
     return (
-      <TransactContainer>
-        <div style={{ height: '90%' }}>
-          <TransactInner>
-            {title || 'No title'}
-            <StatsContainer>
-              <StatsBox>
-                <StatsBoxHeader>
-                  Price in Token
-                  </StatsBoxHeader>
-                  <StatsBoxContent>
-                    {price || '?'} {symbol}
-                  </StatsBoxContent>
-                </StatsBox>
-                <StatsBox>
-                  <StatsBoxHeader>
-                    Current price in ETH
-                  </StatsBoxHeader>
-                  <StatsBoxContent>
-                    {curPrice || '?'} eth
-                  </StatsBoxContent>
-                </StatsBox>
-            </StatsContainer>
-            <ServiceDescription>
-              {description || 'No description'}
-            </ServiceDescription>
-            {/* <div style={{ display: 'flex', width: '100%' }}>
-              <div style={{ fontSize: '64px', width: '60%', textAlign: 'left' }}>
-                {title}
+      <>
+        { serviceArray.length && 
+          [...Array(servicesNumber).keys()].map((i: number) => {
+            console.log(i)
+           return (
+            <TransactContainer>
+              <div style={{ height: '90%' }}>
+                <TransactInner>
+                  {(serviceArray[i] && serviceArray[i].title) || 'No title'}
+                  <StatsContainer>
+                    <StatsBox>
+                      <StatsBoxHeader>
+                        Price in Token
+                        </StatsBoxHeader>
+                        <StatsBoxContent>
+                          {(serviceArray[i] && serviceArray[i].price) || '?'} {symbol}
+                        </StatsBoxContent>
+                      </StatsBox>
+                      <StatsBox>
+                        <StatsBoxHeader>
+                          Current price in ETH
+                        </StatsBoxHeader>
+                        <StatsBoxContent>
+                          {
+                            web3Store.web3.utils.fromWei(web3Store.web3.utils.toBN(curPrice).mul(web3Store.web3.utils.toBN(serviceArray[i].price || 0))) || '?'} eth
+                        </StatsBoxContent>
+                      </StatsBox>
+                  </StatsContainer>
+                  <ServiceDescription>
+                    {(serviceArray[i] && serviceArray[i].description) || 'No description'}
+                  </ServiceDescription>
+                  {/* <div style={{ display: 'flex', width: '100%' }}>
+                    <div style={{ fontSize: '64px', width: '60%', textAlign: 'left' }}>
+                      {title}
+                    </div>
+                    <div style={{ fontSize: '128px', alignSelf: 'center', justifySelf: 'center', width: '50%' }}>
+                      {price}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '16px', textAlign: 'left' }}>
+                    {description}
+                  </div> */}
+                  <RequestTextArea 
+                    name={`msg${i}`} 
+                    placeholder="Enter a message with details about your request ..." 
+                    rows={6} 
+                    cols={30} 
+                    onChange={(e) => this.setState({ [e.target.name]: e.target.value })}
+                  />
+                </TransactInner>
               </div>
-              <div style={{ fontSize: '128px', alignSelf: 'center', justifySelf: 'center', width: '50%' }}>
-                {price}
+              <div style={{ height: '10%', display: 'flex' }}>
+                <RequestButton onClick={this.request}>
+                  REQUEST
+                </RequestButton>
               </div>
-            </div>
-            <div style={{ fontSize: '16px', textAlign: 'left' }}>
-              {description}
-            </div> */}
-            <RequestTextArea 
-              name="msg" 
-              placeholder="Enter a message with details about your request ..." 
-              rows={6} 
-              cols={30} 
-              onChange={(e) => this.setState({ [e.target.name]: e.target.value })}
-            />
-          </TransactInner>
-        </div>
-        <div style={{ height: '10%', display: 'flex' }}>
-          <RequestButton onClick={this.request}>
-            REQUEST
-          </RequestButton>
-        </div>
-      </TransactContainer>
+            </TransactContainer>            
+           )
+          })
+        }
+      </>
     )
   }
 });

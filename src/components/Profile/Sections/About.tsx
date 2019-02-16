@@ -12,7 +12,7 @@ const AboutContainer = styled.div`
   height: 90vh;
   margin-top: 5vh;
   ${shadowMixin}
-  @media (max-width: 450px) {
+  @media (max-width: 480px) {
     width: 94vw;
     margin-bottom: 8%;
   }
@@ -22,6 +22,10 @@ const AboutInner = styled.div`
   padding: 70px;
   display: flex;
   text-align: left;
+  font-size: 14px;
+  @media (max-width: 480px) {
+    font-size: 11px;
+  }
 `;
 
 type AboutSectionProps = {

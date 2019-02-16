@@ -56,7 +56,7 @@ const Wrapper = styled.div`
   padding: 0;
   font-size: 1.25rem;
   font-weight: 500;
-  background: #f3f3f3;
+  background: #000;
   min-height: 100vh;
 `;
 
@@ -192,7 +192,7 @@ const SpeedDialButton = styled.div`
   right: calc(2% + 4px);
   border-radius: 24px;
   ${shadowMixin}
-  background: ${props => props.alt ? colors.Orange : colors.SoftBlue};
+  background: ${props => props.alt ? '#de9360' : colors.SoftBlue};
   color: #FFF;
   display: flex;
   justify-content: center;
