@@ -533,6 +533,8 @@ const Profile = withRouter(inject('ipfsStore', 'web3Store')(observer(class Profi
       });
     };
 
+    // console.log(files)
+
     reader.readAsDataURL(files[0]);
 
     this.setState({
