@@ -287,6 +287,7 @@ export default class Web3Store {
         this.accountsCache.add(myAccount);
         await this.getAccountDataAndCache(myAccount);
         await this.ipfsGetDataAndCache((this.betaCache as any).get(myAccount).metadata);
+        await this.syncMessages(myAccount);
       }
     });
   }
@@ -312,7 +313,7 @@ export default class Web3Store {
     const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
     const tx = await (acc as any).methods.addService(
-      price
+      this.web3.utils.toWei(price),
     ).send(
       { from: this.account },
     );
@@ -534,7 +535,7 @@ export default class Web3Store {
       return;
     }
 
-    console.log('one', address)
+    // console.log('one', address)
 
     const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
@@ -551,7 +552,7 @@ export default class Web3Store {
     // this.getContributorCount(address);
     // this.updateValues(address);
 
-    console.log('two', address)
+    // console.log('two', address)
     // These SHOULD never change (at least in mvp)
     const rAsset = await (acc as any).methods.reserveAsset().call();
     const beneficiary = await (acc as any).methods.beneficiary().call();
@@ -568,7 +569,7 @@ export default class Web3Store {
     // }
 
 
-    console.log('three', address)
+    // console.log('three', address)
     const data = {
       metadata,
       curServiceIndex,
@@ -593,7 +594,7 @@ export default class Web3Store {
       data,
     );
 
-    console.log('four', address)
+    // console.log('four', address)
 
     this.cacheIntoWindowStorage(address, JSON.stringify(data));
 
@@ -656,7 +657,8 @@ export default class Web3Store {
   }
 
   // Updates the values that will change.
-  @action updateValues = async (address: string) => {
+  @action 
+  updateValues = async (address: string) => {
     const { abi } = Account;
     const acc = new this.web3.eth.Contract(abi, address);
 

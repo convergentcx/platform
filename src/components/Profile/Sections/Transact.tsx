@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { colors, shadowMixin } from '../../../common';
 
 import { RingLoader } from 'react-spinners';
+import { any } from 'prop-types';
 
 const TransactContainer = styled.div`
   background: #FFF;
@@ -96,12 +97,18 @@ const RequestTextArea = styled.textarea`
 
 const TransactSection = observer(class TransactPage extends React.Component<any, any> {
   state = {
-    msg: '',
+    msg0: '',
+    msg1: '',
+    msg2: '',
     service: {},
+    [name]: any,
   }
 
-  request = () => {
-    this.props.web3Store.request(this.props.address, 0, this.state.msg);
+  request = (i: number) => {
+    if (i > 2) {
+      throw new Error('attempt to request service out of index bounds');
+    }
+    this.props.web3Store.request(this.props.address, i, this.state[((`msg${i}` as any))]);
   }
 
   render() {
@@ -158,8 +165,8 @@ const TransactSection = observer(class TransactPage extends React.Component<any,
                           Current price in ETH
                         </StatsBoxHeader>
                         <StatsBoxContent>
-                          {
-                            web3Store.web3.utils.fromWei(web3Store.web3.utils.toBN(curPrice).mul(web3Store.web3.utils.toBN(serviceArray[i].price || 0)) || '0') || '?'} eth
+                          { 
+                            web3Store.web3.utils.fromWei(web3Store.web3.utils.toBN(curPrice).mul(web3Store.web3.utils.toBN(serviceArray[i].price || 0)).toString() || '0') || '?'} eth
                         </StatsBoxContent>
                       </StatsBox>
                   </StatsContainer>
@@ -187,7 +194,7 @@ const TransactSection = observer(class TransactPage extends React.Component<any,
                 </TransactInner>
               </div>
               <div style={{ height: '10%', display: 'flex' }}>
-                <RequestButton onClick={this.request}>
+                <RequestButton onClick={() => this.request(i)}>
                   REQUEST
                 </RequestButton>
               </div>
