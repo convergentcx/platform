@@ -6,9 +6,9 @@ import ConvergentBeta from '../assets/artifacts2/ConvergentBeta.json';
 import Account from '../assets/artifacts2/Account.json';
 
 import { b32IntoMhash } from '../lib/ipfs-util';
-import { ObservableValue } from 'mobx/lib/internal';
 
-const CB_PROXY_ADDR_MAINNET = "0x9ce894a11ada19881ab560a5091a4cc3ff8f2d84";
+const CB_PROXY_ADDR_MAINNET = "0x6cdb08d7a67c8c7381deabcfdea885520b651a45";
+// const CB_PROXY_ADDR_MAINNET = "0x9ce894a11ada19881ab560a5091a4cc3ff8f2d84";  // OLD
 const CB_PROXY_ADDR_RINKEBY = "0x60dacca6a82cbe636032f4a7363bdcb166de88be";
 
 const MainnetWebsocketsProvider = 'wss://neatly-tolerant-coral.quiknode.io/73b04107-89ee-4261-9a8f-3c1e946c17b2/CyYMMeeGTb-EeIBHGwORaw==/';
@@ -168,11 +168,11 @@ export default class Web3Store {
       "1",                                            // slopeN
       "1000",                                         // slopeD
       "1",                                            // exponent
-      "60",                                           // spreadN
+      "75",                                           // spreadN
       "100",                                          // spreadD
       premint,                                        // premint
-      metadata,                                       //metadata
-      name,                                           //_name
+      metadata,                                       // metadata
+      name,                                           // _name
       symbol,                                         // _symbol
     ).send({ from: this.account });
     this.handleTransactionReturn(tx);
@@ -285,9 +285,9 @@ export default class Web3Store {
       const myAccount = event.returnValues.account;
       if (!this.accountsCache.has(myAccount)) {
         this.accountsCache.add(myAccount);
+        this.syncMessages(myAccount);
         await this.getAccountDataAndCache(myAccount);
-        await this.ipfsGetDataAndCache((this.betaCache as any).get(myAccount).metadata);
-        await this.syncMessages(myAccount);
+        this.ipfsGetDataAndCache((this.betaCache as any).get(myAccount).metadata);
       }
     });
   }
