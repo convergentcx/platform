@@ -13,6 +13,23 @@ const CB_PROXY_ADDR_RINKEBY = "0x60dacca6a82cbe636032f4a7363bdcb166de88be";
 
 const MainnetWebsocketsProvider = 'wss://neatly-tolerant-coral.quiknode.io/73b04107-89ee-4261-9a8f-3c1e946c17b2/CyYMMeeGTb-EeIBHGwORaw==/';
 
+const IpfsNodes = {
+  Convergent: {
+    write: true,
+    url: 'ipfs.convergent.cx',
+    port: '5002',
+  },
+  Infura: {
+    write: true,
+    url: 'ipfs.infura.io',
+    port: '5001',
+  },
+  Gateway: {
+    write: false,
+    url: 'https://gateway.ipfs.io',
+  }
+}
+
 enum Chain {
   Mainnet = '1',
   Rinkeby = '4',
@@ -79,6 +96,7 @@ export default class Web3Store {
   @observable web3Ws: any = null;
   @observable balancesCache: Map<string, string> = new Map(); // Keeps map of address => account balance
   @observable messageCache: Map<string, object> = new Map();  // Keeps the messages
+  @observable ipfsWrite: any = null;
 
   // This is the first thing that will trigger when a user is on the DApp.
   @action
@@ -91,10 +109,17 @@ export default class Web3Store {
   @action
   initIPFS = () => {
     const ipfs = ipfsClient(
-      'ipfs.infura.io',
-      '5001',
+      IpfsNodes.Convergent.url,
+      IpfsNodes.Convergent.port,
       { protocol: 'https' },
     );
+
+    const ipfsWrite = ipfsClient(
+      IpfsNodes.Infura.url,
+      IpfsNodes.Infura.port,
+      { protocol: 'https' },
+    );
+    this.ipfsWrite = ipfsWrite;
 
     this.ipfs = ipfs;
     this.toaster.add('IPFS initialized!', {appearance: 'info', autoDismiss: true})
@@ -113,6 +138,7 @@ export default class Web3Store {
     this.readonly = true;
     this.web3 = web3;
     this.web3Ws = web3;
+    this.watchForReconnectW3();
     this.toaster.add(`App started in READONLY mode using Infura node. You will not be able to interact with Ethereum until you log in.`, { appearance: 'warning', autoDismiss: true })
     await this.instantiateConvergentBeta();
   }
@@ -144,6 +170,23 @@ export default class Web3Store {
     await this.updateAccount();
     this.toaster.add(`Logged in to ${this.account.slice(0,10) + '...' + this.account.slice(-4)}. You may now interact with Ethereum.`, {appearance: 'success', autoDismiss: true})
     await this.instantiateConvergentBeta();
+  }
+
+  watchForReconnectW3 = async () => {
+    const { currentProvider } = this.web3Ws;
+
+    currentProvider.on('error', () => {
+      console.log('error')
+      if (chain === Chain.Mainnet) {
+        this.web3Ws.setProvider(new Web3.providers.WebsocketProvider('wss://neatly-tolerant-coral.quiknode.io/73b04107-89ee-4261-9a8f-3c1e946c17b2/CyYMMeeGTb-EeIBHGwORaw==/'));
+      } else if (chain === Chain.Rinkeby) {
+        this.web3Ws.setProvider(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws'));
+      }
+      this.instantiateConvergentBeta();
+    })
+    currentProvider.on('end', () => {
+      console.log('end')
+    })
   }
 
   @action
@@ -420,11 +463,18 @@ export default class Web3Store {
 
   @action
   ipfsAdd = async (some: string): Promise<string> => {
-    this.ipfsLock = true;
-    // console.log('IPFS ADDING YO')
-    const ipfsHash = await this.ipfs.add(Buffer.from(some));
-    this.ipfsLock = false;
-    return ipfsHash;
+    try {
+      this.ipfsLock = true;
+      console.log('IPFS ADDING YO')
+      const ipfsHash = await this.ipfsWrite.add(Buffer.from(some));
+      this.ipfsLock = false;
+      return ipfsHash;
+    } catch (e) {
+      console.error(e)
+      return this.ipfsAdd(some);
+    } finally {
+      this.ipfsLock = false;
+    }
   }
 
   @action
@@ -483,6 +533,11 @@ export default class Web3Store {
     // console.log(data.services)
     // TODO: Cannot cache picture because it will slow down the whole DApp.
     this.ipfsCache = this.ipfsCache.set(metadata, data);
+  }
+
+  @action
+  ipfsCacheIt = async (metadata: string, data: any) => {
+    this.ipfsCache.set(metadata, data);
   }
 
   ipfsTransmute = async (metadata: string) => {
