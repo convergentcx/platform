@@ -16,7 +16,8 @@ const MainnetWebsocketsProvider = 'wss://neatly-tolerant-coral.quiknode.io/73b04
 const IpfsNodes = {
   Convergent: {
     write: true,
-    url: '178.62.48.239',
+    url: 'ipfs.convergent.cx',
+    port: '5002',
   },
   Infura: {
     write: true,
@@ -107,8 +108,8 @@ export default class Web3Store {
   initIPFS = () => {
     const ipfs = ipfsClient(
       IpfsNodes.Convergent.url,
-      '5001',
-      { protocol: 'http' },
+      IpfsNodes.Convergent.port,
+      { protocol: 'https' },
     );
 
     this.ipfs = ipfs;
