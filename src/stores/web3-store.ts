@@ -13,6 +13,21 @@ const CB_PROXY_ADDR_RINKEBY = "0x60dacca6a82cbe636032f4a7363bdcb166de88be";
 
 const MainnetWebsocketsProvider = 'wss://neatly-tolerant-coral.quiknode.io/73b04107-89ee-4261-9a8f-3c1e946c17b2/CyYMMeeGTb-EeIBHGwORaw==/';
 
+const IpfsNodes = {
+  Convergent: {
+    write: true,
+    url: '178.62.48.239',
+  },
+  Infura: {
+    write: true,
+    url: 'ipfs.infura.io',
+  },
+  Gateway: {
+    write: false,
+    url: 'https://gateway.ipfs.io',
+  }
+}
+
 enum Chain {
   Mainnet = '1',
   Rinkeby = '4',
@@ -91,9 +106,9 @@ export default class Web3Store {
   @action
   initIPFS = () => {
     const ipfs = ipfsClient(
-      'ipfs.infura.io',
+      IpfsNodes.Convergent.url,
       '5001',
-      { protocol: 'https' },
+      { protocol: 'http' },
     );
 
     this.ipfs = ipfs;
