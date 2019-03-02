@@ -15,6 +15,8 @@ import Inbox from './Inbox/Inbox';
 import Subject from '../Dropzone.jsx';
 // import Wallet from './Wallet/Wallet';
 
+import Modal from '../misc/Modal';
+
 import { colors, shadowMixin } from '../../common';
 import { any } from 'prop-types';
 
@@ -133,7 +135,7 @@ const DashboardMidNav = styled.div`
   flex-direction: row;
 `;
 
-const DashboardMidNavItem = styled(Link)<any>`
+const DashboardMidNavItem = styled(Link)<{active: boolean}>`
   cursor: pointer;
   width: 20%;
   display: flex;
@@ -387,6 +389,7 @@ const Profile = withRouter(inject('ipfsStore', 'web3Store')(observer(class Profi
     serviceNum: 0,
     [name]: any,
     pic: null,
+    open: false,
   }
 
   componentDidMount = async () => {
@@ -478,7 +481,7 @@ const Profile = withRouter(inject('ipfsStore', 'web3Store')(observer(class Profi
       imgBuf = this.state.pic;
     }
 
-    this.setState({ uploading: true });
+    this.setState({ uploading: true, open: true });
 
     let services = [];
     for (let i = 0; i < this.state.serviceNum; i++) {
@@ -506,15 +509,18 @@ const Profile = withRouter(inject('ipfsStore', 'web3Store')(observer(class Profi
     // TODO Cache it
     const b32 = ipfsStore.getBytes32(hash[0].path);
     await web3Store.updateMetadata(address, b32);
+    web3Store.ipfsCacheIt(b32, data);
 
     const { curServiceIndex } = web3Store.betaCache.get(address);
-    console.log(curServiceIndex)
-    console.log(data.services.length)
+    // console.log(curServiceIndex)
+    // console.log(data.services.length)
     if (parseInt(curServiceIndex) < data.services.length) {
       for (let j = parseInt(curServiceIndex); j < data.services.length; j++) {
         await web3Store.addService(address, data.services[j].price);
       }
     }
+
+    this.setState({ open: false });
   }
 
   inputUpdate = (evt: any) => {
@@ -625,6 +631,19 @@ const Profile = withRouter(inject('ipfsStore', 'web3Store')(observer(class Profi
               }
             </>
         }
+
+
+        <Modal show={this.state.open} closeModal={() => this.setState({ open: false })}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+            {
+              this.state.uploading ?
+                'Your data is being uploaded to IPFS please be patient.'
+                : ''
+            }
+            You will be prompted by MetaMask to confirm 1 - 3 transactions depending on how many services you input. Please wait on this page and confirm them all to make sure the services are saved to Ethereum.
+          </div>
+        </Modal>
+
       </ProfileContainer>
     )
   }

@@ -30,7 +30,7 @@ const InvestBox = styled.div`
   }
 `;
 
-const TradeScreenTab = styled.button<any>`
+const TradeScreenTab = styled.button<{active: boolean, id: any, onClick: any}>`
   border: none;
   cursor: pointer;
   width: 20%;
